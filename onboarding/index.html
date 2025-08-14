@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Healthly — Onboarding</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .btn-gradient { @apply text-white bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800; }
+    .pill-gradient { @apply text-white bg-gradient-to-r from-green-500 to-green-700; }
+    .soft-gradient { @apply bg-gradient-to-br from-green-50 via-white to-gray-50; }
+    .card { @apply bg-white border border-gray-200 rounded-2xl shadow-sm; }
+    .card-hover { @apply transition hover:shadow-lg hover:-translate-y-0.5; }
+  </style>
+
+<html lang="en">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoodPlates</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Avenir', sans-serif;
+      background-color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: white;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: black;
+    }
+    ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+      margin: 0;
+      padding: 0;
+      align-items: center;
+    }
+    li a {
+      text-decoration: none;
+      color: black;
+      font-size: 1rem;
+      transition: color 0.2s ease;
+    }
+    li a:hover {
+      color: gray;
+    }
+    .cta {
+      background-color: #16a34a;
+      color: white !important;
+      padding: 0.5rem 1.5rem;
+      border-radius: 999px; /* pill shape */
+      font-weight: medium;
+      transition: background-color 0.2s ease;
+    }
+    .cta:hover {
+      background-color: #12893d;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">GoodPlates</div>
+    <ul>
+      <li><a href="#">Recipes</a></li>
+      <li><a href="#">Grocery List</a></li>
+      <li><a href="#">Order Online</a></li>
+      <li><a href="#">Statistics</a></li>
+      <li><a href="#">Courses</a></li>
+      <li><a href="#">Contact</a></li>
+      <li><a href="#" class="cta">Onboarding</a></li>
+    </ul>
+  </nav>
+
+</body>
+</html>
+
+
+
+
+  <main class="soft-gradient">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold mb-2">Welcome to Healthly</h1>
+        <p class="text-gray-600">Let's personalize your experience in just 3 simple steps</p>
+      </div>
+
+      <!-- Progress -->
+      <div class="mb-10">
+        <div class="flex justify-between text-sm text-gray-500 mb-2">
+          <span id="progressLabel">Step 1 of 3</span>
+          <span id="progressPct">33% Complete</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
+          <div id="progressBar" class="h-2 w-1/3 rounded-full bg-green-500 transition-all"></div>
+        </div>
+      </div>
+
+      <!-- Step Containers -->
+      <section id="step-1" class="card p-8 mb-8">
+        <h2 class="text-2xl font-semibold text-center mb-2">What do you want to do with groceries?</h2>
+        <p class="text-gray-600 text-center mb-8">Choose your primary goal to help us customize your experience</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Goal cards -->
+          <button data-goal="grocery-list"
+                  class="card card-hover p-6 text-center group">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">🛒</div>
+            <h3 class="font-semibold mb-1">Make Grocery List</h3>
+            <p class="text-sm text-gray-600">Create organized shopping lists</p>
+          </button>
+
+          <button data-goal="family-plan"
+                  class="card card-hover p-6 text-center group">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">👥</div>
+            <h3 class="font-semibold mb-1">Grocery Family Plan</h3>
+            <p class="text-sm text-gray-600">Plan meals for the whole family</p>
+          </button>
+
+          <button data-goal="in-app-order"
+                  class="card card-hover p-6 text-center group">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">📱</div>
+            <h3 class="font-semibold mb-1">Order Using In-App Capabilities</h3>
+            <p class="text-sm text-gray-600">Shop directly through the app</p>
+          </button>
+
+          <button data-goal="budget-track"
+                  class="card card-hover p-6 text-center group">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">💵</div>
+            <h3 class="font-semibold mb-1">Track Grocery Budget</h3>
+            <p class="text-sm text-gray-600">Monitor spending and save money</p>
+          </button>
+
+          <button data-goal="calorie-goals"
+                  class="card card-hover p-6 text-center group">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">🎯</div>
+            <h3 class="font-semibold mb-1">Set Calories Goals</h3>
+            <p class="text-sm text-gray-600">Reach your nutrition targets</p>
+          </button>
+
+          <button data-goal="health-calc"
+                  class="card card-hover p-6 text-center group">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">📈</div>
+            <h3 class="font-semibold mb-1">Calculate Health</h3>
+            <p class="text-sm text-gray-600">Track nutrients and wellness</p>
+          </button>
+        </div>
+      </section>
+
+      <section id="step-2" class="card p-8 mb-8 hidden">
+        <h2 class="text-2xl font-semibold text-center mb-2">Select your country of residence</h2>
+        <p class="text-gray-600 text-center mb-8">This helps us customize your experience with local stores and currency</p>
+
+        <div class="max-w-md mx-auto">
+          <div class="relative">
+            <select id="countrySelect"
+                    class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
+              <option value="">Choose your country...</option>
+              <option>United States</option>
+              <option>United Kingdom</option>
+              <option>Canada</option>
+              <option>Australia</option>
+              <option>Other...</option>
+            </select>
+            <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">▾</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="step-3" class="card p-8 mb-8 hidden">
+        <h2 class="text-2xl font-semibold text-center mb-2">Pick your supermarket chain</h2>
+        <p class="text-gray-600 text-center mb-8">Connect with your preferred grocery store for seamless integration</p>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
+          <!-- Store cards -->
+          <button data-store="Walmart" class="card card-hover p-6 text-center">
+            <div class="text-4xl mb-3">🏪</div>
+            <h3 class="font-semibold">Walmart</h3>
+          </button>
+          <button data-store="Tesco" class="card card-hover p-6 text-center">
+            <div class="text-4xl mb-3">🛒</div>
+            <h3 class="font-semibold">Tesco</h3>
+          </button>
+          <button data-store="Whole Foods" class="card card-hover p-6 text-center">
+            <div class="text-4xl mb-3">🥬</div>
+            <h3 class="font-semibold">Whole Foods</h3>
+          </button>
+          <button data-store="Target" class="card card-hover p-6 text-center">
+            <div class="text-4xl mb-3">🎯</div>
+            <h3 class="font-semibold">Target</h3>
+          </button>
+          <button data-store="Kroger" class="card card-hover p-6 text-center">
+            <div class="text-4xl mb-3">🛍️</div>
+            <h3 class="font-semibold">Kroger</h3>
+          </button>
+          <button data-store="Costco" class="card card-hover p-6 text-center">
+            <div class="text-4xl mb-3">📦</div>
+            <h3 class="font-semibold">Costco</h3>
+          </button>
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <div class="flex justify-between items-center">
+        <button id="backBtn"
+                class="px-5 h-11 rounded-xl border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
+          Back
+        </button>
+
+        <div class="flex gap-2" aria-hidden="true">
+          <div id="dot1" class="w-3 h-3 rounded-full bg-green-600"></div>
+          <div id="dot2" class="w-3 h-3 rounded-full bg-gray-200"></div>
+          <div id="dot3" class="w-3 h-3 rounded-full bg-gray-200"></div>
+        </div>
+
+        <button id="nextBtn"
+                class="px-6 h-11 rounded-xl btn-gradient disabled:opacity-50 disabled:cursor-not-allowed">
+          Next
+        </button>
+        <a id="finishLink" href="#" class="hidden">
+          <button id="finishBtn" class="px-6 h-11 rounded-xl btn-gradient disabled:opacity-50 disabled:cursor-not-allowed">
+            Finish
+          </button>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="bg-white border-t border-gray-200 py-6">
+    <div class="max-w-5xl mx-auto px-6 text-center text-sm text-gray-500">
+      © 2025 Healthly. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- Logic -->
+  <script>
+    // State
+    let currentStep = 1;
+    let selectedGoal = "";
+    let selectedCountry = "";
+    let selectedStore = "";
+
+    const steps = [1, 2, 3];
+
+    // Elements
+    const stepEls = {
+      1: document.getElementById('step-1'),
+      2: document.getElementById('step-2'),
+      3: document.getElementById('step-3')
+    };
+    const backBtn = document.getElementById('backBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+    const finishLink = document.getElementById('finishLink');
+
+    const progressBar = document.getElementById('progressBar');
+    const progressLabel = document.getElementById('progressLabel');
+    const progressPct = document.getElementById('progressPct');
+    const dots = [document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3')];
+
+    const countrySelect = document.getElementById('countrySelect');
+
+    // Helpers
+    function updateProgress() {
+      const pct = Math.round((currentStep / 3) * 100);
+      progressBar.style.width = pct + '%';
+      progressLabel.textContent = `Step ${currentStep} of 3`;
+      progressPct.textContent = `${pct}% Complete`;
+      dots.forEach((d, i) => {
+        d.classList.toggle('bg-green-600', i < currentStep);
+        d.classList.toggle('bg-gray-200', i >= currentStep);
+      });
+    }
+
+    function showStep(step) {
+      steps.forEach(s => stepEls[s].classList.toggle('hidden', s !== step));
+      backBtn.disabled = step === 1;
+      const canGo = canProceed();
+      if (step < 3) {
+        nextBtn.classList.remove('hidden');
+        finishLink.classList.add('hidden');
+        nextBtn.disabled = !canGo;
+      } else {
+        nextBtn.classList.add('hidden');
+        finishLink.classList.remove('hidden');
+        finishBtn.disabled = !canGo;
+      }
+      updateProgress();
+    }
+
+    function canProceed() {
+      if (currentStep === 1) return selectedGoal !== "";
+      if (currentStep === 2) return selectedCountry !== "";
+      if (currentStep === 3) return selectedStore !== "";
+      return false;
+    }
+
+    function clearSelection(container, selectedClass = 'ring-2 ring-green-600 bg-green-50') {
+      container.querySelectorAll('[data-selected]').forEach(el => {
+        el.removeAttribute('data-selected');
+        el.classList.remove(...selectedClass.split(' '));
+      });
+    }
+
+    // Step 1: goal selection
+    stepEls[1].querySelectorAll('[data-goal]').forEach(card => {
+      card.addEventListener('click', () => {
+        clearSelection(stepEls[1]);
+        selectedGoal = card.dataset.goal;
+        card.setAttribute('data-selected', 'true');
+        card.classList.add('ring-2', 'ring-green-600', 'bg-green-50');
+        nextBtn.disabled = !canProceed();
+      });
+    });
+
+    // Step 2: country select
+    countrySelect.addEventListener('change', (e) => {
+      selectedCountry = e.target.value;
+      nextBtn.disabled = !canProceed();
+      finishBtn.disabled = !canProceed();
+    });
+
+    // Step 3: store selection
+    stepEls[3].querySelectorAll('[data-store]').forEach(card => {
+      card.addEventListener('click', () => {
+        clearSelection(stepEls[3]);
+        selectedStore = card.dataset.store;
+        card.setAttribute('data-selected', 'true');
+        card.classList.add('ring-2', 'ring-green-600', 'bg-green-50');
+        finishBtn.disabled = !canProceed();
+      });
+    });
+
+    // Navigation
+    backBtn.addEventListener('click', () => {
+      currentStep = Math.max(1, currentStep - 1);
+      showStep(currentStep);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (!canProceed()) return;
+      currentStep = Math.min(3, currentStep + 1);
+      showStep(currentStep);
+    });
+
+    finishBtn.addEventListener('click', (e) => {
+      if (!canProceed()) { e.preventDefault(); return; }
+      // You can replace this with a redirect.
+      alert(`🎉 Onboarding complete!\n\nGoal: ${selectedGoal}\nCountry: ${selectedCountry}\nStore: ${selectedStore}`);
+    });
+
+    // Init
+    showStep(currentStep);
+  </script>
+</body>
+</html>
+
+
+
