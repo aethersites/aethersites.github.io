@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grocery List & Pantry</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* optional: nicer scroll for item lists */
+    .nice-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
+    .nice-scroll::-webkit-scrollbar-thumb { background: rgba(16,185,129,.35); border-radius: 9999px; }
+    .nice-scroll::-webkit-scrollbar-track { background: transparent; }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoodPlates</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Avenir', sans-serif;
+      background-color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: white;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: black;
+    }
+    ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+      margin: 0;
+      padding: 0;
+      align-items: center;
+    }
+    li a {
+      text-decoration: none;
+      color: black;
+      font-size: 1rem;
+      transition: color 0.2s ease;
+    }
+    li a:hover {
+      color: gray;
+    }
+    .cta {
+      background-color: #16a34a;
+      color: white !important;
+      padding: 0.5rem 1.5rem;
+      border-radius: 999px; /* pill shape */
+      font-weight: medium;
+      transition: background-color 0.2s ease;
+    }
+    .cta:hover {
+      background-color: #12893d;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">GoodPlates</div>
+    <ul>
+      <li><a href="#">Recipes</a></li>
+      <li><a href="#">Grocery List</a></li>
+      <li><a href="#">Order Online</a></li>
+      <li><a href="#">Statistics</a></li>
+      <li><a href="#">Courses</a></li>
+      <li><a href="#">Contact</a></li>
+      <li><a href="#" class="cta">Onboarding</a></li>
+    </ul>
+  </nav>
+
+</body>
+</html>
+
+
+
+
+  <main>
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <span class="inline-block mb-4 px-4 py-1 rounded-full text-white text-sm shadow bg-gradient-to-r from-green-400 to-green-600">🛒 Grocery & Pantry</span>
+        <h1 class="text-4xl font-bold mb-4">Grocery List & Pantry</h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Manage your grocery shopping and pantry inventory in one place. Add items, track purchases, and organize by categories.
+        </p>
+      </div>
+
+      <!-- Progress Overview -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <!-- Total Items -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <div class="p-6 flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-green-50">
+              <!-- ShoppingCart Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l3-8H6.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 22a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold">6</p>
+              <p class="text-sm text-gray-500">Total Items</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Completed -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <div class="p-6 flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-green-50">
+              <!-- Package Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.5 7.5L12 3 3.5 7.5 12 12l8.5-4.5z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 7.5V16.5L12 21l8.5-4.5V7.5M12 12v9"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold">1</p>
+              <p class="text-sm text-gray-500">Completed</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pantry Items -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <div class="p-6 flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-green-50">
+              <!-- Filter Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M6 12h12M10 20h4"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-2xl font-bold">4</p>
+              <p class="text-sm text-gray-500">Pantry Items</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Grocery List -->
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <header class="px-6 pt-6">
+            <h2 class="text-lg font-semibold flex items-center gap-2">
+              <!-- ShoppingCart Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l3-8H6.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 22a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"/>
+              </svg>
+              Grocery List
+            </h2>
+          </header>
+          <div class="p-6 space-y-6">
+            <!-- Add New Item -->
+            <div class="space-y-3">
+              <div class="flex gap-2">
+                <input
+                  placeholder="Add new grocery item..."
+                  class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500"
+                />
+                <!-- Category Select -->
+                <div class="relative w-48">
+                  <select class="appearance-none w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
+                    <option value="">Category</option>
+                    <option>Fruits &amp; Vegetables</option>
+                    <option>Dairy &amp; Eggs</option>
+                    <option>Meat &amp; Seafood</option>
+                    <option>Pantry Staples</option>
+                    <option>Snacks</option>
+                    <option>Beverages</option>
+                    <option>Frozen Foods</option>
+                    <option>Bakery</option>
+                  </select>
+                  <!-- Chevron -->
+                  <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+                <button class="px-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-white hover:from-green-500 hover:to-green-700">
+                  <!-- Plus Icon -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Search -->
+            <div class="relative">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"/>
+              </svg>
+              <input
+                placeholder="Search grocery items..."
+                class="w-full pl-10 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500"
+              />
+            </div>
+
+            <!-- Grocery Items (static, preserved from your data) -->
+            <div class="space-y-3 max-h-96 overflow-y-auto nice-scroll">
+              <!-- Item 1 -->
+              <div class="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-green-200">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                  <div>
+                    <p class="font-medium">Organic Bananas</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Fruits &amp; Vegetables</span>
+                      <span class="text-xs text-gray-500">6 count</span>
+                      <span class="text-xs px-2 py-0.5 rounded-full border border-green-300 text-green-700">In Pantry</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
+                  <!-- Trash2 -->
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Item 2 -->
+              <div class="flex items-center justify-between p-3 rounded-lg border bg-white border-gray-200">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                  <div>
+                    <p class="font-medium">Greek Yogurt</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Dairy &amp; Eggs</span>
+                      <span class="text-xs text-gray-500">32 oz</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Item 3 (completed:true) -->
+              <div class="flex items-center justify-between p-3 rounded-lg border bg-green-50 border-green-200">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" checked class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"/>
+                  <div>
+                    <p class="font-medium line-through text-gray-500">Salmon Fillet</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Meat &amp; Seafood</span>
+                      <span class="text-xs text-gray-500">1 lb</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Item 4 -->
+              <div class="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-green-200">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                  <div>
+                    <p class="font-medium">Brown Rice</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Pantry Staples</span>
+                      <span class="text-xs text-gray-500">2 lbs</span>
+                      <span class="text-xs px-2 py-0.5 rounded-full border border-green-300 text-green-700">In Pantry</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Item 5 -->
+              <div class="flex items-center justify-between p-3 rounded-lg border bg-white border-gray-200">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                  <div>
+                    <p class="font-medium">Almond Milk</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Beverages</span>
+                      <span class="text-xs text-gray-500">64 oz</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
+                  </svg>
+                </button>
+              </div>
+
+              <!-- Item 6 -->
+              <div class="flex items-center justify-between p-3 rounded-lg border bg-white border-gray-200">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
+                  <div>
+                    <p class="font-medium">Bell Peppers</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Fruits &amp; Vegetables</span>
+                      <span class="text-xs text-gray-500">3 count</span>
+                    </div>
+                  </div>
+                </div>
+                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pantry Management -->
+        <section class="bg-white border border-gray-200 rounded-xl shadow-sm">
+          <header class="px-6 pt-6">
+            <h2 class="text-lg font-semibold flex items-center gap-2">
+              <!-- Package Icon -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.5 7.5L12 3 3.5 7.5 12 12l8.5-4.5z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 7.5V16.5L12 21l8.5-4.5V7.5M12 12v9"/>
+              </svg>
+              Pantry Management
+            </h2>
+          </header>
+          <div class="p-6 space-y-6">
+            <!-- Add Pantry Item -->
+            <div class="space-y-3">
+              <input placeholder="Add item to pantry..." class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500"/>
+              <div class="flex gap-2">
+                <!-- Category -->
+                <div class="relative flex-1">
+                  <select class="appearance-none w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
+                    <option>Category</option>
+                    <option>Fruits &amp; Vegetables</option>
+                    <option>Dairy &amp; Eggs</option>
+                    <option>Meat &amp; Seafood</option>
+                    <option>Pantry Staples</option>
+                    <option>Snacks</option>
+                    <option>Beverages</option>
+                    <option>Frozen Foods</option>
+                    <option>Bakery</option>
+                  </select>
+                  <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                  </svg>
+                </div>
+                <!-- Expiry -->
+                <input type="date" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500"/>
+                <!-- Add -->
+                <button class="px-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-white hover:from-green-500 hover:to-green-700">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Pantry Items (static, preserved from your data) -->
+            <div class="space-y-3 max-h-96 overflow-y-auto nice-scroll">
+              <!-- Olive Oil -->
+              <div class="p-3 rounded-lg border border-gray-200 bg-white">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="font-medium">Olive Oil</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Pantry Staples</span>
+                      <span class="text-xs text-gray-500">500ml</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Expires: Dec 1, 2024</p>
+                  </div>
+                  <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quinoa -->
+              <div class="p-3 rounded-lg border border-gray-200 bg-white">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="font-medium">Quinoa</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Pantry Staples</span>
+                      <span class="text-xs text-gray-500">1 lb</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Expires: Jun 15, 2025</p>
+                  </div>
+                  <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Canned Tomatoes -->
+              <div class="p-3 rounded-lg border border-gray-200 bg-white">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="font-medium">Canned Tomatoes</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Pantry Staples</span>
+                      <span class="text-xs text-gray-500">4 cans</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Expires: Mar 20, 2025</p>
+                  </div>
+                  <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Frozen Broccoli -->
+              <div class="p-3 rounded-lg border border-gray-200 bg-white">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="font-medium">Frozen Broccoli</p>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Frozen Foods</span>
+                      <span class="text-xs text-gray-500">16 oz</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Expires: Nov 30, 2024</p>
+                  </div>
+                  <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="pt-4 border-t border-gray-200">
+              <div class="grid grid-cols-2 gap-2">
+                <button class="text-sm px-3 py-2 rounded-lg border border-green-300 text-green-700 hover:bg-green-50">Export List</button>
+                <button class="text-sm px-3 py-2 rounded-lg border border-green-300 text-green-700 hover:bg-green-50">Clear Completed</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-200 py-6 text-center text-gray-500 text-sm">
+    © 2025 Healthly. All rights reserved.
+  </footer>
+
+</body>
+</html>
+
+
