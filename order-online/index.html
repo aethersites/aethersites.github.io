@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoodPlates</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Avenir', sans-serif;
+      background-color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: white;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: black;
+    }
+    ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+      margin: 0;
+      padding: 0;
+      align-items: center;
+    }
+    li a {
+      text-decoration: none;
+      color: black;
+      font-size: 1rem;
+      transition: color 0.2s ease;
+    }
+    li a:hover {
+      color: gray;
+    }
+    .cta {
+      background-color: #16a34a;
+      color: white !important;
+      padding: 0.5rem 1.5rem;
+      border-radius: 999px; /* pill shape */
+      font-weight: medium;
+      transition: background-color 0.2s ease;
+    }
+    .cta:hover {
+      background-color: #12893d;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">GoodPlates</div>
+  <ul>
+    <li><a href="recipes/">Recipes</a></li>
+    <li><a href="grocery-list/">Grocery List</a></li>
+    <li><a href="order-online/">Order Online</a></li>
+    <li><a href="statistics/">Statistics</a></li>
+    <li><a href="courses/">Courses</a></li>
+    <li><a href="contact/">Contact</a></li>
+    <li><a href="onboarding/" class="cta">Onboarding</a></li>
+  </ul>
+</nav>
+
+
+
+
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recipe Groceries — Vanilla HTML</title>
+  <style>
+    :root{
+      --bg: #f6f7f9;
+      --card: #ffffff;
+      --card-muted: #fafafa;
+      --border: #e5e7eb;
+      --ring: #16a34a33; /* translucent green */
+      --text: #1f2937;   /* gray-800 */
+      --muted: #6b7280;  /* gray-500 */
+      --primary: #16a34a;/* green-600 */
+      --primary-700:#15803d;
+      --green-50:#ecfdf5;
+      --green-100:#dcfce7;
+      --green-200:#bbf7d0;
+      --shadow: 0 8px 24px rgba(0,0,0,.06);
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.35;
+    }
+    .container{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+    .header{
+      text-align:center;
+      margin-bottom: 32px;
+    }
+    .title{
+      font-size: clamp(28px, 3.2vw, 40px);
+      font-weight: 800;
+      letter-spacing:-0.02em;
+      margin: 0 0 8px;
+    }
+    .subtitle{
+      max-width: 680px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    /* Card */
+    .card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: clip;
+    }
+    .card-header{
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      display:flex; align-items:center; gap:8px;
+    }
+    .card-content{ padding: 16px 18px; }
+    .muted{ color: var(--muted); }
+    .badge{
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 4px 8px; border-radius: 999px;
+      font-size: 12px; font-weight: 600;
+      background: var(--green-100);
+      color: #166534; border: 1px solid #86efac;
+      white-space: nowrap;
+    }
+
+    /* Grids */
+    .grid{ display:grid; gap: 16px; }
+    .grid-3-lg{
+      grid-template-columns: 1fr;
+    }
+    @media(min-width:1024px){
+      .grid-3-lg{ grid-template-columns: 2fr 1fr  ; }
+    }
+    .stores-grid{
+      display:grid; gap:12px;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+    }
+    @media(min-width:700px){ .stores-grid{ grid-template-columns: repeat(4, minmax(0,1fr)); } }
+
+    /* Store card */
+    .store-card{
+      border:1px solid var(--border);
+      border-radius: 14px;
+      background: var(--card-muted);
+      text-align:center;
+      padding:16px;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+    }
+    .store-card:hover{ transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.08); }
+    .store-card.active{
+      background: #f0fdf4;
+      border-color: #22c55e;
+      box-shadow: 0 0 0 3px var(--ring);
+    }
+    .store-logo{ font-size: 28px; margin-bottom: 6px; }
+    .store-name{ font-weight: 700; font-size: 14px; }
+    .store-eta{ font-size: 12px; color: var(--muted); }
+
+    /* Controls */
+    .controls{
+      display:flex; gap:12px; margin: 18px 0 24px;
+      flex-wrap: wrap;
+    }
+    .input-wrap{ position: relative; flex:1; min-width: 220px; }
+    .input{
+      width:100%; padding: 11px 12px 11px 36px;
+      border:1px solid var(--border); border-radius: 12px;
+      background: #fff;
+      font-size: 14px; color: var(--text);
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .input:focus{ border-color:#22c55e; box-shadow: 0 0 0 3px var(--ring); }
+    .input-emoji{
+      position:absolute; left:10px; top:50%; transform: translateY(-50%);
+      font-size: 16px; opacity:.7; pointer-events:none;
+    }
+    .select{
+      min-width: 200px;
+      padding: 11px 12px;
+      border:1px solid var(--border); border-radius: 12px;
+      background: #fff;
+      font-size: 14px; color: var(--text);
+      outline: none;
+    }
+
+    /* Item grid */
+    .items-grid{
+      display:grid; gap:16px;
+      grid-template-columns: 1fr;
+    }
+    @media(min-width:700px){ .items-grid{ grid-template-columns: repeat(2, 1fr); } }
+    @media(min-width:1040px){ .items-grid{ grid-template-columns: repeat(4, 1fr); } }
+
+    .item-card{
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      background:#fff;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .item-card:hover{ transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0,0,0,.08); }
+    .item-card.pantry{
+      background: var(--green-50);
+      border-color: #86efac;
+      box-shadow: 0 0 0 2px #86efac inset;
+    }
+    .item-title{ font-weight: 700; }
+    .row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+    .price{ font-weight: 800; font-size: 18px; color: var(--primary); }
+    .rating{ display:inline-flex; align-items:center; gap:4px; font-size:12px; color: #ca8a04; } /* amber-ish */
+    .muted-small{ color: var(--muted); font-size:12px; }
+    .muted-smaller{ color: var(--muted); font-size:11px; }
+
+    /* Buttons */
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      width:100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background:#111827; color:#fff;  /* almost-black for sleek look */
+      font-weight: 700; cursor:pointer;
+      transition: transform .14s ease, box-shadow .14s ease, background .14s ease, opacity .14s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0,0,0,.12); }
+    .btn:active{ transform: translateY(0); }
+    .btn.secondary{ background:#fff; color: var(--text); }
+    .btn.primary{ background: var(--primary); border-color:#16a34a; }
+    .btn.primary:hover{ background: var(--primary-700); }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+
+    /* Cart items */
+    .cart-item{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 12px; border:1px solid var(--border); border-radius: 12px;
+      background: var(--card-muted);
+    }
+
+    /* Modal */
+    .modal-backdrop{
+      position: fixed; inset:0;
+      background: rgba(17, 24, 39, .55);
+      display:none;
+      align-items:center; justify-content:center;
+      padding: 24px;
+      z-index: 50;
+    }
+    .modal-backdrop.open{ display:flex; }
+    .modal{
+      width: min(720px, 96vw);
+      background:#fff; border:1px solid var(--border); border-radius: 18px; box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal .card-header{ border-bottom:1px solid var(--border); }
+    .store-option{
+      display:flex; align-items:center; gap:12px;
+      padding: 12px; border:1px solid var(--border); border-radius: 12px;
+      transition: background .12s ease, border-color .12s ease;
+    }
+    .store-option:hover{ background:#f9fafb; }
+    .radio{ margin-right: 6px; accent-color: var(--primary); }
+    .right{ margin-left:auto; text-align:right; }
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+
+    @media (prefers-reduced-motion: reduce){
+      .store-card, .item-card, .btn{ transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Recipe Groceries</h1>
+      <p class="subtitle">
+        Add ingredients from your recipes to your cart. Items you already have are highlighted in green.
+      </p>
+    </header>
+
+    <!-- Store selection & Cart summary -->
+    <div class="grid grid-3-lg" style="margin-bottom:20px">
+      <section class="card">
+        <div class="card-header">🛒 Store Selection</div>
+        <div class="card-content">
+          <div id="storeGrid" class="stores-grid" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <aside class="card">
+        <div class="card-header">💲 Cart Summary</div>
+        <div class="card-content">
+          <div class="grid" style="gap:8px">
+            <div class="row">
+              <span class="muted-small">Items:</span>
+              <span id="cartCount" style="font-weight:700">0</span>
+            </div>
+            <div class="row">
+              <span class="muted-small">Total:</span>
+              <span id="cartTotal" style="font-weight:800; font-size: 18px">$0.00</span>
+            </div>
+            <button id="checkoutBtn" class="btn primary" disabled>
+              ✅ Checkout (<span id="checkoutCount">0</span>)
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="controls">
+      <div class="input-wrap">
+        <span class="input-emoji" aria-hidden="true">🔎</span>
+        <input id="searchInput" class="input" placeholder="Search ingredients..." />
+      </div>
+      <select id="categorySelect" class="select" aria-label="Filter by category"></select>
+    </div>
+
+    <!-- Items -->
+    <section id="itemsGrid" class="items-grid" aria-live="polite"></section>
+
+    <!-- Cart Items -->
+    <section id="cartSection" class="card" style="margin-top:24px; display:none">
+      <div class="card-header">Cart Items (<span id="cartItemsHeaderCount">0</span>)</div>
+      <div class="card-content">
+        <div id="cartItems" class="grid" style="gap:12px"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Modal -->
+  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <div class="card-header" id="modalTitle">Choose Store</div>
+      <div class="card-content">
+        <div id="modalBody" class="grid" style="gap:12px"></div>
+        <div class="grid" style="gap:8px; margin-top:14px">
+          <button id="modalAddBtn" class="btn primary">➕ Add to Cart</button>
+          <button id="modalCancelBtn" class="btn secondary">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Data ----------
+    const stores = [
+      { id: "walmart",    name: "Walmart",    logo: "🏪", delivery: "2–3 hours" },
+      { id: "wholefoods", name: "Whole Foods",logo: "🥬", delivery: "1–2 hours" },
+      { id: "target",     name: "Target",     logo: "🎯", delivery: "2–4 hours" },
+      { id: "kroger",     name: "Kroger",     logo: "🛍️", delivery: "1–3 hours" },
+    ];
+    const categories = [
+      "All Items",
+      "Fruits & Vegetables",
+      "Dairy & Eggs",
+      "Meat & Seafood",
+      "Pantry Staples",
+      "Spices & Seasonings",
+    ];
+    const groceryItems = [
+      { id:1, name:"Eggs", category:"Dairy & Eggs", inPantry:true,  prices:{
+        walmart:{price:2.48, brand:"Great Value",   size:"12 count", rating:4.3},
+        wholefoods:{price:4.99, brand:"365 Organic", size:"12 count", rating:4.7},
+        target:{price:2.79, brand:"Good & Gather",  size:"12 count", rating:4.4},
+        kroger:{price:2.69, brand:"Kroger Brand",   size:"12 count", rating:4.2},
+      }},
+      { id:2, name:"Milk", category:"Dairy & Eggs", inPantry:false, prices:{
+        walmart:{price:3.68, brand:"Great Value", size:"1 gallon", rating:4.1},
+        wholefoods:{price:5.99, brand:"365 Organic", size:"1 gallon", rating:4.8},
+        target:{price:3.89, brand:"Good & Gather", size:"1 gallon", rating:4.3},
+        kroger:{price:3.79, brand:"Kroger Brand", size:"1 gallon", rating:4.0},
+      }},
+      { id:3, name:"Butter", category:"Dairy & Eggs", inPantry:true, prices:{
+        walmart:{price:4.98, brand:"Land O'Lakes", size:"1 lb", rating:4.5},
+        wholefoods:{price:6.49, brand:"Organic Valley", size:"1 lb", rating:4.6},
+        target:{price:5.29, brand:"Good & Gather", size:"1 lb", rating:4.2},
+        kroger:{price:5.19, brand:"Kroger Brand", size:"1 lb", rating:4.1},
+      }},
+      { id:4, name:"Flour", category:"Pantry Staples", inPantry:false, prices:{
+        walmart:{price:2.48, brand:"Great Value", size:"5 lbs", rating:4.2},
+        wholefoods:{price:4.99, brand:"365 Organic", size:"5 lbs", rating:4.6},
+        target:{price:2.79, brand:"Gold Medal", size:"5 lbs", rating:4.4},
+        kroger:{price:2.69, brand:"Kroger Brand", size:"5 lbs", rating:4.0},
+      }},
+      { id:5, name:"Carrots", category:"Fruits & Vegetables", inPantry:false, prices:{
+        walmart:{price:1.18, brand:"Fresh", size:"2 lbs", rating:4.0},
+        wholefoods:{price:2.49, brand:"Organic", size:"2 lbs", rating:4.5},
+        target:{price:1.29, brand:"Good & Gather", size:"2 lbs", rating:4.1},
+        kroger:{price:1.39, brand:"Fresh", size:"2 lbs", rating:3.9},
+      }},
+      { id:6, name:"Lettuce", category:"Fruits & Vegetables", inPantry:false, prices:{
+        walmart:{price:1.68, brand:"Fresh", size:"1 head", rating:3.8},
+        wholefoods:{price:2.99, brand:"Organic", size:"1 head", rating:4.3},
+        target:{price:1.79, brand:"Good & Gather", size:"1 head", rating:4.0},
+        kroger:{price:1.89, brand:"Fresh", size:"1 head", rating:3.7},
+      }},
+      { id:7, name:"Strawberries", category:"Fruits & Vegetables", inPantry:true, prices:{
+        walmart:{price:2.48, brand:"Fresh", size:"1 lb", rating:4.1},
+        wholefoods:{price:4.99, brand:"Organic", size:"1 lb", rating:4.6},
+        target:{price:2.79, brand:"Good & Gather", size:"1 lb", rating:4.2},
+        kroger:{price:2.89, brand:"Fresh", size:"1 lb", rating:4.0},
+      }},
+      { id:8, name:"Tomatoes", category:"Fruits & Vegetables", inPantry:false, prices:{
+        walmart:{price:1.98, brand:"Fresh", size:"1 lb", rating:3.9},
+        wholefoods:{price:3.49, brand:"Organic", size:"1 lb", rating:4.4},
+        target:{price:2.19, brand:"Good & Gather", size:"1 lb", rating:4.0},
+        kroger:{price:2.29, brand:"Fresh", size:"1 lb", rating:3.8},
+      }},
+    ];
+
+    // ---------- State ----------
+    const state = {
+      selectedStore: "walmart",
+      searchTerm: "",
+      selectedCategory: "all",
+      cart: [],
+      modalItemId: null,
+      modalSelectedStore: "walmart"
+    };
+
+    // ---------- Utils ----------
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+    const money = (n) => `$${n.toFixed(2)}`;
+
+    const currentStore = () => stores.find(s => s.id === state.selectedStore);
+
+    const filteredItems = () => {
+      const term = state.searchTerm.trim().toLowerCase();
+      const cat = state.selectedCategory;
+      return groceryItems.filter(item => {
+        const matchSearch = item.name.toLowerCase().includes(term);
+        const matchCat = cat === "all" || cat === "all items" || item.category.toLowerCase() === cat;
+        return matchSearch && matchCat;
+      });
+    };
+
+    const cartTotal = () => state.cart.reduce((sum, it) => sum + it.selectedPrice.price, 0);
+
+    // ---------- Renderers ----------
+    function renderStores(){
+      const grid = $("#storeGrid");
+      grid.innerHTML = stores.map(s => `
+        <button class="store-card ${state.selectedStore===s.id?'active':''}" data-store="${s.id}" aria-pressed="${state.selectedStore===s.id}">
+          <div class="store-logo">${s.logo}</div>
+          <div class="store-name">${s.name}</div>
+          <div class="store-eta">${s.delivery}</div>
+        </button>
+      `).join("");
+
+      $$(".store-card", grid).forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          state.selectedStore = btn.dataset.store;
+          renderAll();
+        }, {once:false});
+      });
+    }
+
+    function renderControls(){
+      // categories
+      const sel = $("#categorySelect");
+      if(!sel.dataset.ready){
+        sel.innerHTML = categories.map(c=>{
+          const val = c.toLowerCase();
+          return `<option value="${val}">${c}</option>`;
+        }).join("");
+        sel.value = "all items";
+        sel.dataset.ready = "true";
+        sel.addEventListener("change", e=>{
+          state.selectedCategory = e.target.value;
+          renderItems();
+        });
+      }
+      // search
+      const input = $("#searchInput");
+      if(!input.dataset.ready){
+        input.dataset.ready="true";
+        input.addEventListener("input", e=>{
+          state.searchTerm = e.target.value || "";
+          renderItems();
+        });
+      }
+    }
+
+    function renderItems(){
+      const grid = $("#itemsGrid");
+      const items = filteredItems();
+      const store = currentStore();
+
+      grid.innerHTML = items.map(item=>{
+        const sp = item.prices[state.selectedStore];
+        return `
+          <article class="item-card ${item.inPantry ? 'pantry' : ''}">
+            <div class="card-content">
+              <div class="row" style="margin-bottom:8px">
+                <div class="item-title">${item.name}</div>
+                ${item.inPantry ? `<span class="badge"><span aria-hidden="true">✅</span> In Pantry</span>`:''}
+              </div>
+
+              <div class="grid" style="gap:6px; margin-bottom:10px">
+                <div class="row">
+                  <span class="price">${money(sp.price)}</span>
+                  <span class="rating" title="Rating"><span aria-hidden="true">⭐</span> ${sp.rating.toFixed(1)}</span>
+                </div>
+                <div class="muted-small">${sp.brand} • ${sp.size}</div>
+                <div class="muted-smaller">at ${store?.name ?? ''}</div>
+              </div>
+
+              <button class="btn ${item.inPantry ? 'secondary' : 'primary'} add-btn" ${item.inPantry ? 'disabled' : ''} data-id="${item.id}">
+                <span aria-hidden="true">${item.inPantry ? '✅' : '➕'}</span>
+                ${item.inPantry ? 'Already Have' : 'Add to Cart'}
+              </button>
+            </div>
+          </article>
+        `;
+      }).join("");
+
+      $$(".add-btn", grid).forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const id = Number(btn.dataset.id);
+          openModal(id);
+        });
+      });
+    }
+
+    function renderCart(){
+      $("#cartCount").textContent = String(state.cart.length);
+      $("#checkoutCount").textContent = String(state.cart.length);
+      $("#cartTotal").textContent = money(cartTotal());
+
+      const section = $("#cartSection");
+      section.style.display = state.cart.length ? "block" : "none";
+      $("#cartItemsHeaderCount").textContent = String(state.cart.length);
+
+      const list = $("#cartItems");
+      list.innerHTML = state.cart.map((it, idx)=>{
+        const storeName = stores.find(s=>s.id===it.selectedStore)?.name ?? '';
+        return `
+          <div class="cart-item">
+            <div>
+              <div style="font-weight:700">${it.name}</div>
+              <div class="muted-small">${it.selectedPrice.brand} from ${storeName}</div>
+            </div>
+            <div class="right">
+              <div style="font-weight:800">${money(it.selectedPrice.price)}</div>
+              <div class="muted-smaller">Qty: ${it.quantity}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      $("#checkoutBtn").disabled = state.cart.length === 0;
+    }
+
+    // ---------- Modal logic ----------
+    function openModal(itemId){
+      state.modalItemId = itemId;
+      state.modalSelectedStore = state.selectedStore;
+      const item = groceryItems.find(i=>i.id===itemId);
+      if(!item) return;
+
+      const body = $("#modalBody");
+      body.innerHTML = `
+        <div class="muted" style="margin-bottom:6px">Choose store for <strong>${item.name}</strong></div>
+        ${stores.map(store=>{
+          const opt = item.prices[store.id];
+          return `
+            <label class="store-option">
+              <input class="radio" type="radio" name="storeRadio" value="${store.id}" ${store.id===state.modalSelectedStore?'checked':''} />
+              <div style="display:flex; align-items:center; gap:8px">
+                <span style="font-size:18px">${store.logo}</span>
+                <div>
+                  <div style="font-weight:700">${store.name}</div>
+                  <div class="muted-smaller">${opt.brand} • ${opt.size}</div>
+                </div>
+              </div>
+              <div class="right">
+                <div style="font-weight:800">${money(opt.price)}</div>
+                <div class="muted-smaller"><span aria-hidden="true">⭐</span> ${opt.rating.toFixed(1)}</div>
+              </div>
+            </label>
+          `;
+        }).join("")}
+      `;
+
+      // radio handling
+      $$('input[name="storeRadio"]', body).forEach(r=>{
+        r.addEventListener("change", (e)=> {
+          state.modalSelectedStore = e.target.value;
+        });
+      });
+
+      $("#modalAddBtn").onclick = ()=>{
+        addToCart(itemId, state.modalSelectedStore);
+        closeModal();
+      };
+      $("#modalCancelBtn").onclick = closeModal;
+
+      $("#modalBackdrop").classList.add("open");
+      // trap a11y focus basic
+      setTimeout(()=>$("#modalAddBtn").focus(), 0);
+    }
+
+    function closeModal(){
+      $("#modalBackdrop").classList.remove("open");
+      state.modalItemId = null;
+    }
+
+    function addToCart(itemId, storeId){
+      const item = groceryItems.find(i=>i.id===itemId);
+      if(!item) return;
+      const cartItem = {
+        ...item,
+        selectedStore: storeId,
+        selectedPrice: item.prices[storeId],
+        quantity: 1
+      };
+      state.cart = [...state.cart, cartItem];
+      renderCart();
+    }
+
+    // ---------- Init ----------
+    function renderAll(){
+      renderStores();
+      renderControls();
+      renderItems();
+      renderCart();
+    }
+    renderAll();
+  </script>
+</body>
+</html>
+
+
