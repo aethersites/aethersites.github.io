@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Meal Courses — Culinary Education</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .nice-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+    .nice-scroll::-webkit-scrollbar-thumb { background: rgba(16,185,129,.35); border-radius: 9999px; }
+    .nice-scroll::-webkit-scrollbar-track { background: transparent; }
+    .pill-gradient { @apply text-white bg-gradient-to-r from-green-500 to-green-700; }
+    .btn-gradient { @apply text-white bg-gradient-to-r from-green-500 to-green-700 hover:from-green-600 hover:to-green-800; }
+    .soft-gradient { @apply bg-gradient-to-br from-green-50 via-white to-gray-50; }
+  </style>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+
+  <!-- Nav -->
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoodPlates</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Avenir', sans-serif;
+      background-color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: white;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: black;
+    }
+    ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+      margin: 0;
+      padding: 0;
+      align-items: center;
+    }
+    li a {
+      text-decoration: none;
+      color: black;
+      font-size: 1rem;
+      transition: color 0.2s ease;
+    }
+    li a:hover {
+      color: gray;
+    }
+    .cta {
+      background-color: #16a34a;
+      color: white !important;
+      padding: 0.5rem 1.5rem;
+      border-radius: 999px; /* pill shape */
+      font-weight: medium;
+      transition: background-color 0.2s ease;
+    }
+    .cta:hover {
+      background-color: #12893d;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">GoodPlates</div>
+  <ul>
+    <li><a href="recipes/">Recipes</a></li>
+    <li><a href="grocery-list/">Grocery List</a></li>
+    <li><a href="order-online/">Order Online</a></li>
+    <li><a href="statistics/">Statistics</a></li>
+    <li><a href="courses/">Courses</a></li>
+    <li><a href="contact/">Contact</a></li>
+    <li><a href="onboarding/" class="cta">Onboarding</a></li>
+  </ul>
+</nav>
+
+
+
+
+
+  <main>
+    <!-- Hero -->
+    <section class="soft-gradient py-16 px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto text-center space-y-6">
+        <div class="space-y-4">
+          <span class="inline-flex items-center gap-2 px-4 py-1 rounded-full text-sm pill-gradient shadow">
+            🎓 Premium Culinary Education
+          </span>
+          <h1 class="text-4xl lg:text-5xl font-bold leading-tight">
+            Master World Cuisines with
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-green-800"> Expert Chefs</span>
+          </h1>
+          <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+            Learn authentic cooking techniques from professional chefs around the world.
+            From traditional family recipes to advanced culinary arts.
+          </p>
+        </div>
+
+        <!-- Search + Filters -->
+        <div class="max-w-4xl mx-auto space-y-4">
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔎</span>
+            <input
+              class="w-full h-12 pl-12 pr-28 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 text-lg"
+              placeholder="Search courses, cuisines, or techniques..." />
+            <button class="absolute right-2 top-1/2 -translate-y-1/2 h-9 px-4 rounded-lg btn-gradient text-sm">
+              Search
+            </button>
+          </div>
+
+          <div class="flex flex-wrap gap-3 justify-center">
+            <div class="relative">
+              <select class="appearance-none w-40 h-10 px-3 pr-9 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
+                <option>All Cuisines</option>
+                <option>Italian</option>
+                <option>Thai</option>
+                <option>Indian</option>
+                <option>French</option>
+                <option>Korean</option>
+                <option>Middle Eastern</option>
+                <option>Mexican</option>
+                <option>Japanese</option>
+              </select>
+              <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">▾</span>
+            </div>
+
+            <div class="relative">
+              <select class="appearance-none w-40 h-10 px-3 pr-9 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
+                <option>All Levels</option>
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
+              </select>
+              <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">▾</span>
+            </div>
+
+            <button class="h-10 px-4 rounded-lg border border-green-300 text-green-700 bg-white hover:bg-green-50 text-sm flex items-center gap-2">
+              🧰 More Filters
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Course Packs -->
+    <section class="py-12 px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h2 class="text-3xl font-bold mb-1">Featured Course Packs</h2>
+            <p class="text-gray-600">Professional culinary education from master chefs</p>
+          </div>
+          <div class="flex gap-2">
+            <button class="px-3 h-9 rounded-lg border border-green-300 text-green-700 bg-white hover:bg-green-50 text-sm">Newest</button>
+            <button class="px-3 h-9 rounded-lg border border-green-300 text-green-700 bg-white hover:bg-green-50 text-sm">Popular</button>
+            <button class="px-3 h-9 rounded-lg btn-gradient text-sm">Trending</button>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Course 1 -->
+          <article class="relative overflow-hidden bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition">
+            <div class="absolute top-3 left-3">
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full pill-gradient shadow">📈 Popular</span>
+            </div>
+            <div class="absolute top-3 right-3">
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-yellow-400 text-white shadow">👑 Premium</span>
+            </div>
+
+            <div class="relative">
+              <div class="w-full h-48 soft-gradient flex items-center justify-center">
+                <div class="text-5xl">🧑‍🍳</div>
+              </div>
+              <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <button class="px-5 py-2 rounded-lg bg-white/90 hover:bg-white text-gray-900 text-sm shadow">
+                  ▶️ Preview
+                </button>
+              </div>
+            </div>
+
+            <div class="p-6 pt-5">
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-700 bg-gray-50">Middle Eastern</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-red-200 text-red-700 bg-red-50">Advanced</span>
+              </div>
+
+              <h3 class="text-lg font-semibold leading-snug mb-2">Authentic Moroccan Cuisine Mastery</h3>
+              <p class="text-sm text-gray-600">Master the complex flavors and techniques of traditional Moroccan cooking, from tagines to pastries.</p>
+
+              <div class="flex items-center gap-2 mt-3">
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">🧑‍🍳</div>
+                <span class="text-sm font-medium">Chef Amina Hassani</span>
+              </div>
+
+              <div class="mt-4 mb-3 text-sm text-gray-600 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <span>⏱ 8 hours</span>
+                  <span>📘 12 lessons</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-sm mb-3">
+                <div class="flex items-center gap-2">
+                  <span>⭐ 4.9</span>
+                  <span class="text-gray-500">(2,850 students)</span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Traditional recipes</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Spice blending</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-600 bg-gray-50">+2 more</span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg font-bold">$89.99</span>
+                    <span class="text-sm text-gray-500 line-through">$129.99</span>
+                  </div>
+                </div>
+                <button class="px-4 h-10 rounded-lg btn-gradient">Enroll Now</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Course 2 -->
+          <article class="overflow-hidden bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition">
+            <div class="relative">
+              <div class="w-full h-48 soft-gradient flex items-center justify-center">
+                <div class="text-5xl">🧑‍🍳</div>
+              </div>
+              <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <button class="px-5 py-2 rounded-lg bg-white/90 hover:bg-white text-gray-900 text-sm shadow">
+                  ▶️ Preview
+                </button>
+              </div>
+            </div>
+
+            <div class="p-6 pt-5">
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-700 bg-gray-50">Italian</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-yellow-200 text-yellow-700 bg-yellow-50">Intermediate</span>
+              </div>
+
+              <h3 class="text-lg font-semibold leading-snug mb-2">Italian Regional Specialties</h3>
+              <p class="text-sm text-gray-600">Explore authentic dishes from each Italian region, understanding local ingredients and traditions.</p>
+
+              <div class="flex items-center gap-2 mt-3">
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">🧑‍🍳</div>
+                <span class="text-sm font-medium">Chef Marco Benedetti</span>
+              </div>
+
+              <div class="mt-4 mb-3 text-sm text-gray-600 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <span>⏱ 6 hours</span>
+                  <span>📘 10 lessons</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-sm mb-3">
+                <div class="flex items-center gap-2">
+                  <span>⭐ 4.8</span>
+                  <span class="text-gray-500">(3,200 students)</span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Regional recipes</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Pasta making</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-600 bg-gray-50">+2 more</span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg font-bold">$64.99</span>
+                    <span class="text-sm text-gray-500 line-through">$89.99</span>
+                  </div>
+                </div>
+                <button class="px-4 h-10 rounded-lg btn-gradient">Enroll Now</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Course 3 -->
+          <article class="relative overflow-hidden bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition">
+            <div class="absolute top-3 left-3">
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full pill-gradient shadow">📈 Popular</span>
+            </div>
+
+            <div class="relative">
+              <div class="w-full h-48 soft-gradient flex items-center justify-center">
+                <div class="text-5xl">🧑‍🍳</div>
+              </div>
+              <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <button class="px-5 py-2 rounded-lg bg-white/90 hover:bg-white text-gray-900 text-sm shadow">
+                  ▶️ Preview
+                </button>
+              </div>
+            </div>
+
+            <div class="p-6 pt-5">
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-700 bg-gray-50">Thai</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-green-200 text-green-700 bg-green-50">Beginner</span>
+              </div>
+
+              <h3 class="text-lg font-semibold leading-snug mb-2">Thai Street Food Adventures</h3>
+              <p class="text-sm text-gray-600">Learn to recreate authentic Thai street food favorites in your own kitchen.</p>
+
+              <div class="flex items-center gap-2 mt-3">
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">🧑‍🍳</div>
+                <span class="text-sm font-medium">Chef Siriporn Nakamura</span>
+              </div>
+
+              <div class="mt-4 mb-3 text-sm text-gray-600 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <span>⏱ 5 hours</span>
+                  <span>📘 8 lessons</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-sm mb-3">
+                <div class="flex items-center gap-2">
+                  <span>⭐ 4.7</span>
+                  <span class="text-gray-500">(1,890 students)</span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Street food classics</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Curry pastes</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-600 bg-gray-50">+2 more</span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg font-bold">$49.99</span>
+                    <span class="text-sm text-gray-500 line-through">$69.99</span>
+                  </div>
+                </div>
+                <button class="px-4 h-10 rounded-lg btn-gradient">Enroll Now</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Course 4 -->
+          <article class="relative overflow-hidden bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition">
+            <div class="absolute top-3 right-3">
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-yellow-400 text-white shadow">👑 Premium</span>
+            </div>
+
+            <div class="relative">
+              <div class="w-full h-48 soft-gradient flex items-center justify-center">
+                <div class="text-5xl">🧑‍🍳</div>
+              </div>
+              <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <button class="px-5 py-2 rounded-lg bg-white/90 hover:bg-white text-gray-900 text-sm shadow">
+                  ▶️ Preview
+                </button>
+              </div>
+            </div>
+
+            <div class="p-6 pt-5">
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-700 bg-gray-50">French</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-red-200 text-red-700 bg-red-50">Advanced</span>
+              </div>
+
+              <h3 class="text-lg font-semibold leading-snug mb-2">French Pastry &amp; Dessert Mastery</h3>
+              <p class="text-sm text-gray-600">Master the art of French pastry making, from croissants to complex desserts.</p>
+
+              <div class="flex items-center gap-2 mt-3">
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">🧑‍🍳</div>
+                <span class="text-sm font-medium">Chef Élise Dubois</span>
+              </div>
+
+              <div class="mt-4 mb-3 text-sm text-gray-600 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <span>⏱ 10 hours</span>
+                  <span>📘 15 lessons</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-sm mb-3">
+                <div class="flex items-center gap-2">
+                  <span>⭐ 4.9</span>
+                  <span class="text-gray-500">(1,650 students)</span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Classic techniques</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Laminated doughs</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-600 bg-gray-50">+2 more</span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg font-bold">$99.99</span>
+                    <span class="text-sm text-gray-500 line-through">$149.99</span>
+                  </div>
+                </div>
+                <button class="px-4 h-10 rounded-lg btn-gradient">Enroll Now</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Course 5 -->
+          <article class="relative overflow-hidden bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition">
+            <div class="absolute top-3 left-3">
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full pill-gradient shadow">📈 Popular</span>
+            </div>
+
+            <div class="relative">
+              <div class="w-full h-48 soft-gradient flex items-center justify-center">
+                <div class="text-5xl">🧑‍🍳</div>
+              </div>
+              <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <button class="px-5 py-2 rounded-lg bg-white/90 hover:bg-white text-gray-900 text-sm shadow">
+                  ▶️ Preview
+                </button>
+              </div>
+            </div>
+
+            <div class="p-6 pt-5">
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-700 bg-gray-50">Korean</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-green-200 text-green-700 bg-green-50">Beginner</span>
+              </div>
+
+              <h3 class="text-lg font-semibold leading-snug mb-2">Korean Home Cooking Essentials</h3>
+              <p class="text-sm text-gray-600">Learn fundamental Korean cooking techniques and prepare beloved home-style dishes.</p>
+
+              <div class="flex items-center gap-2 mt-3">
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">🧑‍🍳</div>
+                <span class="text-sm font-medium">Chef Min-jun Park</span>
+              </div>
+
+              <div class="mt-4 mb-3 text-sm text-gray-600 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <span>⏱ 4 hours</span>
+                  <span>📘 7 lessons</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-sm mb-3">
+                <div class="flex items-center gap-2">
+                  <span>⭐ 4.6</span>
+                  <span class="text-gray-500">(2,400 students)</span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Fermentation basics</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Banchan preparation</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-600 bg-gray-50">+2 more</span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg font-bold">$39.99</span>
+                    <span class="text-sm text-gray-500 line-through">$54.99</span>
+                  </div>
+                </div>
+                <button class="px-4 h-10 rounded-lg btn-gradient">Enroll Now</button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Course 6 -->
+          <article class="relative overflow-hidden bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-lg hover:-translate-y-1 transition">
+            <div class="absolute top-3 right-3">
+              <span class="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-yellow-400 text-white shadow">👑 Premium</span>
+            </div>
+
+            <div class="relative">
+              <div class="w-full h-48 soft-gradient flex items-center justify-center">
+                <div class="text-5xl">🧑‍🍳</div>
+              </div>
+              <div class="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <button class="px-5 py-2 rounded-lg bg-white/90 hover:bg-white text-gray-900 text-sm shadow">
+                  ▶️ Preview
+                </button>
+              </div>
+            </div>
+
+            <div class="p-6 pt-5">
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-700 bg-gray-50">Indian</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-yellow-200 text-yellow-700 bg-yellow-50">Intermediate</span>
+              </div>
+
+              <h3 class="text-lg font-semibold leading-snug mb-2">Indian Spice Academy</h3>
+              <p class="text-sm text-gray-600">Unlock the secrets of Indian spices and create complex, flavorful dishes from various regions.</p>
+
+              <div class="flex items-center gap-2 mt-3">
+                <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">🧑‍🍳</div>
+                <span class="text-sm font-medium">Chef Priya Sharma</span>
+              </div>
+
+              <div class="mt-4 mb-3 text-sm text-gray-600 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <span>⏱ 7 hours</span>
+                  <span>📘 11 lessons</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-sm mb-3">
+                <div class="flex items-center gap-2">
+                  <span>⭐ 4.8</span>
+                  <span class="text-gray-500">(3,100 students)</span>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-2 mb-4">
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Spice combinations</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-green-300 text-green-700 bg-white">Regional variations</span>
+                <span class="text-xs px-2 py-1 rounded-full border border-gray-200 text-gray-600 bg-gray-50">+2 more</span>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="space-y-0.5">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg font-bold">$74.99</span>
+                    <span class="text-sm text-gray-500 line-through">$99.99</span>
+                  </div>
+                </div>
+                <button class="px-4 h-10 rounded-lg btn-gradient">Enroll Now</button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div class="text-center mt-12">
+          <button class="px-8 h-11 rounded-xl border border-green-300 text-green-700 bg-white hover:bg-green-50">
+            Load More Courses
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Community Stats -->
+    <section class="soft-gradient py-12 px-6 lg:px-8">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl font-bold mb-3">Join Our Culinary Community</h2>
+          <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            Connect with fellow food enthusiasts, share your creations, and learn from the best chefs worldwide.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-8 text-center">
+          <div class="space-y-4">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-green-100 flex items-center justify-center text-3xl">👥</div>
+            <div class="text-3xl font-bold">50,000+</div>
+            <div class="text-gray-600">Active Students</div>
+          </div>
+          <div class="space-y-4">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-green-100 flex items-center justify-center text-3xl">🧑‍🍳</div>
+            <div class="text-3xl font-bold">200+</div>
+            <div class="text-gray-600">Expert Chefs</div>
+          </div>
+          <div class="space-y-4">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-green-100 flex items-center justify-center text-3xl">📘</div>
+            <div class="text-3xl font-bold">500+</div>
+            <div class="text-gray-600">Course Hours</div>
+          </div>
+          <div class="space-y-4">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-green-100 flex items-center justify-center text-3xl">🌍</div>
+            <div class="text-3xl font-bold">30+</div>
+            <div class="text-gray-600">World Cuisines</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto text-center space-y-8">
+        <div class="space-y-3">
+          <h2 class="text-4xl font-bold">Ready to Become a Better Cook?</h2>
+          <p class="text-lg text-gray-600">Join thousands of students learning authentic cooking techniques from world-class chefs.</p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button class="px-8 h-12 rounded-xl btn-gradient">Browse All Courses</button>
+          <button class="px-8 h-12 rounded-xl border border-green-300 text-green-700 bg-white hover:bg-green-50">Become an Instructor</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-white border-t border-gray-200 py-6">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center text-sm text-gray-500">
+      © 2025 Healthly. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>
+
+
