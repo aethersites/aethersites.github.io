@@ -1,303 +1,379 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GoodPlates</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GoodPlates — Plan, Shop & Cook Smarter</title>
+  <meta name="color-scheme" content="light dark">
   <style>
+    /* ============ Design Tokens ============ */
+    :root {
+      --bg: #ffffff;
+      --text: #0f172a;      /* slate-900 */
+      --muted: #475569;     /* slate-600 */
+      --muted-2: #64748b;   /* slate-500 */
+      --surface: #ffffff;   /* surfaces/cards */
+      --surface-2: #f8fafc; /* soft section bg */
+      --border: #e2e8f0;    /* soft borders */
+      --primary: #16a34a;   /* emerald-600 */
+      --primary-700: #15803d;
+      --primary-100: #dcfce7;
+      --shadow: 0 1px 2px rgba(2,6,23,.06), 0 10px 30px rgba(2,6,23,.08);
+      --radius: 16px;
+      --radius-lg: 24px;
+
+      /* Fluid type scale */
+      --step--1: clamp(0.875rem, 0.82rem + 0.15vw, 0.95rem);
+      --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --step-1: clamp(1.25rem, 1.06rem + 0.8vw, 1.6rem);
+      --step-2: clamp(1.6rem, 1.2rem + 1.6vw, 2.25rem);
+      --step-3: clamp(2rem, 1.6rem + 2.2vw, 3rem);
+      --step-4: clamp(2.5rem, 2rem + 3vw, 3.75rem);
+
+      /* Spacing scale */
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --space-16: 4rem;
+      --space-20: 5rem;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b1220;
+        --text: #e5e7eb;
+        --muted: #94a3b8;
+        --muted-2: #7c8699;
+        --surface: #0f172a;
+        --surface-2: #0b1220;
+        --border: #1f2937;
+        --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+      }
+      .btn-outline { border-color: rgba(255,255,255,.25); }
+    }
+
+    /* ============ Base ============ */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
       margin: 0;
-      font-family: 'Avenir', sans-serif;
-      background-color: white;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: var(--step-0);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      background-color: white;
+    img { max-width: 100%; height: auto; border-radius: var(--radius); }
+    a { color: inherit; text-decoration: none; }
+    .container { width: min(1200px, 100% - var(--space-8)*2); margin-inline: auto; }
+    section { padding-block: clamp(var(--space-12), 6vw, var(--space-20)); }
+
+    /* ============ Navigation ============ */
+    .site-nav {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: saturate(180%) blur(12px);
+      background: color-mix(in oklab, var(--surface) 85%, transparent);
+      border-bottom: 1px solid var(--border);
     }
-    .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: black;
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); padding-block: var(--space-4); }
+    .logo { font-weight: 800; letter-spacing: -0.02em; font-size: var(--step-1); display: inline-flex; align-items: center; gap: .625rem; }
+    .logo-mark { display:inline-grid; place-items:center; width: 2rem; height: 2rem; border-radius: 10px; background: linear-gradient(135deg, var(--primary), #22c55e); color: #fff; font-weight: 700; box-shadow: var(--shadow); }
+
+    .nav-links { display: flex; align-items: center; gap: var(--space-6); }
+    .nav-links a { font-weight: 600; color: var(--muted); }
+    .nav-links a:hover { color: var(--text); }
+
+    .btn { display:inline-flex; align-items:center; gap:.5rem; padding: .85rem 1.25rem; border-radius: 999px; font-weight: 700; border: 1px solid transparent; transition: transform .06s ease, background .2s ease, border-color .2s ease; will-change: transform; }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-700); }
+    .btn-outline { background: transparent; border-color: var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: color-mix(in oklab, var(--primary) 60%, var(--border)); color: var(--primary); }
+
+    .nav-cta { padding: .75rem 1.15rem; }
+
+    /* Mobile Nav */
+    .nav-toggle { display: none; background: transparent; border: 0; padding: .5rem; border-radius: 10px; }
+    .nav-toggle svg { width: 28px; height: 28px; }
+    @media (max-width: 960px) {
+      .nav-toggle { display: inline-flex; }
+      .nav-links { position: fixed; inset: 64px 0 0 0; padding: var(--space-8); background: var(--bg); border-top: 1px solid var(--border); flex-direction: column; align-items: flex-start; gap: var(--space-4); transform: translateY(-105%); transition: transform .25s ease; }
+      .site-nav[data-open="true"] .nav-links { transform: translateY(0); }
+      .nav-cta { width: 100%; justify-content: center; }
     }
-    ul {
-      list-style: none;
-      display: flex;
-      gap: 2rem;
-      margin: 0;
-      padding: 0;
-      align-items: center;
-    }
-    li a {
-      text-decoration: none;
-      color: black;
-      font-size: 1rem;
-      transition: color 0.2s ease;
-    }
-    li a:hover {
-      color: gray;
-    }
-    .cta {
-      background-color: #16a34a;
-      color: white !important;
-      padding: 0.5rem 1.5rem;
-      border-radius: 999px; /* pill shape */
-      font-weight: medium;
-      transition: background-color 0.2s ease;
-    }
-    .cta:hover {
-      background-color: #12893d;
+
+    /* ============ Hero ============ */
+    .hero { text-align: center; }
+    .badge { display:inline-flex; align-items:center; gap:.5rem; padding: .4rem .9rem; border-radius: 999px; background: var(--primary-100); color: var(--primary); font-weight: 700; border: 1px solid color-mix(in oklab, var(--primary) 25%, transparent); }
+    .hero h1 { font-size: var(--step-4); line-height: 1.1; letter-spacing: -0.02em; margin: .8rem 0 1rem; }
+    .hero p.lead { color: var(--muted); font-size: var(--step-1); max-width: 68ch; margin-inline: auto; }
+    .hero-actions { display:flex; justify-content:center; gap: var(--space-4); margin-top: var(--space-8); flex-wrap: wrap; }
+    .hero-proof { margin-top: var(--space-4); color: var(--muted-2); font-weight: 600; font-size: var(--step--1); }
+    .hero-media { margin-top: var(--space-12); overflow: hidden; border-radius: var(--radius-lg); box-shadow: var(--shadow); border: 1px solid var(--border); }
+
+    /* ============ Sections ============ */
+    .section-title { text-align: center; font-size: var(--step-2); letter-spacing: -0.02em; margin-bottom: var(--space-10); }
+
+    .grid { display: grid; gap: var(--space-8); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    @media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 800px)  { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--space-8); box-shadow: var(--shadow); }
+    .card h3 { margin: 0 0 .35rem; letter-spacing: -0.01em; }
+    .card p { margin: 0; color: var(--muted); }
+    .feature { display:flex; gap: var(--space-4); align-items:flex-start; }
+    .feature .icon { width: 2.25rem; height: 2.25rem; border-radius: 12px; display:grid; place-items:center; background: var(--surface-2); border: 1px solid var(--border); font-size: 1.2rem; }
+
+    .section-alt { background: var(--surface-2); }
+
+    /* CTA band */
+    .cta-band { text-align: center; color: #fff; background: linear-gradient(135deg, var(--primary), #22c55e 60%, #86efac 110%); }
+    .cta-band .container { padding-block: var(--space-16); }
+    .cta-band h2 { font-size: var(--step-2); line-height: 1.15; margin: 0 0 .5rem; }
+    .cta-band p { margin: 0 0 var(--space-6); opacity: .95; }
+    .btn-light { background: #fff; color: var(--primary-700);  }
+    .btn-ghost { background: transparent; border-color: rgba(255,255,255,.35); color: #fff; }
+    .btn-ghost:hover { border-color: #fff; }
+
+    /* Footer */
+    footer { background: #0f172a; color: #cbd5e1; padding-block: var(--space-12); }
+    footer .brand { color: #fff; font-weight: 800; letter-spacing: -0.02em; }
+    footer a { color: inherit; }
+    footer a:hover { color: #fff; }
+
+    /* Motion preferences */
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
     }
   </style>
 </head>
 <body>
+  <!-- ============ Navigation ============ -->
+  <nav class="site-nav" id="siteNav">
+    <div class="container nav-inner">
+      <a href="#" class="logo" aria-label="GoodPlates home">
+        <span class="logo-mark">GP</span>
+        GoodPlates
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="nav-links" role="navigation" aria-label="Primary">
+        <a href="/recipes/">Recipes</a>
+        <a href="/grocery-list/">Grocery List</a>
+        <a href="/order-online/">Order Online</a>
+        <a href="/statistics/">Statistics</a>
+        <a href="/courses/">Courses</a>
+        <a href="/contact/">Contact</a>
+        <a href="/onboarding/" class="btn btn-primary nav-cta">Onboarding</a>
+      </div>
+    </div>
+  </nav>
 
-<nav>
-  <div class="logo">GoodPlates</div>
-  <ul>
-    <li><a href="/recipes/">Recipes</a></li>
-    <li><a href="/grocery-list/">Grocery List</a></li>
-    <li><a href="/order-online/">Order Online</a></li>
-    <li><a href="/statistics/">Statistics</a></li>
-    <li><a href="/courses/">Courses</a></li>
-    <li><a href="/contact/">Contact</a></li>
-    <li><a href="/onboarding/" class="cta">Onboarding</a></li>
-  </ul>
-</nav>
+  <!-- ============ Hero ============ -->
+  <header class="hero">
+    <div class="container">
+        <br>
+        <br>
+      <span class="badge">🍽️ Meal Planning, Simplified</span>
+      <br>
+      <br>
+      <h1>Plan, Shop & Cook — all in one sleek app</h1>
+      <p class="lead">GoodPlates helps you discover delicious recipes, generate smart grocery lists, and track nutrition with a modern, distraction‑free design.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#get-started">Get Started</a>
+        <a class="btn btn-outline" href="#demo">Watch Demo</a>
+        <br>
+      </div>
+      <br>
+      <div class="hero-proof">✅ Free to start &nbsp; • &nbsp; 50,000+ recipes &nbsp; • &nbsp; AI‑powered suggestions</div>
+      <div class="hero-media">
+        <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1600&auto=format&fit=crop" alt="GoodPlates interface preview with fresh ingredients" />
+      </div>
+    </div>
+  </header>
 
+  <!-- ============ Features Overview ============ -->
+  <section>
+    <div class="container">
+      <h2 class="section-title">Everything you need for stress‑free cooking</h2>
+      <div class="grid grid-4">
+        <div class="card">
+          <h3>👨‍🍳 Smart Meal Planning</h3>
+          <p>AI‑powered recipes based on your tastes and pantry.</p>
+        </div>
+        <div class="card">
+          <h3>🛒 Instant Grocery Delivery</h3>
+          <p>One tap to send your list to top delivery apps.</p>
+        </div>
+        <div class="card">
+          <h3>❤️ Nutrition Tracking</h3>
+          <p>Calories, macros and goals—beautifully visualized.</p>
+        </div>
+        <div class="card">
+          <h3>📖 Cooking Courses</h3>
+          <p>Level up skills with bite‑sized video lessons.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
+  <!-- ============ Meal Planning ============ -->
+  <section class="section-alt">
+    <div class="container grid grid-2" style="align-items:center;">
+      <div>
+        <span class="badge">🔍 Advanced Filtering</span>
+        <h2 class="" style="margin:.6rem 0 1rem; font-size: var(--step-2);">Find the perfect meal every time</h2>
+        <p class="" style="color: var(--muted); max-width: 60ch;">Dial in by diet, time, ingredients and budget. Save favorites and auto‑scale servings for any occasion.</p>
+        <div class="grid" style="margin-top: var(--space-6); grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+          <div class="feature"><div class="icon">⚙️</div><div><strong>Smart filters</strong><br><span style="color:var(--muted-2)">Vegan, gluten‑free, low‑carb & more</span></div></div>
+          <div class="feature"><div class="icon">🎯</div><div><strong>Adjustable servings</strong><br><span style="color:var(--muted-2)">From solo to family feast</span></div></div>
+          <div class="feature"><div class="icon">🤖</div><div><strong>AI recommendations</strong><br><span style="color:var(--muted-2)">Tailored to your tastes</span></div></div>
+          <div class="feature"><div class="icon">⏱️</div><div><strong>Time‑based filters</strong><br><span style="color:var(--muted-2)">15‑, 30‑ or 60‑minute meals</span></div></div>
+        </div>
+        <div style="margin-top: var(--space-8); display:flex; gap: var(--space-4); flex-wrap: wrap;">
+          <a class="btn btn-primary" href="/recipes/">Explore Meal Planning</a>
+          <a class="btn btn-outline" href="#demo">See it in action</a>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3 style="margin-top:0;">This Week's Plan</h3>
+          <p>🥗 Mediterranean Quinoa Bowl — 25 min — 420 cal</p>
+          <p>🍛 Spicy Thai Curry — 30 min — 380 cal</p>
+          <p>🐟 Grilled Salmon & Veg — 20 min — 450 cal</p>
+          <p>🍝 Creamy Pesto Pasta — 20 min — 520 cal</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Grocery Integration ============ -->
+  <section>
+    <div class="container grid grid-2" style="align-items:center;">
+      <div>
+        <img src="https://images.unsplash.com/photo-1605067140636-9be1631f30fc?q=80&w=1400&auto=format&fit=crop" alt="Grocery delivery arriving with fresh produce" />
+      </div>
+      <div>
+        <span class="badge">🛍️ Seamless Shopping</span>
+        <h2 style="margin:.6rem 0 1rem; font-size: var(--step-2);">From meal plan to doorstep</h2>
+        <p style="color:var(--muted); max-width: 60ch;">Skip the store. Send optimized lists to your preferred grocery service with automatic substitutions and budget tracking.</p>
+        <div class="feature" style="margin-top:var(--space-6);"><div class="icon">📱</div><div><strong>Multi‑app integration</strong><br><span style="color:var(--muted-2)">Instacart, Uber Eats & more</span></div></div>
+        <div class="feature"><div class="icon">✅</div><div><strong>Smart lists</strong><br><span style="color:var(--muted-2)">Grouped by aisle, deduplicated</span></div></div>
+        <div class="feature"><div class="icon">💸</div><div><strong>Budget insights</strong><br><span style="color:var(--muted-2)">See cost per meal</span></div></div>
+        <div style="margin-top: var(--space-6);"><a class="btn btn-primary" href="/grocery-list/">Start Shopping Smart</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Nutrition Tracking ============ -->
+  <section class="section-alt">
+    <div class="container grid grid-2" style="align-items:center;">
+      <div>
+        <span class="badge">📊 Health Analytics</span>
+        <h2 style="margin:.6rem 0 1rem; font-size: var(--step-2);">Track nutrition that actually motivates</h2>
+        <p style="color:var(--muted); max-width:60ch;">Monitor calories, macros and micronutrients. Set goals and let GoodPlates keep you on track with gentle nudges.</p>
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-6);">
+          <div class="card"><strong>🎯 Calorie Goals</strong><p>Daily/weekly trends</p></div>
+          <div class="card"><strong>❤️ Macro Balance</strong><p>Protein, carbs, fats</p></div>
+          <div class="card"><strong>📈 Nutrient Insights</strong><p>Vitamins & minerals</p></div>
+          <div class="card"><strong>⭐ Progress</strong><p>Streaks & badges</p></div>
+        </div>
+        <div style="margin-top: var(--space-8);"><a class="btn btn-primary" href="/statistics/">Track Your Health</a></div>
+      </div>
+      <div>
+        <img src="https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=1400&auto=format&fit=crop" alt="Nutrition dashboard with charts" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Testimonials ============ -->
+  <section>
+    <div class="container">
+      <h2 class="section-title">Loved by cooks everywhere</h2>
+      <div class="grid grid-3">
+        <div class="card">
+          ⭐⭐⭐⭐⭐
+          <p><em>“GoodPlates saves us hours every week. Planning is actually fun now!”</em></p>
+          <strong>Sarah Johnson</strong> — Working mom
+        </div>
+        <div class="card">
+          ⭐⭐⭐⭐⭐
+          <p><em>“The nutrition tracking is next level. I finally see how meals fit my goals.”</em></p>
+          <strong>Michael Chen</strong> — Fitness enthusiast
+        </div>
+        <div class="card">
+          ⭐⭐⭐⭐⭐
+          <p><em>“As a student, the price filters and budget view are game‑changers.”</em></p>
+          <strong>Emma Rodriguez</strong> — College student
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA Band ============ -->
+  <section class="cta-band" id="get-started">
+    <div class="container">
+      <h2>Ready to transform your kitchen?</h2>
+      <p>Join thousands of cooks planning smarter with GoodPlates.</p>
+      <div class="hero-actions">
+        <a class="btn btn-light" href="/onboarding/">Get Started Free</a>
+        <a class="btn btn-ghost" href="#demo">Schedule Demo</a>
+      </div>
+      <div class="hero-proof" style="color:#fff; opacity:.9;">✅ 14‑day free trial &nbsp; • &nbsp; No credit card &nbsp; • &nbsp; Cancel anytime</div>
+    </div>
+  </section>
+
+  <!-- ============ Footer ============ -->
+  <footer>
+    <div class="container grid grid-3" style="gap: var(--space-12);">
+      <div>
+        <div class="brand" style="font-size: var(--step-1);">GoodPlates</div>
+        <p style="max-width: 40ch; color:#93a3b8">The modern way to plan meals, shop faster and eat better.</p>
+      </div>
+      <div style="display:grid; gap:.5rem;">
+        <strong style="color:#fff;">Product</strong>
+        <a href="/recipes/">Recipes</a>
+        <a href="/grocery-list/">Grocery List</a>
+        <a href="/order-online/">Order Online</a>
+        <a href="/courses/">Courses</a>
+      </div>
+      <div style="display:grid; gap:.5rem;">
+        <strong style="color:#fff;">Company</strong>
+        <a href="/contact/">Contact</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Support</a>
+      </div>
+    </div>
+    <div class="container" style="border-top:1px solid #1f2937; margin-top: var(--space-12); padding-top: var(--space-6); font-size: var(--step--1); color:#93a3b8; display:flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4);">
+      <span>© <span id="year"></span> GoodPlates. All rights reserved.</span>
+      <span>Made with ♥︎ for everyday cooks.</span>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile nav toggle
+    const nav = document.getElementById('siteNav');
+    const btn = document.getElementById('navToggle');
+    btn?.addEventListener('click', () => {
+      const open = nav.getAttribute('data-open') === 'true';
+      nav.setAttribute('data-open', String(!open));
+      btn.setAttribute('aria-expanded', String(!open));
+    });
+
+    // Year in footer
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>Healthly – Meal Planning App</title>
-<style>
-:root {
---bg: #ffffff;
---fg: #0f172a;
---muted: #6b7280;
---muted-2: #9ca3af;
---border: #e5e7eb;
---surface: #ffffff;
---surface-2: #f3f4f6;
---primary: #18d45c;
---primary-700: #15803d;
---primary-100: #dcfce7;
---shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(2,6,23,.06);
---radius: 16px;
-}
-* {box-sizing: border-box;}
-body {
-margin: 0;
-font-family: system-ui, sans-serif;
-background: var(--bg);
-color: var(--fg);
-line-height: 1.6;
-}
-h1,h2,h3,h4 {margin-top: 0;}
-section {padding: 4rem 1rem;}
-.container {max-width: 1200px; margin: auto;}
-.badge {
-display: inline-block;
-padding: 0.25rem 1rem;
-border-radius: 999px;
-font-weight: 600;
-font-size: 0.875rem;
-border: 1px solid transparent;
-}
-.badge-success {background: var(--primary-100); color: var(--primary); border-color: rgba(22,163,74,0.2);}
-.badge-primary {background: var(--primary-100); color: var(--primary); border-color: rgba(22,163,74,0.2);}
-.grid {display: grid; gap: 2rem;}
-.grid-2 {grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));}
-.grid-3 {grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));}
-.grid-4 {grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));}
-.card {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: var(--radius);
-padding: 2rem;
-box-shadow: var(--shadow);
-}
-.card-icon {font-size: 2rem; margin-bottom: 1rem; color: var(--primary);}
-.btn {
-display: inline-block;
-padding: 0.75rem 1.5rem;
-border-radius: 999px;
-font-weight: 600;
-text-decoration: none;
-}
-.btn-primary {background: var(--primary); color: white;}
-.btn-outline {background: transparent; border: 2px solid var(--primary); color: var(--primary);}
-.btn-light {background: white; color: var(--primary);}
-.feature-list {display: flex; gap: 1rem; align-items: center;}
-.feature-icon {width: 2rem; height: 2rem; text-align: center; font-size: 1.2rem;}
-footer {
-background: #0f172a;
-color: var(--muted-2);
-padding: 2rem 1rem;
-text-align: center;
-}
-footer a {color: var(--muted-2); text-decoration: none; margin: 0 0.5rem;}
-footer a:hover {color: white;}
-</style>
-<!-- Hero -->
-<section class="container" style="text-align:center;">
-<span class="badge badge-success">🍽️ The Ultimate Meal Planning App</span>
-<h1>Transform How You <span style="color: var(--primary)">Plan, Shop & Cook</span></h1>
-<p>The all-in-one meal planning app with AI-powered recipes, instant grocery delivery, nutrition tracking, and cooking education.</p>
-<a href="#" class="btn btn-primary">Get Started</a>
-<a href="#" class="btn btn-outline">Watch Demo</a>
-<p>✅ Free to start &nbsp; ✅ 50,000+ recipes &nbsp; ✅ AI-powered</p>
-<img src="hero-image.jpg" alt="Healthy meal planning app interface" />
-</section>
-<!-- Features Overview -->
-<section class="container">
-<h2 style="text-align:center;">Everything You Need in One App</h2>
-<div class="grid grid-4">
-<div class="card">
-<div class="card-icon">👨‍🍳</div>
-<h3>Smart Meal Planning</h3>
-<p>AI-powered recipe suggestions based on your preferences and pantry</p>
-</div>
-<div class="card">
-<div class="card-icon">🛒</div>
-<h3>Instant Grocery Delivery</h3>
-<p>Direct integration with delivery apps for seamless shopping</p>
-</div>
-<div class="card">
-<div class="card-icon">❤️</div>
-<h3>Nutrition Tracking</h3>
-<p>Comprehensive calorie and nutrient monitoring with goal tracking</p>
-</div>
-<div class="card">
-<div class="card-icon">📖</div>
-<h3>Culinary Education</h3>
-<p>Learn cooking techniques from world cuisines with expert courses</p>
-</div>
-</div>
-</section>
-<!-- Meal Planning -->
-<section style="background: var(--surface-2);">
-<div class="container grid grid-2">
-<div>
-<span class="badge badge-primary">🔍 Advanced Filtering</span>
-<h2>Find Perfect Meals Every Time</h2>
-<p>Discover recipes that match your dietary preferences, time, and budget.</p>
-<div>
-<div class="feature-list"><div class="feature-icon">⚙️</div> Smart Filtering</div>
-<div class="feature-list"><div class="feature-icon">🎯</div> Adjustable Servings</div>
-<div class="feature-list"><div class="feature-icon">🤖</div> AI Recommendations</div>
-</div>
-<a href="#" class="btn btn-primary">Explore Meal Planning</a>
-</div>
-<div>
-<div class="card">
-<h3>This Week's Meals</h3>
-<p>🥗 Mediterranean Quinoa Bowl – 25 min – 420 cal</p>
-<p>🍛 Spicy Thai Curry – 30 min – 380 cal</p>
-<p>🐟 Grilled Salmon & Veg – 20 min – 450 cal</p>
-</div>
-</div>
-</div>
-</section>
-<!-- Grocery Integration -->
-<section class="container grid grid-2">
-<img src="grocery-integration.jpg" alt="Grocery shopping integration">
-<div>
-<span class="badge badge-success">🛍️ Seamless Shopping</span>
-<h2>From Meal Plan to Doorstep</h2>
-<p>Skip the grocery store with direct integration to major delivery services.</p>
-<div class="feature-list"><div class="feature-icon">📱</div> Multi-App Integration</div>
-<div class="feature-list"><div class="feature-icon">✅</div> Smart Grocery Lists</div>
-<div class="feature-list"><div class="feature-icon">📈</div> Budget Tracking</div>
-<a href="#" class="btn btn-primary">Start Shopping Smart</a>
-</div>
-</section>
-<!-- Nutrition Tracking -->
-<section style="background: var(--surface-2);">
-<div class="container grid grid-2">
-<div>
-<span class="badge badge-primary">📊 Health Analytics</span>
-<h2>Track Your Nutrition Goals</h2>
-<p>Monitor calories, macros, and micronutrients to meet your wellness goals.</p>
-<div class="grid grid-2">
-<div>🎯 Calorie Tracking</div>
-<div>❤️ Macro Balance</div>
-<div>📈 Nutrient Analysis</div>
-<div>⭐ Goal Indicators</div>
-</div>
-<a href="#" class="btn btn-primary">Track Your Health</a>
-</div>
-<img src="nutrition-tracking.jpg" alt="Nutrition tracking dashboard">
-</div>
-</section>
-<!-- Family Features -->
-<section class="container grid grid-2">
-<img src="family-cooking.jpg" alt="Family cooking together">
-<div>
-<span class="badge badge-success">👨‍👩‍👧‍👦 Family Features</span>
-<h2>Cook Together, Plan Together</h2>
-<p>Collaborative meal planning, shared grocery lists, and cooking education for all skill levels.</p>
-<div class="feature-list"><div class="feature-icon">👥</div> Family Collaboration</div>
-<div class="feature-list"><div class="feature-icon">📖</div> Cooking Courses</div>
-<div class="feature-list"><div class="feature-icon">🔗</div> Recipe Sharing</div>
-<a href="#" class="btn btn-primary">Start Cooking Together</a>
-</div>
-</section>
-<!-- Testimonials -->
-<section style="background: var(--surface-2);">
-<div class="container">
-<h2 style="text-align:center;">Loved by Families Everywhere</h2>
-<div class="grid grid-3">
-<div class="card">
-⭐⭐⭐⭐⭐
-<p><em>"Healthly has completely changed how our family eats. The meal planning saves me hours every week!"</em></p>
-<strong>Sarah Johnson</strong> – Working Mom
-</div>
-<div class="card">
-⭐⭐⭐⭐⭐
-<p><em>"The nutrition tracking is incredible. I can finally see exactly what I'm eating and how it aligns with my fitness goals."</em></p>
-<strong>Michael Chen</strong> – Fitness Enthusiast
-</div>
-<div class="card">
-⭐⭐⭐⭐⭐
-<p><em>"As a student on a budget, the cost tracking and recipe filtering by price has been amazing."</em></p>
-<strong>Emma Rodriguez</strong> – College Student
-</div>
-</div>
-</div>
-</section>
-<!-- CTA -->
-<section style="background: var(--primary); color:white; text-align:center;">
-<div class="container">
-<h2>Ready to Transform Your Kitchen?</h2>
-<p>Join thousands of users who have revolutionized their cooking experience.</p>
-<a href="#" class="btn btn-light">Get Started Free</a>
-<a href="#" class="btn btn-outline" style="border-color:white;color:white;">Schedule Demo</a>
-<p>✅ 14-day free trial &nbsp; ✅ No credit card required &nbsp; ✅ Cancel anytime</p>
-</div>
-</section>
-<!-- Footer -->
-<footer>
-<h3 style="color:white;">Healthly</h3>
-<p>The ultimate meal planning app for modern families</p>
-<div>
-<a href="#">Privacy Policy</a> |
-<a href="#">Terms of Service</a> |
-<a href="#">Contact Us</a> |
-<a href="#">Support</a>
-</div>
-  fetch("header.html")
-<p style="margin-top:1rem;">© 2024 Healthly. All rights reserved.</p>
-</footer>
-</body>
-</html>
-
