@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipes - Perfect Meal Planner</title>
+<style>
+  body {
+    font-family: 'Avenir', sans-serif;
+    margin: 0;
+    background: #fff;
+    color: #000;
+  }
+  header {
+    padding: 20px 40px;
+    border-bottom: 1px solid #eee;
+  }
+  nav.breadcrumb {
+    font-size: 0.9rem;
+    margin: 10px 40px;
+    color: #666;
+  }
+  nav.breadcrumb a {
+    color: #2ecc71;
+    text-decoration: none;
+  }
+  .layout {
+    display: flex;
+    max-width: 1400px;
+    margin: 20px auto;
+    gap: 20px;
+    padding: 0 20px;
+  }
+  aside {
+    width: 160px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  aside h3 { margin-top: 0; font-size: 1.1rem; }
+  .filter-section { margin-bottom: 20px; }
+  .filter-section label { display: block; margin: 8px 0; font-size: 0.9rem; }
+  input[type=range] { width: 100%; }
+  .star-rating { display: flex; gap: 5px; font-size: 1.2rem; cursor: pointer; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag { padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; color: white; cursor: pointer; user-select: none; }
+  .tag.green { background-color: #27ae60; }
+  .tag.blue { background-color: #3498db; }
+  .tag.orange { background-color: #e67e22; }
+  .tag.purple { background-color: #9b59b6; }
+  .tag.red { background-color: #e74c3c; }
+  .tag.active { border: 2px solid #000; }
+  .meal-gallery {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .meal-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease;
+    cursor: pointer;
+  }
+  .meal-card:hover { transform: translateY(-5px); }
+  .meal-card img { width: 100%; height: 160px; object-fit: cover; }
+  .meal-card-content { padding: 15px; flex: 1; }
+  .meal-card-content h4 { margin: 0 0 8px; font-size: 1.1rem; }
+  .meal-card-content p { margin: 0 0 10px; font-size: 0.9rem; color: #555; }
+  .view-recipe-btn {
+    background-color: #2ecc71;
+    color: white;
+    font-size: 0.9rem;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .view-recipe-btn:hover { background-color: #27ae60; }
+  footer { text-align: center; padding: 20px; font-size: 0.9rem; color: #555; margin-top: 40px; }
+
+  /* Recipe detail + grocery list styles */
+  .recipe-detail { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin: 20px; }
+  .hidden { display: none; }
+  .recipe-tags { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+  .recipe-tags .tag { padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; color: white; background: #27ae60; }
+  .ingredient-list { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; }
+  .ingredient-card { background: #f4f4f4; padding: 10px 15px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  .ingredient-card button { background: #2ecc71; color: white; border: none; padding: 5px 8px; border-radius: 8px; cursor: pointer; margin-top: 5px; }
+  .ingredient-card button:hover { background: #27ae60; }
+  .add-all-btn { background: #2ecc71; color: white; border: none; padding: 8px 14px; border-radius: 8px; cursor: pointer; margin-bottom: 20px; }
+  .grocery-list { position: fixed; right: 20px; top: 100px; background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 8px; width: 200px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .grocery-items { list-style: none; padding: 0; margin: 0; font-size: 0.9rem; }
+  .grocery-items li { margin-bottom: 5px; }
+  .close-detail { background: none; border: none; color: #2ecc71; font-size: 1rem; cursor: pointer; margin-bottom: 15px; }
+  
+.tag.teal { background-color: #16a085; }   /* teal-ish */
+.tag.brown { background-color: #8B5E3C; }  /* warm brown */
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Perfect Meal Planner</h1>
+</header>
+
+<nav class="breadcrumb">
+  <a href="#">Home</a> &gt; <a href="#">Recipes</a> &gt; Vegan
+</nav>
+
+<div class="layout">
+  <aside>
+    <h3>Filters</h3>
+    <div class="filter-section">
+      <strong>Difficulty</strong>
+      <div class="star-rating">
+        <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+      </div>
+    </div>
+    <div class="filter-section">
+      <strong>Calories</strong>
+      <label><input type="radio" name="calories"> Low</label>
+      <label><input type="radio" name="calories"> Medium</label>
+      <label><input type="radio" name="calories"> High</label>
+    </div>
+    <div class="filter-section">
+      <strong>Prep Time (min)</strong>
+      <input type="range" min="5" max="600" step="5" value="30">
+    </div>
+    <div class="filter-section">
+      <strong>Number of Ingredients</strong>
+      <input type="range" min="0" max="15" value="5">
+    </div>
+    <div class="filter-section">
+      <strong>Tags</strong>
+      <div class="tags">
+        <div class="tag green">Vegan</div>
+        <div class="tag blue">Halal</div>
+        <div class="tag orange">Quick</div>
+        <div class="tag purple">Low-Calorie</div>
+        <div class="tag red">Budget-Friendly</div>
+        <div class="tag teal">3 Ingredient</div>
+        <div class="tag teal">4 Ingredient</div>
+        <div class="tag teal">5+ Ingredient</div>
+        <div class="tag brown">One Pot</div>
+        <div class="tag brown">One Pan</div>
+        <div class="tag brown">One Bowl</div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="meal-gallery">
+    <div class="meal-card" 
+         data-title="Fresh Vegan Salad"
+         data-tags="Vegan,Low-Calorie,Quick"
+         data-ingredients='[{"name":"Lettuce","price":1.5},{"name":"Tomato","price":0.8},{"name":"Cucumber","price":0.9}]'
+         data-instructions="Wash all vegetables, chop them, and toss with dressing.">
+      <img src="https://www.hummusapien.com/wp-content/uploads/2019/04/broccoli-salad.jpg">
+      <div class="meal-card-content">
+        <h4>Fresh Vegan Salad</h4>
+        <p>Prep: 10 min | 250 cal</p>
+        <button class="view-recipe-btn">View Recipe</button>
+      </div>
+    </div>
+
+<div class="meal-card"
+     data-title="Chickpea Salad"
+     data-tags="Vegan,Quick,Low-Calorie,3 Ingredient,One Bowl"
+     data-ingredients='[{"name":"Canned Chickpeas","price":1},{"name":"Olive Oil","price":0.5},{"name":"Lemon Juice","price":0.5}]'
+     data-instructions="Drain chickpeas, drizzle with olive oil and lemon juice, toss to combine.">
+  <img src="https://www.fitmeal.ca/cdn/shop/files/ChickPeaSalad_600x.png?v=1725052407" alt="Chickpea Salad">
+  <div class="meal-card-content">
+    <h4>Chickpea Salad</h4>
+    <p>Prep: 5 min | 300 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<div class="meal-card"
+     data-title="Vegan Lentil Soup"
+     data-tags="Vegan,Halal,Budget-Friendly,4 Ingredient,One Pot"
+     data-ingredients='[{"name":"Lentils","price":1},{"name":"Carrots","price":0.5},{"name":"Onion","price":0.5},{"name":"Vegetable Stock","price":1}]'
+     data-instructions="Simmer all ingredients until lentils are soft. Season to taste.">
+  <img src="https://msmarket.coop/wp-content/uploads/saba-lentil-e1614119159723.jpg" alt="Vegan Lentil Soup">
+  <div class="meal-card-content">
+    <h4>Vegan Lentil Soup</h4>
+    <p>Prep: 35 min | 400 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<div class="meal-card"
+     data-title="Avocado Toast"
+     data-tags="Vegan,Quick,Low-Calorie,3 Ingredient,One Pan"
+     data-ingredients='[{"name":"Bread","price":0.5},{"name":"Avocado","price":1.5},{"name":"Salt","price":0.1}]'
+     data-instructions="Toast bread, smash avocado on top, sprinkle with salt.">
+  <img src="https://www.rootsandradishes.com/wp-content/uploads/2017/08/avocado-toast-with-everything-bagel-seasoning-feat.jpg" alt="Avocado Toast">
+  <div class="meal-card-content">
+    <h4>Avocado Toast</h4>
+    <p>Prep: 7 min | 280 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<!-- Halal Recipes -->
+<div class="meal-card"
+     data-title="Chicken Biryani"
+     data-tags="Halal,Budget-Friendly,5+ Ingredient,One Pot"
+     data-ingredients='[{"name":"Chicken","price":4},{"name":"Rice","price":1},{"name":"Onions","price":0.5},{"name":"Yogurt","price":1},{"name":"Spices","price":0.5}]'
+     data-instructions="Cook chicken with spices, layer with rice, steam until done.">
+  <img src="https://www.thespruceeats.com/thmb/XDBL9gA6A6nYWUdsRZ3QwH084rk=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/SES-chicken-biryani-recipe-7367850-hero-A-ed211926bb0e4ca1be510695c15ce111.jpg" alt="Chicken Biryani">
+  <div class="meal-card-content">
+    <h4>Chicken Biryani</h4>
+    <p>Prep: 60 min | 700 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<div class="meal-card"
+     data-title="Grilled Lamb Chops"
+     data-tags="Halal,Quick,4 Ingredient,One Pan"
+     data-ingredients='[{"name":"Lamb Chops","price":6},{"name":"Olive Oil","price":0.5},{"name":"Garlic","price":0.2},{"name":"Rosemary","price":0.5}]'
+     data-instructions="Season lamb, sear in hot pan until cooked to preference.">
+  <img src="https://thejoyfilledkitchen.com/wp-content/uploads/2020/07/DSC_0075-2.jpg" alt="Grilled Lamb Chops">
+  <div class="meal-card-content">
+    <h4>Grilled Lamb Chops</h4>
+    <p>Prep: 20 min | 650 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<div class="meal-card"
+     data-title="Shakshuka"
+     data-tags="Halal,Vegan,Budget-Friendly,5+ Ingredient,One Pan"
+     data-ingredients='[{"name":"Tomatoes","price":1},{"name":"Bell Peppers","price":1},{"name":"Onions","price":0.5},{"name":"Eggs","price":1},{"name":"Spices","price":0.5}]'
+     data-instructions="Simmer vegetables with spices, crack eggs on top, cook until set.">
+  <img src="https://i2.wp.com/www.downshiftology.com/wp-content/uploads/2023/12/Shakshuka-main-1.jpg" alt="Shakshuka">
+  <div class="meal-card-content">
+    <h4>Shakshuka</h4>
+    <p>Prep: 25 min | 400 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<!-- Quick Recipes -->
+<div class="meal-card"
+     data-title="Garlic Butter Shrimp"
+     data-tags="Quick,Halal,4 Ingredient,One Pan"
+     data-ingredients='[{"name":"Shrimp","price":5},{"name":"Garlic","price":0.2},{"name":"Butter","price":0.5},{"name":"Parsley","price":0.3}]'
+     data-instructions="Sauté shrimp with butter and garlic, sprinkle parsley before serving.">
+  <img src="https://www.pantsdownapronson.com/wp-content/uploads/garlic-butter-shrimp.jpg" alt="Garlic Butter Shrimp">
+  <div class="meal-card-content">
+    <h4>Garlic Butter Shrimp</h4>
+    <p>Prep: 15 min | 350 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<div class="meal-card"
+     data-title="Caprese Salad"
+     data-tags="Quick,Vegan,3 Ingredient,One Bowl"
+     data-ingredients='[{"name":"Tomatoes","price":0.8},{"name":"Mozzarella","price":1.5},{"name":"Basil","price":0.5}]'
+     data-instructions="Layer tomato slices with mozzarella and basil.">
+  <img src="https://wellnessmama.com/wp-content/uploads/Caprese_Salad_Recipe_9-500x500.jpg" alt="Caprese Salad">
+  <div class="meal-card-content">
+    <h4>Caprese Salad</h4>
+    <p>Prep: 10 min | 320 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<div class="meal-card"
+     data-title="Egg Fried Rice"
+     data-tags="Quick,Budget-Friendly,4 Ingredient,One Pan"
+     data-ingredients='[{"name":"Rice","price":1},{"name":"Eggs","price":1},{"name":"Soy Sauce","price":0.5},{"name":"Peas","price":0.5}]'
+     data-instructions="Stir-fry rice with eggs, peas, and soy sauce.">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVj6dMQ0NpkQ9EgJ-Kx9RExCSCF1go4iMJlw&s" alt="Egg Fried Rice">
+  <div class="meal-card-content">
+    <h4>Egg Fried Rice</h4>
+    <p>Prep: 15 min | 450 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<!-- Low-Calorie Recipes -->
+<div class="meal-card"
+     data-title="Zucchini Noodles with Pesto"
+     data-tags="Low-Calorie,Vegan,4 Ingredient,One Pan"
+     data-ingredients='[{"name":"Zucchini","price":1},{"name":"Pesto","price":1.5},{"name":"Cherry Tomatoes","price":1},{"name":"Olive Oil","price":0.5}]'
+     data-instructions="Sauté zucchini noodles, toss with pesto and cherry tomatoes.">
+  <img src="https://www.allrecipes.com/thmb/S2ktDOtLB5yupe7wzKmWdvG00h4=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/172398-zucchini-noodles-DDMFS-beauty-4x3-38e8c6f60efd477f8d1a1400f3a825cd.jpg" alt="Zucchini Noodles">
+  <div class="meal-card-content">
+    <h4>Zucchini Noodles with Pesto</h4>
+    <p>Prep: 12 min | 280 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<div class="meal-card"
+     data-title="Grilled Salmon with Lemon"
+     data-tags="Low-Calorie,Halal,3 Ingredient,One Pan"
+     data-ingredients='[{"name":"Salmon Fillet","price":5},{"name":"Lemon","price":0.5},{"name":"Salt","price":0.1}]'
+     data-instructions="Season salmon, grill, and squeeze lemon over top.">
+  <img src="https://static01.nyt.com/images/2024/11/24/multimedia/Salmon-With-Lemon-Herb-Marinaderex-zcfp/Salmon-With-Lemon-Herb-Marinaderex-zcfp-videoSixteenByNineJumbo1600-v2.jpg" alt="Grilled Salmon with Lemon">
+  <div class="meal-card-content">
+    <h4>Grilled Salmon with Lemon</h4>
+    <p>Prep: 15 min | 300 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<div class="meal-card"
+     data-title="Greek Yogurt Parfait"
+     data-tags="Low-Calorie,Quick,3 Ingredient,One Bowl"
+     data-ingredients='[{"name":"Greek Yogurt","price":1.5},{"name":"Honey","price":0.3},{"name":"Berries","price":1}]'
+     data-instructions="Layer yogurt with honey and berries.">
+  <img src="https://www.homemadefoodjunkie.com/wp-content/uploads/2021/07/Untitled-design-84.jpg" alt="Greek Yogurt Parfait">
+  <div class="meal-card-content">
+    <h4>Greek Yogurt Parfait</h4>
+    <p>Prep: 5 min | 200 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<!-- Budget-Friendly Recipes -->
+<div class="meal-card"
+     data-title="Cabbage Stir Fry"
+     data-tags="Budget-Friendly,Vegan,4 Ingredient,One Pan"
+     data-ingredients='[{"name":"Cabbage","price":1},{"name":"Garlic","price":0.2},{"name":"Soy Sauce","price":0.5},{"name":"Carrots","price":0.5}]'
+     data-instructions="Sauté vegetables with soy sauce until tender.">
+  <img src="https://www.budgetbytes.com/wp-content/uploads/2016/08/Beef-and-Cabbage-Stir-Fry-eat-2.jpg" alt="Cabbage Stir Fry">
+  <div class="meal-card-content">
+    <h4>Cabbage Stir Fry</h4>
+    <p>Prep: 15 min | 250 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<div class="meal-card"
+     data-title="Peanut Butter Banana Toast"
+     data-tags="Budget-Friendly,Quick,3 Ingredient,One Pan"
+     data-ingredients='[{"name":"Bread","price":0.5},{"name":"Peanut Butter","price":0.5},{"name":"Banana","price":0.3}]'
+     data-instructions="Toast bread, spread peanut butter, top with banana slices.">
+  <img src="https://img.sndimg.com/food/image/upload/q_92,fl_progressive,w_1200,c_scale/v1/img/recipes/95/71/1/THEZJa5MSmuzuSu4Y4LM_peanut-butter-banana-toast-1296.jpg" alt="Peanut Butter Banana Toast">
+  <div class="meal-card-content">
+    <h4>Peanut Butter Banana Toast</h4>
+    <p>Prep: 6 min | 320 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+
+<div class="meal-card"
+     data-title="Potato Soup"
+     data-tags="Budget-Friendly,Halal,5+ Ingredient,One Pot"
+     data-ingredients='[{"name":"Potatoes","price":1},{"name":"Onion","price":0.5},{"name":"Garlic","price":0.2},{"name":"Milk","price":1},{"name":"Butter","price":0.5}]'
+     data-instructions="Simmer all ingredients until potatoes are soft, blend for smoothness.">
+  <img src="https://valentinascorner.com/wp-content/uploads/2019/09/Easy-Potato-Soup-Recipe-2.jpg" alt="Potato Soup">
+  <div class="meal-card-content">
+    <h4>Potato Soup</h4>
+    <p>Prep: 35 min | 380 cal</p>
+    <button class="view-recipe-btn">View Recipe</button>
+  </div>
+</div>
+    <div class="meal-card"
+         data-title="Classic Pasta"
+         data-tags="Vegetarian,Quick,Budget-Friendly"
+         data-ingredients='[{"name":"Pasta","price":2},{"name":"Tomato Sauce","price":1.5},{"name":"Basil","price":0.5}]'
+         data-instructions="Boil pasta, heat sauce, and combine. Top with fresh basil.">
+      <img src="https://pngimg.com/d/pasta_PNG58.png" alt="Pasta">
+      <div class="meal-card-content">
+        <h4>Classic Pasta</h4>
+        <p>Prep: 20 min | 450 cal</p>
+        <button class="view-recipe-btn">View Recipe</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <div class="meal-card"
+         data-title="Simple Pasta"
+         data-tags="Vegetarian,Quick,Budget-Friendly"
+         data-ingredients='[{"name":"Pasta","price":2},{"name":"Tomato Sauce","price":1.5},{"name":"Basil","price":0.5}]'
+         data-instructions="Boil pasta, heat sauce, and combine. Top with fresh basil.">
+      <img src="https://www.spicebangla.com/wp-content/uploads/2024/08/Spicy-Pasta-recipe-optimised-scaled.webp" alt="Pasta">
+      <div class="meal-card-content">
+        <h4>Classic Pasta</h4>
+        <p>Prep: 20 min | 450 cal</p>
+        <button class="view-recipe-btn">View Recipe</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="recipe-detail hidden">
+  <button class="close-detail">&larr; Back to recipes</button>
+  <h2 class="recipe-title"></h2>
+  <div class="recipe-tags"></div>
+  <h3>Ingredients</h3>
+  <div class="ingredient-list"></div>
+  <button class="add-all-btn">Add All to Grocery List</button>
+  <h3>Instructions</h3>
+  <p class="recipe-instructions"></p>
+</div>
+
+<div class="grocery-list">
+  <h3>Your Grocery List</h3>
+  <ul class="grocery-items"></ul>
+</div>
+
+<footer>
+  &copy; 2025 Perfect Meal Planner. All rights reserved.
+</footer>
+
+<script>
+  // Toggle tag active state in filters
+  document.querySelectorAll('.tag').forEach(tag => {
+    tag.addEventListener('click', () => tag.classList.toggle('active'));
+  });
+
+  const groceryList = [];
+
+  document.querySelectorAll('.view-recipe-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const card = e.target.closest('.meal-card');
+      const title = card.dataset.title;
+      const tags = card.dataset.tags.split(',');
+      const ingredients = JSON.parse(card.dataset.ingredients);
+      const instructions = card.dataset.instructions;
+
+      document.querySelector('.recipe-title').textContent = title;
+
+      const tagContainer = document.querySelector('.recipe-tags');
+      tagContainer.innerHTML = '';
+      tags.forEach(tag => {
+        const span = document.createElement('div');
+        span.className = 'tag';
+        span.textContent = tag;
+        tagContainer.appendChild(span);
+      });
+
+      const ingredientContainer = document.querySelector('.ingredient-list');
+      ingredientContainer.innerHTML = '';
+      ingredients.forEach(ing => {
+        const div = document.createElement('div');
+        div.className = 'ingredient-card';
+        div.innerHTML = `<strong>${ing.name}</strong><span>$${ing.price.toFixed(2)}</span>`;
+        const btnAdd = document.createElement('button');
+        btnAdd.textContent = "Add to Cart";
+        btnAdd.addEventListener('click', () => {
+          groceryList.push(ing);
+          renderGroceryList();
+        });
+        div.appendChild(btnAdd);
+        ingredientContainer.appendChild(div);
+      });
+
+      document.querySelector('.add-all-btn').onclick = () => {
+        ingredients.forEach(ing => groceryList.push(ing));
+        renderGroceryList();
+      };
+
+      document.querySelector('.recipe-instructions').textContent = instructions;
+
+      document.querySelector('.meal-gallery').classList.add('hidden');
+      document.querySelector('.recipe-detail').classList.remove('hidden');
+    });
+  });
+
+  document.querySelector('.close-detail').addEventListener('click', () => {
+    document.querySelector('.recipe-detail').classList.add('hidden');
+    document.querySelector('.meal-gallery').classList.remove('hidden');
+  });
+
+  function renderGroceryList() {
+    const ul = document.querySelector('.grocery-items');
+    ul.innerHTML = '';
+    groceryList.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = `${item.name} - $${item.price.toFixed(2)}`;
+      ul.appendChild(li);
+    });
+  }
+</script>
+
+</body>
+</html>
+
+
