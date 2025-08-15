@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +7,7 @@
   <title>Budget Page</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-green-50 font-sans text-gray-900">
+<body class="min-h-screen bg-white-50 font-sans text-gray-900">
 
   <!-- Navigation -->
 <!DOCTYPE html>
@@ -77,44 +78,113 @@
     <li><a href="/onboarding/" class="cta">Onboarding</a></li>
   </ul>
 </nav>
+<!-- Hero Section -->
+<style>
+  /* Pulling key variables & classes from the desired hero design */
+  :root {
+    --fg: #0f172a; /* slate-900 */
+    --muted: #6b7280; /* gray-500 */
+    --muted-2: #9ca3af; /* gray-400 */
+    --border: #e5e7eb; /* gray-200 */
+    --surface: #ffffff;
+    --primary: #16a34a; /* green-600 */
+    --primary-700: #15803d; /* green-700 */
+    --primary-100: #dcfce7; /* green-100 */
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(2,6,23,.06);
+    --radius: 16px;
+  }
+  .hero {
+    background: linear-gradient(180deg,#f0fdf4,#f7fff8);
+    font-family: 'Avenir', sans-serif;
+  }
+  .hero h1 {
+    font-size: 40px;
+    line-height: 1.2;
+    font-weight: 800;
+    margin-top: 12px;
+    color: var(--fg);
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 1rem;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+    border: 1px solid rgba(22, 163, 74, .25);
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--primary-100);
+    color: var(--primary);
+    font-weight: 500;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .stat-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--fg);
+  }
+  .stat-sub {
+    font-size: 12px;
+    color: var(--muted-2);
+    margin: 0;
+  }
+  .hero-img {
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+</style>
 
+<section class="hero py-16 px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+    
+    <!-- Left Column -->
+    <div>
+      <span class="badge">💰 Smart Budget Tracking</span>
+      <h1>Master Your <span style="color: var(--primary)">Grocery Budget</span></h1>
+      <p class="mb-6">
+        Track every dollar, analyze spending patterns, and discover smart ways to save while maintaining a healthy and delicious meal plan.
+      </p>
 
-  <!-- Hero Section -->
-  <section class="relative py-16 px-6 lg:px-8 bg-gradient-to-r from-f0fcf4-0 to-f0fcf4-0">
-    <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-      <div class="space-y-6">
-        <span class="bg-green-100 text-green-700 border border-green-300 px-4 py-1 rounded-full text-sm">
-          💰 Smart Budget Tracking
-        </span>
-        <h1 class="text-4xl lg:text-5xl font-bold leading-tight">
-          Master Your <span class="text-green-700">Grocery Budget</span>
-        </h1>
-        <p class="text-lg text-green-800/80">
-          Track every dollar, analyze spending patterns, and discover smart ways to save while maintaining a healthy and delicious meal plan.
-        </p>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div class="bg-white rounded-2xl p-4 border border-green-200">
-            <div class="flex items-center gap-2 text-green-700 mb-1">
-              💵 <span class="text-sm font-medium">This Month</span>
-            </div>
-            <p class="text-2xl font-bold">$432.50</p>
-            <p class="text-xs text-green-800/70">of $500 budget</p>
-          </div>
-          <div class="bg-white rounded-2xl p-4 border border-green-200">
-            <div class="flex items-center gap-2 text-green-700 mb-1">
-              🎯 <span class="text-sm font-medium">Saved</span>
-            </div>
-            <p class="text-2xl font-bold">$67.50</p>
-            <p class="text-xs text-green-800/70">vs last month</p>
-          </div>
+      <!-- Stats -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="stat-card">
+          <div class="stat-title">💵 <span>This Month</span></div>
+          <p class="stat-value">$432.50</p>
+          <p class="stat-sub">of $500 budget</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">🎯 <span>Saved</span></div>
+          <p class="stat-value">$67.50</p>
+          <p class="stat-sub">vs last month</p>
         </div>
       </div>
-      <div>
-        <img src="budget-hero.jpg" alt="Budget tracking dashboard" class="rounded-3xl shadow-xl w-full"/>
-      </div>
     </div>
-  </section>
+
+    <!-- Right Column -->
+    <div>
+      <img src="budget-hero.jpg" alt="Budget tracking dashboard" class="hero-img w-full" />
+    </div>
+
+  </div>
+</section>
 
   <!-- Overview Cards -->
   <section class="py-12 px-6 lg:px-8">
@@ -368,8 +438,4 @@
             <div class="flex justify-between">
               <h4 class="font-semibold">Meal prep on Sundays</h4>
               <span class="text-xs bg
-
-
-
-
-
+              
