@@ -136,7 +136,14 @@
 
     /* ===== Cards ===== */
     .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden}
-    .card .card-media{height:192px; background:linear-gradient(135deg,#ecfdf5,#f0fdf4); display:flex; align-items:center; justify-content:center}
+.card .card-media {
+  height: 192px;
+  background: linear-gradient(135deg,#ecfdf5,#f0fdf4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* 👈 This keeps absolutely-positioned elements inside */
+}
     .card .card-body{padding:16px 16px 20px}
     .card:hover{box-shadow:var(--shadow); transform:translateY(-2px); transition:transform .2s ease, box-shadow .2s ease}
 
@@ -252,102 +259,105 @@
           </div>
         </div>
       </section>
-
-    <!-- Sidebar (filters) -->
-    <aside id="sidebar" class="sidebar">
-      <div class="block">
-        <div class="flex items-center justify-between">
-          <h2 class="title-lg">Filters</h2>
-          <button class="btn ghost small" data-toggle="sidebar">✖️</button>
+<!-- Layout wrapper -->
+<div class="layout">
+  <!-- Sidebar (filters) -->
+  <aside id="sidebar" class="sidebar">
+    <div class="block">
+      <div class="flex items-center justify-between">
+        <h2 class="title-lg">Filters</h2>
+        <button class="btn ghost small" data-toggle="sidebar">✖️</button>
+      </div>
+      <div class="mt-2">
+        <div class="searchbar" style="position:relative">
+          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
+          <input class="input" placeholder="Search recipes..." style="padding-left:36px" />
         </div>
-        <div class="mt-2">
-          <div class="searchbar" style="position:relative">
-            <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
-            <input class="input" placeholder="Search recipes..." style="padding-left:36px" />
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>Rating</h3>
+      <div class="grid" style="gap:10px">
+        <label class="chip"><input type="checkbox"/> <span class="stars">★★★★★</span> <span class="muted">&nbsp;&amp; up</span></label>
+        <label class="chip"><input type="checkbox"/> <span class="stars">★★★★☆</span> <span class="muted">&nbsp;&amp; up</span></label>
+        <label class="chip"><input type="checkbox"/> <span class="stars">★★★☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
+        <label class="chip"><input type="checkbox"/> <span class="stars">★★☆☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
+        <label class="chip"><input type="checkbox"/> <span class="stars">★☆☆☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>Prep Time (minutes)</h3>
+      <input class="range" type="range" min="5" max="180" step="5" value="60" />
+      <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
+    </div>
+
+    <div class="block">
+      <h3>Calories</h3>
+      <div class="grid" style="gap:10px">
+        <label class="chip"><input type="checkbox"/> Under 200 calories</label>
+        <label class="chip"><input type="checkbox"/> 200-400 calories</label>
+        <label class="chip"><input type="checkbox"/> 400-600 calories</label>
+        <label class="chip"><input type="checkbox"/> 600-800 calories</label>
+        <label class="chip"><input type="checkbox"/> 800+ calories</label>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>Diet Type</h3>
+      <div class="grid" style="gap:10px">
+        <label class="chip"><input type="checkbox"/> Vegetarian</label>
+        <label class="chip"><input type="checkbox"/> Vegan</label>
+        <label class="chip"><input type="checkbox"/> Gluten-Free</label>
+        <label class="chip"><input type="checkbox"/> Keto</label>
+        <label class="chip"><input type="checkbox"/> Paleo</label>
+        <label class="chip"><input type="checkbox"/> Halal</label>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>Ingredients</h3>
+      <input class="range" type="range" min="3" max="20" step="1" value="10" />
+      <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
+    </div>
+
+    <div class="block">
+      <button class="btn w-100">Clear All Filters</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main>
+    <div class="main-header">
+      <div class="container flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <button class="btn" data-open="sidebar" aria-label="Open filters" style="display:none">⚙️ Filters</button>
+          <div>
+            <h1 class="title-lg">All Recipes</h1>
+            <div class="muted small">Showing 2,450 recipes</div>
           </div>
         </div>
-      </div>
-
-      <div class="block">
-        <h3>Rating</h3>
-        <div class="grid" style="gap:10px">
-          <!-- 5 to 1 stars -->
-          <label class="chip"><input type="checkbox"/> <span class="stars">★★★★★</span> <span class="muted">&nbsp;&amp; up</span></label>
-          <label class="chip"><input type="checkbox"/> <span class="stars">★★★★☆</span> <span class="muted">&nbsp;&amp; up</span></label>
-          <label class="chip"><input type="checkbox"/> <span class="stars">★★★☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
-          <label class="chip"><input type="checkbox"/> <span class="stars">★★☆☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
-          <label class="chip"><input type="checkbox"/> <span class="stars">★☆☆☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
+        <div class="flex gap-2">
+          <button class="btn">Newest</button>
+          <button class="btn">Popular</button>
+          <button class="btn primary">Rating</button>
         </div>
       </div>
+    </div>
 
-      <div class="block">
-        <h3>Prep Time (minutes)</h3>
-        <input class="range" type="range" min="5" max="180" step="5" value="60" />
-        <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
-      </div>
-
-      <div class="block">
-        <h3>Calories</h3>
-        <div class="grid" style="gap:10px">
-          <label class="chip"><input type="checkbox"/> Under 200 calories</label>
-          <label class="chip"><input type="checkbox"/> 200-400 calories</label>
-          <label class="chip"><input type="checkbox"/> 400-600 calories</label>
-          <label class="chip"><input type="checkbox"/> 600-800 calories</label>
-          <label class="chip"><input type="checkbox"/> 800+ calories</label>
-        </div>
-      </div>
-
-      <div class="block">
-        <h3>Diet Type</h3>
-        <div class="grid" style="gap:10px">
-          <label class="chip"><input type="checkbox"/> Vegetarian</label>
-          <label class="chip"><input type="checkbox"/> Vegan</label>
-          <label class="chip"><input type="checkbox"/> Gluten-Free</label>
-          <label class="chip"><input type="checkbox"/> Keto</label>
-          <label class="chip"><input type="checkbox"/> Paleo</label>
-          <label class="chip"><input type="checkbox"/> Halal</label>
-        </div>
-      </div>
-
-      <div class="block">
-        <h3>Ingredients</h3>
-        <input class="range" type="range" min="3" max="20" step="1" value="10" />
-        <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
-      </div>
-
-      <div class="block">
-        <button class="btn w-100">Clear All Filters</button>
-      </div>
-    </aside>
-
-    <!-- Main content -->
-    <main>
-      <div class="main-header">
-        <div class="container flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <button class="btn" data-open="sidebar" aria-label="Open filters" style="display:none">⚙️ Filters</button>
-            <div>
-              <h1 class="title-lg">All Recipes</h1>
-              <div class="muted small">Showing 2,450 recipes</div>
-            </div>
-          </div>
+    <!-- Featured Recipes -->
+    <section class="section">
+      <div class="container">
+        <div class="flex items-center justify-between mb-3">
+          <div></div>
           <div class="flex gap-2">
-            <button class="btn">Newest</button>
-            <button class="btn">Popular</button>
-            <button class="btn primary">Rating</button>
           </div>
         </div>
-      </div>
-      <!-- Featured Recipes -->
-      <section class="section">
-        <div class="container">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-            </div>
+
+        <!-- your recipe grid continues... -->
+
             <div class="flex gap-2">
-              <button class="btn">Newest</button>
-              <button class="btn">Popular</button>
-              <button class="btn primary">Trending</button>
             </div>
           </div>
 
@@ -355,12 +365,11 @@
             <!-- Card 1 -->
             <article class="card">
               <div class="card-media">
-                <div class="badge" style="position:absolute; left:12px; top:12px">Mediterranean</div>
                 <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
                   <button class="icon-btn" title="Like">❤️</button>
                   <button class="icon-btn" title="Save">🔖</button>
                 </div>
-                <div style="font-size:56px; opacity:.25">🍳</div>
+  <img src="https://media.istockphoto.com/id/1194750269/photo/fresh-quinoa-tabbouleh-salad.jpg?s=612x612&w=0&k=20&c=Jo7y2fl9RKIMBXteG83NZUpl57HpvEd4GiCfj-gh8yM=" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
               </div>
               <div class="card-body">
                 <div class="flex items-center justify-between">
@@ -391,12 +400,11 @@
             <!-- Card 2 -->
             <article class="card">
               <div class="card-media">
-                <div class="badge" style="position:absolute; left:12px; top:12px">Thai</div>
                 <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
                   <button class="icon-btn">❤️</button>
                   <button class="icon-btn">🔖</button>
                 </div>
-                <div style="font-size:56px; opacity:.25">🍳</div>
+  <img src="https://images.pexels.com/photos/33435594/pexels-photo-33435594.jpeg" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
               </div>
               <div class="card-body">
                 <div class="flex items-center justify-between">
@@ -427,12 +435,11 @@
             <!-- Card 3 -->
             <article class="card">
               <div class="card-media">
-                <div class="badge" style="position:absolute; left:12px; top:12px">Italian</div>
                 <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
                   <button class="icon-btn">❤️</button>
                   <button class="icon-btn">🔖</button>
                 </div>
-                <div style="font-size:56px; opacity:.25">🍳</div>
+<img src="https://images.pexels.com/photos/33457994/pexels-photo-33457994.jpeg" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
               </div>
               <div class="card-body">
                 <div class="flex items-center justify-between">
@@ -463,12 +470,11 @@
             <!-- Card 4 -->
             <article class="card">
               <div class="card-media">
-                <div class="badge" style="position:absolute; left:12px; top:12px">American</div>
                 <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
                   <button class="icon-btn">❤️</button>
                   <button class="icon-btn">🔖</button>
                 </div>
-                <div style="font-size:56px; opacity:.25">🍳</div>
+  <img src="https://images.pexels.com/photos/725991/pexels-photo-725991.jpeg" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
               </div>
               <div class="card-body">
                 <div class="flex items-center justify-between">
@@ -499,12 +505,11 @@
             <!-- Card 5 -->
             <article class="card">
               <div class="card-media">
-                <div class="badge" style="position:absolute; left:12px; top:12px">Moroccan</div>
                 <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
                   <button class="icon-btn">❤️</button>
                   <button class="icon-btn">🔖</button>
                 </div>
-                <div style="font-size:56px; opacity:.25">🍳</div>
+  <img src="https://images.pexels.com/photos/30459912/pexels-photo-30459912.jpeg" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
               </div>
               <div class="card-body">
                 <div class="flex items-center justify-between">
@@ -535,12 +540,11 @@
             <!-- Card 6 -->
             <article class="card">
               <div class="card-media">
-                <div class="badge" style="position:absolute; left:12px; top:12px">Fusion</div>
                 <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
                   <button class="icon-btn">❤️</button>
                   <button class="icon-btn">🔖</button>
                 </div>
-                <div style="font-size:56px; opacity:.25">🍳</div>
+  <img src="https://images.pexels.com/photos/13887558/pexels-photo-13887558.jpeg" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
               </div>
               <div class="card-body">
                 <div class="flex items-center justify-between">
@@ -652,8 +656,18 @@
                   <button class="btn">Save for Later</button>
                 </div>
               </div>
-              <div class="card-media" style="min-height:280px"><div style="font-size:80px; opacity:.2">🍳</div></div>
-            </div>
+<div class="card-media" style="
+  height: 300px;          /* 👈 Set a fixed height (not min-height) */
+  border-radius: 12px;    /* 👈 Rounded corners */
+  overflow: hidden;       /* 👈 Ensures image stays inside rounded corners */
+  position: relative;     /* 👈 Required if you're positioning things absolutely */
+">
+  <img
+    src="https://images.pexels.com/photos/4518838/pexels-photo-4518838.jpeg"
+    alt="Dish image"
+    style="width:100%; height:100%; object-fit:cover;"
+  />
+</div>            </div>
           </article>
         </div>
       </section>
@@ -691,6 +705,3 @@
   </script>
 </body>
 </html>
-
-
-
