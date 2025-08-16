@@ -1,455 +1,443 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Grocery List & Pantry</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budget Page</title>
   <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-white-50 font-sans text-gray-900">
+
+  <!-- Navigation -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoodPlates</title>
   <style>
-    /* optional: nicer scroll for item lists */
-    .nice-scroll::-webkit-scrollbar { height: 8px; width: 8px; }
-    .nice-scroll::-webkit-scrollbar-thumb { background: rgba(16,185,129,.35); border-radius: 9999px; }
-    .nice-scroll::-webkit-scrollbar-track { background: transparent; }
-    
+    body {
+      margin: 0;
+      font-family: 'Avenir', sans-serif; 
+      background-color: white;
+    }
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: white;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: black;
+    }
+    ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+      margin: 0;
+      padding: 0;
+      align-items: center;
+    }
+    li a {
+      text-decoration: none;
+      color: black;
+      font-size: 1rem;
+      transition: color 0.2s ease;
+    }
+    li a:hover {
+      color: gray;
+    }
+    .cta {
+      background-color: #16a34a;
+      color: white !important;
+      padding: 0.5rem 1.5rem;
+      border-radius: 999px; /* pill shape */
+      font-weight: medium;
+      transition: background-color 0.2s ease;
+    }
+    .cta:hover {
+      background-color: #12893d;
+    }
   </style>
 </head>
-<body class="min-h-screen bg-white text-gray-900">
+<body>
 
-<!-- Navigation -->
-<nav class="flex justify-between items-center px-8 py-4 bg-white">
-  <div class="text-xl font-bold">GoodPlates</div>
-  <ul class="flex items-center gap-8 list-none">
-    <li><a href="/recipes/" class="hover:text-gray-500">Recipes</a></li>
-    <li><a href="/grocery-list/" class="hover:text-gray-500">Grocery List</a></li>
-    <li><a href="/order-online/" class="hover:text-gray-500">Order Online</a></li>
-    <li><a href="/statistics/" class="hover:text-gray-500">Statistics</a></li>
-    <li><a href="/courses/" class="hover:text-gray-500">Courses</a></li>
-    <li><a href="/contact/" class="hover:text-gray-500">Contact</a></li>
-    <li>
-      <a href="/onboarding/" class="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition">
-        Onboarding
-      </a>
-    </li>
+<nav>
+  <div class="logo">GoodPlates</div>
+  <ul>
+    <li><a href="/recipes/">Recipes</a></li>
+    <li><a href="/grocery-list/">Grocery List</a></li>
+    <li><a href="/order-online/">Order Online</a></li>
+    <li><a href="/statistics/">Statistics</a></li>
+    <li><a href="/courses/">Courses</a></li>
+    <li><a href="/contact/">Contact</a></li>
+    <li><a href="/onboarding/" class="cta">Onboarding</a></li>
   </ul>
 </nav>
-
 <!-- Hero Section -->
-<section class="hero section py-16" style="background-color: #F2FDF4;">
-  <div class="max-w-7xl mx-auto px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center">
+<style>
+  /* Pulling key variables & classes from the desired hero design */
+  :root {
+    --fg: #0f172a; /* slate-900 */
+    --muted: #6b7280; /* gray-500 */
+    --muted-2: #9ca3af; /* gray-400 */
+    --border: #e5e7eb; /* gray-200 */
+    --surface: #ffffff;
+    --primary: #16a34a; /* green-600 */
+    --primary-700: #15803d; /* green-700 */
+    --primary-100: #dcfce7; /* green-100 */
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(2,6,23,.06);
+    --radius: 16px;
+  }
+  .hero {
+    background: linear-gradient(180deg,#f0fdf4,#f7fff8);
+    font-family: 'Helvetica Neue', sans-serif;
     
-    <!-- Text Content -->
+  }
+  .hero h1 {
+    font-size: 40px;
+    line-height: 1.2;
+    font-weight: 800;
+    margin-top: 12px;
+    color: var(--fg);
+  }
+  .hero p {
+    color: var(--muted);
+    font-size: 1rem;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 14px;
+    border: 1px solid rgba(22, 163, 74, .25);
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--primary-100);
+    color: var(--primary);
+    font-weight: 500;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  .stat-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    color: var(--fg);
+  }
+  .stat-sub {
+    font-size: 12px;
+    color: var(--muted-2);
+    margin: 0;
+  }
+  .hero-img {
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+</style>
+
+<section class="hero py-16 px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+    
+    <!-- Left Column -->
     <div>
-      <span class="inline-flex items-center gap-2 px-4 py-1 rounded-full text-green-700 bg-green-100 border border-green-200 text-sm">
-        🛒 Grocery & Pantry
-      </span>
-      <h1 class="text-4xl font-extrabold mt-4 mb-4">
-        Manage Your <span class="text-green-600">Grocery List & Pantry</span>
-      </h1>
-      <p class="text-gray-600 mb-6">
-        Keep your shopping list and pantry inventory in one place. Add items, track purchases, and organize by categories — all with ease.
+      <span class="badge">💰 Smart Budget Tracking</span>
+      <h1>Master Your <span style="color: var(--primary)">Grocery Budget</span></h1>
+      <p class="mb-6">
+        Track every dollar, analyze spending patterns, and discover smart ways to save while maintaining a healthy and delicious meal plan.
       </p>
-      <div class="relative mb-4">
-        <span class="absolute left-4 top-1/2 -translate-y-1/2">🔎</span>
-        <input type="text" placeholder="Search items, categories..." class="w-full pl-10 pr-28 py-3 border border-gray-200 rounded-full" />
-        <button class="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 text-white px-4 py-1 rounded-full hover:bg-green-700">
-          Search
-        </button>
-      </div>
-      <div class="flex items-center gap-6 text-gray-500 text-sm">
-        <span>📦 Track pantry stock</span>
-        <span>🛍 Organize by category</span>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="stat-card">
+          <div class="stat-title">💵 <span>This Month</span></div>
+          <p class="stat-value">$432.50</p>
+          <p class="stat-sub">of $500 budget</p>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">🎯 <span>Saved</span></div>
+          <p class="stat-value">$67.50</p>
+          <p class="stat-sub">vs last month</p>
+        </div>
       </div>
     </div>
 
+    <!-- Right Column -->
+    <div>
+      <img src="budget-hero.jpg" alt="Budget tracking dashboard" class="hero-img w-full" />
+    </div>
 
   </div>
-</section> <!-- end of hero -->
+</section>
 
-<div class="mx-36">
-    <div class="my-5">
+  <!-- Overview Cards -->
+  <section class="py-12 px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <!-- Card 1 -->
+        <div class="border border-green-200 rounded-xl bg-white p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">💵</div>
+            <span class="bg-green-100 text-green-700 border border-green-300 px-2 py-1 rounded-full text-xs">-12%</span>
+          </div>
+          <h3 class="text-2xl font-bold">$432.50</h3>
+          <p class="text-sm text-green-800/80">Total Spent This Month</p>
+          <div class="w-full bg-green-200 h-2 rounded mt-3">
+            <div class="bg-green-600 h-2 rounded" style="width:86.5%"></div>
+          </div>
+          <p class="text-xs text-green-700 mt-1">86.5% of budget used</p>
+        </div>
 
-  <!-- all your later page content goes here -->
+        <!-- Card 2 -->
+        <div class="border border-green-200 rounded-xl bg-white p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">🎯</div>
+            <span class="bg-green-100 text-green-700 border border-green-300 px-2 py-1 rounded-full text-xs">On Track</span>
+          </div>
+          <h3 class="text-2xl font-bold">$108.13</h3>
+          <p class="text-sm text-green-800/80">Average Per Week</p>
+          <div class="mt-3 text-xs text-green-800/70 flex justify-between">
+            <span>Weekly Budget: $125</span>
+            <span class="text-green-700">Under budget</span>
+          </div>
+        </div>
 
-</body>
-</html>
-    <br>
+        <!-- Card 3 -->
+        <div class="border border-green-200 rounded-xl bg-white p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">📈</div>
+            <span class="bg-green-100 text-green-700 border border-green-300 px-2 py-1 rounded-full text-xs">Saved</span>
+          </div>
+          <h3 class="text-2xl font-bold">$67.50</h3>
+          <p class="text-sm text-green-800/80">Money Saved</p>
+          <p class="text-xs text-green-700 mt-3">13.5% under budget this month</p>
+        </div>
 
-      <!-- Progress Overview -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <!-- Total Items -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="p-6 flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-green-50">
-                
+        <!-- Card 4 -->
+        <div class="border border-green-200 rounded-xl bg-white p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">🛒</div>
+            <span class="bg-green-100 text-green-700 border border-green-300 px-2 py-1 rounded-full text-xs">23 trips</span>
+          </div>
+          <h3 class="text-2xl font-bold">$18.80</h3>
+          <p class="text-sm text-green-800/80">Avg Per Shopping Trip</p>
+          <p class="text-xs text-green-800/70 mt-3">2.3 trips per week on average</p>
+        </div>
+      </div>
 
-              <!-- ShoppingCart Icon -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l3-8H6.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 22a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"/>
-              </svg>
+      <!-- Weekly Breakdown & Category Breakdown -->
+      <div class="grid lg:grid-cols-2 gap-8 mb-12">
+        <!-- Weekly Spending -->
+        <div class="border border-green-200 rounded-xl bg-white p-6">
+          <h3 class="text-lg font-semibold mb-2">📊 Weekly Spending Breakdown</h3>
+          <p class="text-sm text-green-800/70 mb-4">Track your spending patterns throughout the month</p>
+
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-sm">
+                <span class="font-medium">Week 1</span>
+                <span class="text-green-800">$95.25 <span class="bg-green-100 text-green-700 px-1 rounded text-xs">76.2%</span></span>
+              </div>
+              <div class="w-full bg-green-200 h-2 rounded mt-1">
+                <div class="bg-green-600 h-2 rounded" style="width:76.2%"></div>
+              </div>
             </div>
             <div>
-              <p class="text-2xl font-bold">6</p>
-              <p class="text-sm text-gray-500">Total Items</p>
+              <div class="flex justify-between text-sm">
+                <span class="font-medium">Week 2</span>
+                <span class="text-green-800">$118.40 <span class="bg-red-100 text-red-700 px-1 rounded text-xs">94.7%</span></span>
+              </div>
+              <div class="w-full bg-green-200 h-2 rounded mt-1">
+                <div class="bg-red-500 h-2 rounded" style="width:94.7%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm">
+                <span class="font-medium">Week 3</span>
+                <span class="text-green-800">$102.85 <span class="bg-green-100 text-green-700 px-1 rounded text-xs">82.3%</span></span>
+              </div>
+              <div class="w-full bg-green-200 h-2 rounded mt-1">
+                <div class="bg-green-600 h-2 rounded" style="width:82.3%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm">
+                <span class="font-medium">Week 4</span>
+                <span class="text-green-800">$116.00 <span class="bg-red-100 text-red-700 px-1 rounded text-xs">92.8%</span></span>
+              </div>
+              <div class="w-full bg-green-200 h-2 rounded mt-1">
+                <div class="bg-red-500 h-2 rounded" style="width:92.8%"></div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Completed -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="p-6 flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-green-50">
-              <!-- Package Icon -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.5 7.5L12 3 3.5 7.5 12 12l8.5-4.5z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 7.5V16.5L12 21l8.5-4.5V7.5M12 12v9"/>
-              </svg>
-            </div>
-            <div>
-              <p class="text-2xl font-bold">1</p>
-              <p class="text-sm text-gray-500">Completed</p>
-            </div>
-          </div>
-        </div>
+        <!-- Spending by Category -->
+        <div class="border border-green-200 rounded-xl bg-white p-6">
+          <h3 class="text-lg font-semibold mb-2">🥗 Spending by Category</h3>
+          <p class="text-sm text-green-800/70 mb-4">See where your grocery budget goes</p>
 
-        <!-- Pantry Items -->
-        <div class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <div class="p-6 flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-green-50">
-              <!-- Filter Icon -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h18M6 12h12M10 20h4"/>
-              </svg>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between text-sm">
+                <span>🍖 Proteins</span>
+                <span>$156.80 (36.3%)</span>
+              </div>
+              <div class="w-full bg-green-200 h-1 rounded mt-1">
+                <div class="bg-green-700 h-1 rounded" style="width:36.3%"></div>
+              </div>
             </div>
             <div>
-              <p class="text-2xl font-bold">4</p>
-              <p class="text-sm text-gray-500">Pantry Items</p>
+              <div class="flex justify-between text-sm">
+                <span>🥦 Vegetables</span>
+                <span>$89.20 (20.6%)</span>
+              </div>
+              <div class="w-full bg-green-200 h-1 rounded mt-1">
+                <div class="bg-green-700 h-1 rounded" style="width:20.6%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm">
+                <span>🍞 Grains & Carbs</span>
+                <span>$78.40 (18.1%)</span>
+              </div>
+              <div class="w-full bg-green-200 h-1 rounded mt-1">
+                <div class="bg-green-700 h-1 rounded" style="width:18.1%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm">
+                <span>🧀 Dairy</span>
+                <span>$54.30 (12.6%)</span>
+              </div>
+              <div class="w-full bg-green-200 h-1 rounded mt-1">
+                <div class="bg-green-700 h-1 rounded" style="width:12.6%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm">
+                <span>🍪 Snacks</span>
+                <span>$32.60 (7.5%)</span>
+              </div>
+              <div class="w-full bg-green-200 h-1 rounded mt-1">
+                <div class="bg-green-700 h-1 rounded" style="width:7.5%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-sm">
+                <span>🥤 Beverages</span>
+                <span>$21.20 (4.9%)</span>
+              </div>
+              <div class="w-full bg-green-200 h-1 rounded mt-1">
+                <div class="bg-green-700 h-1 rounded" style="width:4.9%"></div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Main Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Grocery List -->
-        <section class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <header class="px-6 pt-6">
-            <h2 class="text-lg font-semibold flex items-center gap-2">
-              <!-- ShoppingCart Icon -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l3-8H6.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M9 22a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"/>
-              </svg>
-              Grocery List
-            </h2>
-          </header>
-          <div class="p-6 space-y-6">
-            <!-- Add New Item -->
-            <div class="space-y-3">
-              <div class="flex gap-2">
-                <input
-                  placeholder="Add new grocery item..."
-                  class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500"
-                />
-                <!-- Category Select -->
-                <div class="relative w-48">
-                  <select class="appearance-none w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
-                    <option value="">Category</option>
-                    <option>Fruits &amp; Vegetables</option>
-                    <option>Dairy &amp; Eggs</option>
-                    <option>Meat &amp; Seafood</option>
-                    <option>Pantry Staples</option>
-                    <option>Snacks</option>
-                    <option>Beverages</option>
-                    <option>Frozen Foods</option>
-                    <option>Bakery</option>
-                  </select>
-                  <!-- Chevron -->
-                  <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                  </svg>
-                </div>
-                <button class="px-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-white hover:from-green-500 hover:to-green-700">
-                  <!-- Plus Icon -->
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14"/>
-                  </svg>
-                </button>
-              </div>
+      <!-- Recent Transactions -->
+      <div class="border border-green-200 rounded-xl bg-white p-6 mb-12">
+        <h3 class="text-lg font-semibold mb-2">⏰ Recent Transactions</h3>
+        <p class="text-sm text-green-800/70 mb-4">Your latest grocery purchases and spending</p>
+
+        <div class="space-y-4">
+          <div class="flex justify-between items-center p-4 bg-green-50 rounded-2xl">
+            <div>
+              <h4 class="font-medium">Whole Foods Market</h4>
+              <p class="text-sm text-green-800/80">Organic Salmon, Mixed Greens, Greek Yogurt</p>
+              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Proteins & Dairy</span>
+              <span class="text-xs text-green-800/60 ml-2">Today</span>
             </div>
-
-            <!-- Search -->
-            <div class="relative">
-              <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"/>
-              </svg>
-              <input
-                placeholder="Search grocery items..."
-                class="w-full pl-10 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500"
-              />
-            </div>
-
-            <!-- Grocery Items (static, preserved from your data) -->
-            <div class="space-y-3 max-h-96 overflow-y-auto nice-scroll">
-              <!-- Item 1 -->
-              <div class="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-green-200">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
-                  <div>
-                    <p class="font-medium">Organic Bananas</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Fruits &amp; Vegetables</span>
-                      <span class="text-xs text-gray-500">6 count</span>
-                      <span class="text-xs px-2 py-0.5 rounded-full border border-green-300 text-green-700">In Pantry</span>
-                    </div>
-                  </div>
-                </div>
-                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
-                  <!-- Trash2 -->
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Item 2 -->
-              <div class="flex items-center justify-between p-3 rounded-lg border bg-white border-gray-200">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
-                  <div>
-                    <p class="font-medium">Greek Yogurt</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Dairy &amp; Eggs</span>
-                      <span class="text-xs text-gray-500">32 oz</span>
-                    </div>
-                  </div>
-                </div>
-                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Item 3 (completed:true) -->
-              <div class="flex items-center justify-between p-3 rounded-lg border bg-green-50 border-green-200">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" checked class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"/>
-                  <div>
-                    <p class="font-medium line-through text-gray-500">Salmon Fillet</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Meat &amp; Seafood</span>
-                      <span class="text-xs text-gray-500">1 lb</span>
-                    </div>
-                  </div>
-                </div>
-                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Item 4 -->
-              <div class="flex items-center justify-between p-3 rounded-lg border bg-gray-50 border-green-200">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
-                  <div>
-                    <p class="font-medium">Brown Rice</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Pantry Staples</span>
-                      <span class="text-xs text-gray-500">2 lbs</span>
-                      <span class="text-xs px-2 py-0.5 rounded-full border border-green-300 text-green-700">In Pantry</span>
-                    </div>
-                  </div>
-                </div>
-                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Item 5 -->
-              <div class="flex items-center justify-between p-3 rounded-lg border bg-white border-gray-200">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
-                  <div>
-                    <p class="font-medium">Almond Milk</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Beverages</span>
-                      <span class="text-xs text-gray-500">64 oz</span>
-                    </div>
-                  </div>
-                </div>
-                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
-                  </svg>
-                </button>
-              </div>
-
-              <!-- Item 6 -->
-              <div class="flex items-center justify-between p-3 rounded-lg border bg-white border-gray-200">
-                <div class="flex items-center gap-3">
-                  <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500" />
-                  <div>
-                    <p class="font-medium">Bell Peppers</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Fruits &amp; Vegetables</span>
-                      <span class="text-xs text-gray-500">3 count</span>
-                    </div>
-                  </div>
-                </div>
-                <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
+            <p class="text-lg font-semibold">$67.45</p>
           </div>
-        </section>
 
-        <!-- Pantry Management -->
-        <section class="bg-white border border-gray-200 rounded-xl shadow-sm">
-          <header class="px-6 pt-6">
-            <h2 class="text-lg font-semibold flex items-center gap-2">
-              <!-- Package Icon -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.5 7.5L12 3 3.5 7.5 12 12l8.5-4.5z"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.5 7.5V16.5L12 21l8.5-4.5V7.5M12 12v9"/>
-              </svg>
-              Pantry Management
-            </h2>
-          </header>
-          <div class="p-6 space-y-6">
-            <!-- Add Pantry Item -->
-            <div class="space-y-3">
-              <input placeholder="Add item to pantry..." class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500"/>
-              <div class="flex gap-2">
-                <!-- Category -->
-                <div class="relative flex-1">
-                  <select class="appearance-none w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
-                    <option>Category</option>
-                    <option>Fruits &amp; Vegetables</option>
-                    <option>Dairy &amp; Eggs</option>
-                    <option>Meat &amp; Seafood</option>
-                    <option>Pantry Staples</option>
-                    <option>Snacks</option>
-                    <option>Beverages</option>
-                    <option>Frozen Foods</option>
-                    <option>Bakery</option>
-                  </select>
-                  <svg class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                  </svg>
-                </div>
-                <!-- Expiry -->
-                <input type="date" class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500"/>
-                <!-- Add -->
-                <button class="px-3 rounded-lg bg-gradient-to-r from-green-400 to-green-600 text-white hover:from-green-500 hover:to-green-700">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14M5 12h14"/>
-                  </svg>
-                </button>
-              </div>
+          <div class="flex justify-between items-center p-4 bg-green-50 rounded-2xl">
+            <div>
+              <h4 class="font-medium">Local Farmers Market</h4>
+              <p class="text-sm text-green-800/80">Seasonal Vegetables, Fresh Herbs</p>
+              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Vegetables</span>
+              <span class="text-xs text-green-800/60 ml-2">Yesterday</span>
             </div>
-
-            <!-- Pantry Items (static, preserved from your data) -->
-            <div class="space-y-3 max-h-96 overflow-y-auto nice-scroll">
-              <!-- Olive Oil -->
-              <div class="p-3 rounded-lg border border-gray-200 bg-white">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <p class="font-medium">Olive Oil</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Pantry Staples</span>
-                      <span class="text-xs text-gray-500">500ml</span>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Expires: Dec 1, 2024</p>
-                  </div>
-                  <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Quinoa -->
-              <div class="p-3 rounded-lg border border-gray-200 bg-white">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <p class="font-medium">Quinoa</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Pantry Staples</span>
-                      <span class="text-xs text-gray-500">1 lb</span>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Expires: Jun 15, 2025</p>
-                  </div>
-                  <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Canned Tomatoes -->
-              <div class="p-3 rounded-lg border border-gray-200 bg-white">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <p class="font-medium">Canned Tomatoes</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Pantry Staples</span>
-                      <span class="text-xs text-gray-500">4 cans</span>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Expires: Mar 20, 2025</p>
-                  </div>
-                  <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Frozen Broccoli -->
-              <div class="p-3 rounded-lg border border-gray-200 bg-white">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <p class="font-medium">Frozen Broccoli</p>
-                    <div class="flex items-center gap-2 mt-1">
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white">Frozen Foods</span>
-                      <span class="text-xs text-gray-500">16 oz</span>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Expires: Nov 30, 2024</p>
-                  </div>
-                  <button class="p-2 rounded-lg text-red-600 hover:bg-red-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18M8 6v12m8-12v12M10 6l1-2h2l1 2m-7 0h10M9 18h6"/>
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="pt-4 border-t border-gray-200">
-              <div class="grid grid-cols-2 gap-2">
-                <button class="text-sm px-3 py-2 rounded-lg border border-green-300 text-green-700 hover:bg-green-50">Export List</button>
-                <button class="text-sm px-3 py-2 rounded-lg border border-green-300 text-green-700 hover:bg-green-50">Clear Completed</button>
-              </div>
-            </div>
+            <p class="text-lg font-semibold">$28.80</p>
           </div>
-        </section>
+
+          <div class="flex justify-between items-center p-4 bg-green-50 rounded-2xl">
+            <div>
+              <h4 class="font-medium">Target</h4>
+              <p class="text-sm text-green-800/80">Pasta, Rice, Canned Goods</p>
+              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Grains & Pantry</span>
+              <span class="text-xs text-green-800/60 ml-2">3 days ago</span>
+            </div>
+            <p class="text-lg font-semibold">$45.20</p>
+          </div>
+
+          <div class="flex justify-between items-center p-4 bg-green-50 rounded-2xl">
+            <div>
+              <h4 class="font-medium">Amazon Fresh</h4>
+              <p class="text-sm text-green-800/80">Weekly Produce Box, Organic Snacks</p>
+              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Mixed</span>
+              <span class="text-xs text-green-800/60 ml-2">5 days ago</span>
+            </div>
+            <p class="text-lg font-semibold">$83.15</p>
+          </div>
+        </div>
+
+        <div class="text-center mt-6">
+          <button class="px-4 py-2 border border-green-300 rounded-lg text-green-700 hover:bg-green-100">View All Transactions</button>
+        </div>
       </div>
-    </div>
-  </main>
 
-  <!-- Footer -->
-  <footer class="bg-white border-t border-gray-200 py-6 text-center text-gray-500 text-sm">
-    © 2025 Healthly. All rights reserved.
-  </footer>
+      <!-- Savings Tips -->
+      <div class="border-2 border-green-300 rounded-xl bg-white p-6 shadow">
+        <h3 class="text-lg font-semibold mb-2">🎯 Smart Savings Tips</h3>
+        <p class="text-sm text-green-800/70 mb-6">Personalized recommendations to optimize your grocery budget</p>
 
-</body>
-</html>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
+            <div class="flex justify-between">
+              <h4 class="font-semibold">Switch to seasonal produce</h4>
+              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Easy</span>
+            </div>
+            <p class="text-sm text-green-800/80">Save 15-20% by choosing in-season vegetables and fruits</p>
+            <div class="flex justify-between items-center">
+              <span class="text-lg font-bold text-green-700">$12-15/week</span>
+              <button class="px-3 py-1 border border-green-300 rounded text-green-700 hover:bg-green-100 text-sm">Try This</button>
+            </div>
+          </div>
+
+          <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
+            <div class="flex justify-between">
+              <h4 class="font-semibold">Buy generic brands</h4>
+              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Easy</span>
+            </div>
+            <p class="text-sm text-green-800/80">Generic staples can save you up to 30% without compromising quality</p>
+            <div class="flex justify-between items-center">
+              <span class="text-lg font-bold text-green-700">$8-12/week</span>
+              <button class="px-3 py-1 border border-green-300 rounded text-green-700 hover:bg-green-100 text-sm">Try This</button>
+            </div>
+          </div>
+
+          <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
+            <div class="flex justify-between">
+              <h4 class="font-semibold">Meal prep on Sundays</h4>
+              <span class="text-xs bg
+              
