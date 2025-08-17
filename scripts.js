@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  
   const recipeGrid = document.getElementById("recipeGrid");
   const modal = document.getElementById("recipeModal");
   const closeModal = document.getElementById("closeModal");
@@ -6,6 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalImage = document.getElementById("modalImage");
   const modalIngredients = document.getElementById("modalIngredients");
   const modalInstructions = document.getElementById("modalInstructions");
+  document.getElementById('totalRecipes').textContent = recipes.length;
+
 
   // Render all recipe cards
   function renderRecipes(list) {
@@ -110,6 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Render results
  renderRecipes(filtered);
     document.getElementById('totalRecipes').textContent = filtered.length;
+    
   }
 
   // 🔥 NEW: Attach listeners
