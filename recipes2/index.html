@@ -337,7 +337,7 @@
           <button class="btn" data-open="sidebar" aria-label="Open filters" style="display:none">⚙️ Filters</button>
           <div>
             <h1 class="title-lg">All Recipes</h1>
-            <div class="muted small">Showing 2,450 recipes</div>
+            <div class="muted small">Showing <span id="totalRecipes"></span> recipes</div>
           </div>
         </div>
       </div>
@@ -512,8 +512,9 @@
 
    <script src="../recipes.js"></script>
   <script src="../scripts.js"></script>
+  <script>
+  document.getElementById('totalRecipes').textContent = Array.isArray(recipes) ? recipes.filter(r => r.id).length : 0;
+  </script>
 </body>
 </html>
-
-
 
