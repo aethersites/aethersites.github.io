@@ -42,7 +42,7 @@ const recipes = [
     `,
     tags: ["Spicy", "Dairy-Free"],
     image: "https://images.pexels.com/photos/33435594/pexels-photo-33435594.jpeg"
-  }
+  },
   {
     id: 3,
     title: "Classic Margherita Pizza",
