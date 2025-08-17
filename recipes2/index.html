@@ -252,8 +252,7 @@
       </section>
 <!-- Layout wrapper -->
 <div class="layout">
-    
-  <!-- Sidebar (filters) -->
+    <!-- Sidebar (filters) -->
 <aside id="sidebar" class="sidebar">
   <div class="block">
     <div class="flex items-center justify-between">
@@ -263,7 +262,8 @@
     <div class="mt-2">
       <div class="searchbar" style="position:relative">
         <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
-        <input class="input" id="filter-search" placeholder="Search recipes..." style="padding-left:36px" />
+        <!-- ✅ must have id="filter-search" -->
+        <input class="input" type="text" id="filter-search" placeholder="Search recipes..." style="padding-left:36px" />
       </div>
     </div>
   </div>
@@ -271,6 +271,7 @@
   <div class="block">
     <h3>Rating</h3>
     <div class="grid" style="gap:10px">
+      <!-- ✅ must use data-filter="rating" -->
       <label class="chip"><input type="checkbox" data-filter="rating" value="5"/> <span class="stars">★★★★★</span> &nbsp;&amp; up</label>
       <label class="chip"><input type="checkbox" data-filter="rating" value="4"/> <span class="stars">★★★★☆</span> &nbsp;&amp; up</label>
       <label class="chip"><input type="checkbox" data-filter="rating" value="3"/> <span class="stars">★★★☆☆</span> &nbsp;&amp; up</label>
@@ -281,6 +282,7 @@
 
   <div class="block">
     <h3>Prep Time (minutes)</h3>
+    <!-- ✅ must have id="filter-prepTime" -->
     <input class="range" type="range" id="filter-prepTime" min="5" max="180" step="5" value="60" />
     <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
   </div>
@@ -288,6 +290,7 @@
   <div class="block">
     <h3>Calories</h3>
     <div class="grid" style="gap:10px">
+      <!-- ✅ must use data-filter="calories" -->
       <label class="chip"><input type="checkbox" data-filter="calories" value="under-200"/> Under 200 calories</label>
       <label class="chip"><input type="checkbox" data-filter="calories" value="200-400"/> 200-400 calories</label>
       <label class="chip"><input type="checkbox" data-filter="calories" value="400-600"/> 400-600 calories</label>
@@ -299,27 +302,28 @@
   <div class="block">
     <h3>Diet Type</h3>
     <div class="grid" style="gap:10px">
+      <!-- ✅ must use data-filter="tags" -->
       <label class="chip"><input type="checkbox" data-filter="tags" value="Vegetarian"/> Vegetarian</label>
-    <label class="chip"><input type="checkbox" data-filter="tags" value="Vegan"/> Vegan</label>
-    <label class="chip"><input type="checkbox" data-filter="tags" value="Gluten-Free"/> Gluten-Free</label>
-    <label class="chip"><input type="checkbox" data-filter="tags" value="Keto"/> Keto</label>
-    <label class="chip"><input type="checkbox" data-filter="tags" value="Paleo"/> Paleo</label>
-    <label class="chip"><input type="checkbox" data-filter="tags" value="Halal"/> Halal</label>
-
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Vegan"/> Vegan</label>
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Gluten-Free"/> Gluten-Free</label>
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Keto"/> Keto</label>
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Paleo"/> Paleo</label>
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Halal"/> Halal</label>
     </div>
   </div>
 
   <div class="block">
     <h3>Ingredients</h3>
+    <!-- ✅ must have id="filter-ingredients" -->
     <input class="range" type="range" id="filter-ingredients" min="3" max="20" step="1" value="10" />
     <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
   </div>
 
   <div class="block">
+    <!-- ✅ must have id="clearFilters" -->
     <button id="clearFilters" class="btn w-100">Clear All Filters</button>
   </div>
 </aside>
-
 
   <!-- Main content -->
   <main>
@@ -506,5 +510,3 @@
   <script src="../scripts.js"></script>
 </body>
 </html>
-
-
