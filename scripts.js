@@ -50,8 +50,21 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!r) return;
       modalTitle.textContent = r.title;
       modalImage.src = r.image;
-      modalIngredients.innerHTML = r.ingredients.map(i => `<li>${i}</li>`).join("");
-      modalInstructions.innerHTML = r.instructions;
+      // Ingredients with checkboxes
+    modalIngredients.innerHTML = r.ingredients
+  .map(i => `
+    <li>
+      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+        <input type="checkbox" style="transform:scale(1.2);" />
+        <span>${i}</span>
+      </label>
+    </li>
+  `).join("");
+
+   // Instructions as numbered list
+   const steps = r.instructions.split("<br>").filter(s => s.trim());
+   modalInstructions.innerHTML = steps.map(s => `<li>${s.trim()}</li>`).join("");
+
   
     modalTags.innerHTML = r.tags.map((t, i) =>
       `<span class="tag tag-${i+1}">${t}</span>`
