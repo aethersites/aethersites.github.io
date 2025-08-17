@@ -108,7 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
     filtered = filtered.filter(r => r.ingredients.length <= ingLimit);
 
     // Render results
-    renderRecipes(filtered);
+ renderRecipes(filtered);
+    document.getElementById('totalRecipes').textContent = filtered.length;
   }
 
   // 🔥 NEW: Attach listeners
