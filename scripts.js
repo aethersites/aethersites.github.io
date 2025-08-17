@@ -93,11 +93,11 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    // Diet
-    const dietChecks = [...document.querySelectorAll('input[data-filter="diet"]:checked')].map(i => i.value);
-    if (dietChecks.length > 0) {
-      filtered = filtered.filter(r => dietChecks.some(d => r.tags.includes(d)));
-    }
+    // Tags (Diet Type)
+  const tagChecks = [...document.querySelectorAll('input[data-filter="tags"]:checked')].map(i => i.value);
+  if (tagChecks.length > 0) {
+    filtered = filtered.filter(r => tagChecks.some(tag => r.tags.includes(tag)));
+  }
 
     // Prep time
     const prepLimit = Number(document.getElementById("filter-prepTime").value);
@@ -119,11 +119,19 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("filter-search").addEventListener("input", applyFilters);
 
   // 🔥 NEW: Clear filters button
+// Clear filters button
   document.getElementById("clearFilters").addEventListener("click", () => {
-    allFilterInputs.forEach(i => (i.checked = false));
-    document.getElementById("filter-prepTime").value = 60;
-    document.getElementById("filter-ingredients").value = 10;
-    document.getElementById("filter-search").value = "";
-    renderRecipes(recipes);
+  // clear checkboxes
+  document.querySelectorAll("#sidebar input[type=checkbox]").forEach(cb => cb.checked = false);
+  
+  // reset ranges to defaults
+  document.getElementById("filter-prepTime").value = 60;
+  document.getElementById("filter-ingredients").value = 10;
+  
+  // clear search
+  document.getElementById("filter-search").value = "";
+  
+  // reapply filters
+  applyFilters();
   });
 });
