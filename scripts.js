@@ -57,4 +57,73 @@ document.addEventListener("DOMContentLoaded", () => {
   modal.addEventListener("click", e => {
     if (e.target === modal) modal.style.display = "none";
   });
+
+  
+  // 🔥 NEW: Filtering logic
+  function applyFilters() {
+    let filtered = [...recipes];
+
+    // Search
+    const searchVal = document.getElementById("filter-search").value.toLowerCase();
+    if (searchVal) {
+      filtered = filtered.filter(r =>
+        r.title.toLowerCase().includes(searchVal) ||
+        r.ingredients.join(" ").toLowerCase().includes(searchVal)
+      );
+    }
+
+    // Rating
+    const ratingChecks = [...document.querySelectorAll('input[data-filter="rating"]:checked')];
+    if (ratingChecks.length > 0) {
+      const minRating = Math.max(...ratingChecks.map(i => Number(i.value)));
+      filtered = filtered.filter(r => r.rating >= minRating);
+    }
+
+    // Calories
+    const calorieChecks = [...document.querySelectorAll('input[data-filter="calories"]:checked')].map(i => i.value);
+    if (calorieChecks.length > 0) {
+      filtered = filtered.filter(r => {
+        return calorieChecks.some(c => {
+          if (c === "under-200") return r.calories < 200;
+          if (c === "200-400") return r.calories >= 200 && r.calories <= 400;
+          if (c === "400-600") return r.calories >= 400 && r.calories <= 600;
+          if (c === "600-800") return r.calories >= 600 && r.calories <= 800;
+          if (c === "800-plus") return r.calories > 800;
+        });
+      });
+    }
+
+    // Diet
+    const dietChecks = [...document.querySelectorAll('input[data-filter="diet"]:checked')].map(i => i.value);
+    if (dietChecks.length > 0) {
+      filtered = filtered.filter(r => dietChecks.some(d => r.tags.includes(d)));
+    }
+
+    // Prep time
+    const prepLimit = Number(document.getElementById("filter-prepTime").value);
+    filtered = filtered.filter(r => r.time <= prepLimit);
+
+    // Ingredients
+    const ingLimit = Number(document.getElementById("filter-ingredients").value);
+    filtered = filtered.filter(r => r.ingredients.length <= ingLimit);
+
+    // Render results
+    renderRecipes(filtered);
+  }
+
+  // 🔥 NEW: Attach listeners
+  const allFilterInputs = document.querySelectorAll("#sidebar input");
+  allFilterInputs.forEach(input => input.addEventListener("change", applyFilters));
+  document.getElementById("filter-prepTime").addEventListener("input", applyFilters);
+  document.getElementById("filter-ingredients").addEventListener("input", applyFilters);
+  document.getElementById("filter-search").addEventListener("input", applyFilters);
+
+  // 🔥 NEW: Clear filters button
+  document.getElementById("clearFilters").addEventListener("click", () => {
+    allFilterInputs.forEach(i => (i.checked = false));
+    document.getElementById("filter-prepTime").value = 60;
+    document.getElementById("filter-ingredients").value = 10;
+    document.getElementById("filter-search").value = "";
+    renderRecipes(recipes);
+  });
 });
