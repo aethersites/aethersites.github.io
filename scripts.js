@@ -7,6 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalImage = document.getElementById("modalImage");
   const modalIngredients = document.getElementById("modalIngredients");
   const modalInstructions = document.getElementById("modalInstructions");
+  const modalTags = document.getElementById("modalTags");
+  const modalFilters = document.getElementById("modalFilters");
 
   // Render all recipe cards
   function renderRecipes(list) {
@@ -50,6 +52,17 @@ document.addEventListener("DOMContentLoaded", () => {
       modalImage.src = r.image;
       modalIngredients.innerHTML = r.ingredients.map(i => `<li>${i}</li>`).join("");
       modalInstructions.innerHTML = r.instructions;
+  
+    modalTags.innerHTML = r.tags.map((t, i) =>
+      `<span class="tag tag-${i+1}">${t}</span>`
+    ).join("");
+
+    modalFilters.innerHTML = `
+      ⏱ ${r.time} min 
+      | 🍽 ${r.servings} servings 
+      | 🔥 ${r.calories} cal 
+      | ⭐ ${r.rating}
+    `;
       modal.style.display = "flex";
     }
   });
