@@ -490,7 +490,7 @@
     });
   </script>
 
-  <!-- ===== Minimal insertion: Recipe Modal (required by scripts.js) ===== <!-- ===== Improved Recipe Modal ===== -->
+  <!-- ===== Improved Recipe Modal ===== -->
 <div id="recipeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); justify-content:center; align-items:center; z-index:9999; overflow-y:auto; padding:40px;">
   <div style="
     background:white; 
@@ -533,24 +533,41 @@
         <!-- Dynamically filled: ⏱ 25 min | 🍽 4 servings | 🔥 420 cal | ⭐ 4.8 -->
       </div>
 
-      <!-- Ingredients + Instructions -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
-        
-        <div>
-          <h3 style="margin:0 0 12px 0; font-size:22px;">Ingredients</h3>
-          <ul id="modalIngredients" style="margin:0; padding-left:20px; color:#555; font-size:16px; line-height:1.6;"></ul>
-        </div>
+<!-- Ingredients + Instructions -->
+<div id="modalBody" style="
+  max-height:400px; 
+  overflow-y:auto; 
+  padding-right:8px;
+">
+  <!-- Ingredients -->
+  <div>
+    <h3 style="margin:0 0 12px 0; font-size:22px;">Ingredients</h3>
+    <ul id="modalIngredients" style="
+      margin:0; 
+      padding:0; 
+      list-style:none; 
+      color:#555; 
+      font-size:16px; 
+      line-height:1.6;
+    "></ul>
+  </div>
 
-        <div>
-          <h3 style="margin:0 0 12px 0; font-size:22px;">Instructions</h3>
-          <div id="modalInstructions" style="color:#555; font-size:16px; line-height:1.7;"></div>
-        </div>
-
+  <!-- Instructions -->
+  <div style="margin-top:28px;">
+    <h3 style="margin:0 0 12px 0; font-size:22px;">Instructions</h3>
+    <ol id="modalInstructions" style="
+      margin:0; 
+      padding-left:22px; 
+      color:#555; 
+      font-size:16px; 
+      line-height:1.7;
+    "></ol>
+  </div>
+   </div>
       </div>
 
     </div>
-  </div>
-</div>
+    </div>
 
 <!-- Add Some Styles -->
 <style>
@@ -588,3 +605,4 @@
   <script src="../scripts.js"></script>
 </body>
 </html>
+
