@@ -7,8 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalImage = document.getElementById("modalImage");
   const modalIngredients = document.getElementById("modalIngredients");
   const modalInstructions = document.getElementById("modalInstructions");
-  document.getElementById('totalRecipes').textContent = recipes.length;
-
 
   // Render all recipe cards
   function renderRecipes(list) {
@@ -39,8 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  renderRecipes(recipes);
+  applyFilters();
 
+  
   // Open modal with recipe details
   recipeGrid.addEventListener("click", e => {
     if (e.target.matches("button[data-id]")) {
