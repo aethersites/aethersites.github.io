@@ -19,7 +19,9 @@ const recipes = [
       3. Drizzle with tahini dressing and serve.
     `,
     tags: ["Vegetarian", "Gluten-Free"],
-    image: "https://media.istockphoto.com/id/1194750269/photo/fresh-quinoa-tabbouleh-salad.jpg?s=612x612&w=0&k=20&c=Jo7y2fl9RKIMBXteG83NZUpl57HpvEd4GiCfj-gh8yM="
+    image: "https://media.istockphoto.com/id/1194750269/photo/fresh-quinoa-tabbouleh-salad.jpg?s=612x612&w=0&k=20&c=Jo7y2fl9RKIMBXteG83NZUpl57HpvEd4GiCfj-gh8yM=",
+    cuisine: "Mediterranean",
+    mealtype: "Lunch"
   },
   {
     id: 2,
@@ -41,7 +43,9 @@ const recipes = [
       3. Garnish with fresh basil and serve.
     `,
     tags: ["Spicy", "Dairy-Free"],
-    image: "https://images.pexels.com/photos/33435594/pexels-photo-33435594.jpeg"
+    image: "https://images.pexels.com/photos/33435594/pexels-photo-33435594.jpeg",
+    cuisine: "Asian",
+    mealtype: "Dinner"
   },
   {
     id: 3,
@@ -64,7 +68,9 @@ const recipes = [
       4. Drizzle with olive oil and bake for 10–12 minutes.
     `,
     tags: ["Vegetarian", "Italian"],
-    image: "https://images.pexels.com/photos/33457994/pexels-photo-33457994.jpeg"
+    image: "https://images.pexels.com/photos/33457994/pexels-photo-33457994.jpeg",
+    cuisine: "European",
+    mealtype: "Dinner"
   },
   {
     id: 4,
@@ -87,7 +93,9 @@ const recipes = [
       4. Drizzle with lemon juice and serve.
     `,
     tags: ["High Protein", "Keto"],
-    image: "https://images.pexels.com/photos/725991/pexels-photo-725991.jpeg"
+    image: "https://images.pexels.com/photos/725991/pexels-photo-725991.jpeg",
+    cuisine: "American",
+    mealtype: "Dinner"
   },
   {
     id: 5,
@@ -110,7 +118,9 @@ const recipes = [
       4. Cover and simmer for 2 hours until tender.
     `,
     tags: ["Traditional", "Halal"],
-    image: "https://images.pexels.com/photos/30459912/pexels-photo-30459912.jpeg"
+    image: "https://images.pexels.com/photos/30459912/pexels-photo-30459912.jpeg",
+    cuisine: "African",
+    mealtype: "Dinner"
   },
   {
     id: 6,
@@ -133,7 +143,9 @@ const recipes = [
       4. Drizzle with tahini sauce and serve.
     `,
     tags: ["Vegan", "Healthy"],
-    image: "https://images.pexels.com/photos/13887558/pexels-photo-13887558.jpeg"
+    image: "https://images.pexels.com/photos/13887558/pexels-photo-13887558.jpeg",
+    cuisine: "Fusion / Global Contemporary",
+    mealtype: "Lunch"
   }
   // 👉 Add more recipes here...
 ];
