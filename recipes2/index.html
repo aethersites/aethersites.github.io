@@ -490,37 +490,101 @@
     });
   </script>
 
-  <!-- ===== Minimal insertion: Recipe Modal (required by scripts.js) ===== --><!-- ===== Improved Recipe Modal ===== -->
-<div id="recipeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:9999;">
+  <!-- ===== Minimal insertion: Recipe Modal (required by scripts.js) ===== <!-- ===== Improved Recipe Modal ===== -->
+<div id="recipeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); justify-content:center; align-items:center; z-index:9999; overflow-y:auto; padding:40px;">
   <div style="
     background:white; 
-    padding:36px 36px 32px 36px; 
     border-radius:20px; 
     max-width:900px; 
-    width:98%; 
+    width:100%; 
     box-shadow:0 16px 48px rgba(0,0,0,.32);
     font-size:18px;
-    ">
-    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px;">
-      <h2 id="modalTitle" style="margin:0; font-size:32px; font-weight:800;"></h2>
-      <button id="closeModal" class="btn" style="font-size:18px; padding:10px 20px;">Close</button>
+    overflow:hidden;
+    animation: fadeInScale .35s ease;
+  ">
+    
+    <!-- Header Image -->
+    <div style="position:relative; height:300px; overflow:hidden;">
+      <img id="modalImage" src="" alt="" style="width:100%; height:100%; object-fit:cover;" />
+      <button id="closeModal" style="
+        position:absolute; 
+        top:16px; right:16px; 
+        background:rgba(0,0,0,0.65); 
+        color:white; 
+        border:none; 
+        padding:8px 14px; 
+        font-size:16px; 
+        border-radius:12px; 
+        cursor:pointer;
+      ">✕</button>
     </div>
-    <div style="display:flex; gap:32px; margin-top:12px; flex-wrap:wrap;">
-      <img id="modalImage" src="" alt="" style="width:340px; height:240px; object-fit:cover; border-radius:16px; flex-shrink:0; box-shadow:0 4px 24px rgba(0,0,0,0.09);" />
-      <div style="flex:1; min-width:260px;">
-        <h3 style="margin:0 0 12px 0; font-size:24px;">Ingredients</h3>
-        <ul id="modalIngredients" style="margin:0 0 18px 22px; padding:0; color:var(--muted); font-size:17px;"></ul>
-        <h3 style="margin:0 0 12px 0; font-size:24px;">Instructions</h3>
-        <div id="modalInstructions" style="color:var(--muted); font-size:17px; line-height:1.7;"></div>
+
+    <!-- Content -->
+    <div style="padding:28px 32px 36px 32px;">
+      
+      <!-- Title -->
+      <h2 id="modalTitle" style="margin:0 0 12px 0; font-size:32px; font-weight:800; line-height:1.2;"></h2>
+      
+      <!-- Tags -->
+      <div id="modalTags" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
+
+      <!-- Info Filters -->
+      <div id="modalFilters" style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:32px; font-size:16px; color:#444;">
+        <!-- Dynamically filled: ⏱ 25 min | 🍽 4 servings | 🔥 420 cal | ⭐ 4.8 -->
       </div>
+
+      <!-- Ingredients + Instructions -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:28px;">
+        
+        <div>
+          <h3 style="margin:0 0 12px 0; font-size:22px;">Ingredients</h3>
+          <ul id="modalIngredients" style="margin:0; padding-left:20px; color:#555; font-size:16px; line-height:1.6;"></ul>
+        </div>
+
+        <div>
+          <h3 style="margin:0 0 12px 0; font-size:22px;">Instructions</h3>
+          <div id="modalInstructions" style="color:#555; font-size:16px; line-height:1.7;"></div>
+        </div>
+
+      </div>
+
     </div>
-    <div id="modalFilters" style="margin-top:24px; display:flex; gap:8px; flex-wrap:wrap;"></div>
   </div>
 </div>
+
+<!-- Add Some Styles -->
+<style>
+  @keyframes fadeInScale {
+    from { opacity:0; transform:scale(0.96); }
+    to { opacity:1; transform:scale(1); }
+  }
+
+  .tag {
+    padding:6px 14px;
+    border-radius:30px;
+    font-size:14px;
+    font-weight:600;
+    color:white;
+    cursor:pointer;
+    transition:all 0.25s ease;
+  }
+
+  .tag:hover {
+    opacity:0.85;
+    transform:translateY(-2px);
+  }
+
+  /* Nice category colors */
+  .tag:nth-child(1n) { background:#FF6B6B; } /* red */
+  .tag:nth-child(2n) { background:#4ECDC4; } /* teal */
+  .tag:nth-child(3n) { background:#FFD93D; color:#222; } /* yellow with dark text */
+  .tag:nth-child(4n) { background:#1A73E8; } /* blue */
+  .tag:nth-child(5n) { background:#9B59B6; } /* purple */
+</style>
+
   <!-- ===== end modal ===== -->
 
    <script src="../recipes.js"></script>
   <script src="../scripts.js"></script>
 </body>
 </html>
-
