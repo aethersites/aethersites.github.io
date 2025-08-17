@@ -61,9 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
     </li>
   `).join("");
 
-   // Instructions as numbered list
+   // Instructions as plain paragraphs (no numbers)
    const steps = r.instructions.split("<br>").filter(s => s.trim());
-   modalInstructions.innerHTML = steps.map(s => `<li>${s.trim()}</li>`).join("");
+    modalInstructions.innerHTML = steps.map(s => `<p>${s.trim()}</p>`).join("");
 
   
     modalTags.innerHTML = r.tags.map((t, i) =>
