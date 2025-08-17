@@ -262,70 +262,71 @@
 <!-- Layout wrapper -->
 <div class="layout">
   <!-- Sidebar (filters) -->
-  <aside id="sidebar" class="sidebar">
-    <div class="block">
-      <div class="flex items-center justify-between">
-        <h2 class="title-lg">Filters</h2>
-        <button class="btn ghost small" data-toggle="sidebar">✖️</button>
-      </div>
-      <div class="mt-2">
-        <div class="searchbar" style="position:relative">
-          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
-          <input class="input" placeholder="Search recipes..." style="padding-left:36px" />
-        </div>
-      </div>
+<aside id="sidebar" class="sidebar">
+  <div class="block">
+    <div class="flex items-center justify-between">
+      <h2 class="title-lg">Filters</h2>
+      <button class="btn ghost small" data-toggle="sidebar">✖️</button>
     </div>
-
-    <div class="block">
-      <h3>Rating</h3>
-      <div class="grid" style="gap:10px">
-        <label class="chip"><input type="checkbox"/> <span class="stars">★★★★★</span> <span class="muted">&nbsp;&amp; up</span></label>
-        <label class="chip"><input type="checkbox"/> <span class="stars">★★★★☆</span> <span class="muted">&nbsp;&amp; up</span></label>
-        <label class="chip"><input type="checkbox"/> <span class="stars">★★★☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
-        <label class="chip"><input type="checkbox"/> <span class="stars">★★☆☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
-        <label class="chip"><input type="checkbox"/> <span class="stars">★☆☆☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
+    <div class="mt-2">
+      <div class="searchbar" style="position:relative">
+        <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
+        <input class="input" id="filter-search" placeholder="Search recipes..." style="padding-left:36px" />
       </div>
     </div>
+  </div>
 
-    <div class="block">
-      <h3>Prep Time (minutes)</h3>
-      <input class="range" type="range" min="5" max="180" step="5" value="60" />
-      <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
+  <div class="block">
+    <h3>Rating</h3>
+    <div class="grid" style="gap:10px">
+      <label class="chip"><input type="checkbox" data-filter="rating" value="5"/> <span class="stars">★★★★★</span> &nbsp;&amp; up</label>
+      <label class="chip"><input type="checkbox" data-filter="rating" value="4"/> <span class="stars">★★★★☆</span> &nbsp;&amp; up</label>
+      <label class="chip"><input type="checkbox" data-filter="rating" value="3"/> <span class="stars">★★★☆☆</span> &nbsp;&amp; up</label>
+      <label class="chip"><input type="checkbox" data-filter="rating" value="2"/> <span class="stars">★★☆☆☆</span> &nbsp;&amp; up</label>
+      <label class="chip"><input type="checkbox" data-filter="rating" value="1"/> <span class="stars">★☆☆☆☆</span> &nbsp;&amp; up</label>
     </div>
+  </div>
 
-    <div class="block">
-      <h3>Calories</h3>
-      <div class="grid" style="gap:10px">
-        <label class="chip"><input type="checkbox"/> Under 200 calories</label>
-        <label class="chip"><input type="checkbox"/> 200-400 calories</label>
-        <label class="chip"><input type="checkbox"/> 400-600 calories</label>
-        <label class="chip"><input type="checkbox"/> 600-800 calories</label>
-        <label class="chip"><input type="checkbox"/> 800+ calories</label>
-      </div>
-    </div>
+  <div class="block">
+    <h3>Prep Time (minutes)</h3>
+    <input class="range" type="range" id="filter-prepTime" min="5" max="180" step="5" value="60" />
+    <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
+  </div>
 
-    <div class="block">
-      <h3>Diet Type</h3>
-      <div class="grid" style="gap:10px">
-        <label class="chip"><input type="checkbox"/> Vegetarian</label>
-        <label class="chip"><input type="checkbox"/> Vegan</label>
-        <label class="chip"><input type="checkbox"/> Gluten-Free</label>
-        <label class="chip"><input type="checkbox"/> Keto</label>
-        <label class="chip"><input type="checkbox"/> Paleo</label>
-        <label class="chip"><input type="checkbox"/> Halal</label>
-      </div>
+  <div class="block">
+    <h3>Calories</h3>
+    <div class="grid" style="gap:10px">
+      <label class="chip"><input type="checkbox" data-filter="calories" value="under-200"/> Under 200 calories</label>
+      <label class="chip"><input type="checkbox" data-filter="calories" value="200-400"/> 200-400 calories</label>
+      <label class="chip"><input type="checkbox" data-filter="calories" value="400-600"/> 400-600 calories</label>
+      <label class="chip"><input type="checkbox" data-filter="calories" value="600-800"/> 600-800 calories</label>
+      <label class="chip"><input type="checkbox" data-filter="calories" value="800-plus"/> 800+ calories</label>
     </div>
+  </div>
 
-    <div class="block">
-      <h3>Ingredients</h3>
-      <input class="range" type="range" min="3" max="20" step="1" value="10" />
-      <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
+  <div class="block">
+    <h3>Diet Type</h3>
+    <div class="grid" style="gap:10px">
+      <label class="chip"><input type="checkbox" data-filter="diet" value="Vegetarian"/> Vegetarian</label>
+      <label class="chip"><input type="checkbox" data-filter="diet" value="Vegan"/> Vegan</label>
+      <label class="chip"><input type="checkbox" data-filter="diet" value="Gluten-Free"/> Gluten-Free</label>
+      <label class="chip"><input type="checkbox" data-filter="diet" value="Keto"/> Keto</label>
+      <label class="chip"><input type="checkbox" data-filter="diet" value="Paleo"/> Paleo</label>
+      <label class="chip"><input type="checkbox" data-filter="diet" value="Halal"/> Halal</label>
     </div>
+  </div>
 
-    <div class="block">
-      <button class="btn w-100">Clear All Filters</button>
-    </div>
-  </aside>
+  <div class="block">
+    <h3>Ingredients</h3>
+    <input class="range" type="range" id="filter-ingredients" min="3" max="20" step="1" value="10" />
+    <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
+  </div>
+
+  <div class="block">
+    <button id="clearFilters" class="btn w-100">Clear All Filters</button>
+  </div>
+</aside>
+
 
   <!-- Main content -->
   <main>
@@ -368,6 +369,7 @@
           <div class="text-center mt-4">
             <button class="btn">Load More Recipes</button>
           </div>
+          <br>
         </div>
       </section>
 
