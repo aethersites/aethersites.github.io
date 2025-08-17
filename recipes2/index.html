@@ -137,6 +137,11 @@
   justify-content: center;
   position: relative; /* 👈 This keeps absolutely-positioned elements inside */
 }
+
+  .grid {
+  padding-left: 15px;
+  padding-right: 15px;
+  }
     .card .card-body{padding:16px 16px 20px}
     .card:hover{box-shadow:var(--shadow); transform:translateY(-2px); transition:transform .2s ease, box-shadow .2s ease}
 
@@ -333,7 +338,7 @@
           <button class="btn" data-open="sidebar" aria-label="Open filters" style="display:none">⚙️ Filters</button>
           <div>
             <h1 class="title-lg">All Recipes</h1>
-       <div class="muted small" id="recipeCounter"></div>
+            <div class="muted small">Showing 2,450 recipes</div>
           </div>
         </div>
       </div>
@@ -512,3 +517,4 @@
   <script src="../scripts.js"></script>
 </body>
 </html>
+
