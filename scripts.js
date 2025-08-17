@@ -135,5 +135,3 @@ document.addEventListener("DOMContentLoaded", () => {
   applyFilters();
   });
 });
-
-
