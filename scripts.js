@@ -140,7 +140,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Render results (with paging)
     renderRecipes(filtered, resetPaging);
-
+    // Update the counter for filtered and total recipes
+  const recipeCounter = document.getElementById("recipeCounter");
+  const totalCount = recipes.length;
+  const filteredCount = filtered.length;
+  if (recipeCounter) {
+    recipeCounter.textContent = `Showing ${filteredCount} of ${totalCount} recipe${totalCount !== 1 ? "s" : ""}`;
+   } 
     // Save filtered list for paging
     filterState.filteredList = filtered;
   }
