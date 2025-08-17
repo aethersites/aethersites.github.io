@@ -139,18 +139,16 @@ document.addEventListener("DOMContentLoaded", () => {
     filtered = filtered.filter(r => r.ingredients.length <= ingLimit);
 
     // Render results (with paging)
-    renderRecipes(filtered, resetPaging);
-    // Update the counter for filtered and total recipes
-  const recipeCounter = document.getElementById("recipeCounter");
-  const totalCount = recipes.length;
-  const filteredCount = filtered.length;
-  if (recipeCounter) {
-    recipeCounter.textContent = `Showing ${filteredCount} of ${totalCount} recipe${totalCount !== 1 ? "s" : ""}`;
-   } 
-    // Save filtered list for paging
-    filterState.filteredList = filtered;
-  }
-
+  renderRecipes(filtered, resetPaging);
+// Update the counter for filtered and total recipes (using paging)
+   const recipeCounter = document.getElementById("recipeCounter");
+   const totalCount = recipes.length;
+   const visibleCount = Math.min(filtered.length - filterState.offset, filterState.limit, filtered.length);
+    if (recipeCounter) {
+    recipeCounter.textContent =
+      `Showing ${filtered.length === 0 ? 0 : visibleCount} of ${totalCount} recipe${totalCount !== 1 ? "s" : ""}`;
+   }
+    
   // Attach listeners for all filters
   const allFilterInputs = document.querySelectorAll("#sidebar input");
   allFilterInputs.forEach(input => input.addEventListener("change", () => applyFilters()));
