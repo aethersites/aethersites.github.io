@@ -28,7 +28,7 @@ signupForm.addEventListener('submit', async (e) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         document.getElementById('signupSuccessMessage').classList.add('show');
-        setTimeout(() => window.location.href = 'dashboard.html', 2000);
+        setTimeout(() => window.location.href = '/dashboard/', 2000);
     } catch (error) {
         if (error.code.includes('email')) {
             document.getElementById('signupEmailError').textContent = error.message;
