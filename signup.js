@@ -1,15 +1,15 @@
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-// Your Firebase config (copy from your main project)
 const firebaseConfig = {
   apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
   authDomain: "goodplates-7ae36.firebaseapp.com",
   projectId: "goodplates-7ae36",
-    storageBucket: "goodplates-7ae36.firebasestorage.app",
-    messagingSenderId: "541149626283",
-    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
+  storageBucket: "goodplates-7ae36.firebasestorage.app",
+  messagingSenderId: "541149626283",
+  appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+  measurementId: "G-HKMSHM726J"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -24,9 +24,11 @@ signupForm.addEventListener('submit', async (e) => {
     // Clear previous errors
     document.getElementById('signupEmailError').textContent = '';
     document.getElementById('signupPasswordError').textContent = '';
+    document.getElementById('signupEmailError').classList.remove('show');
+    document.getElementById('signupPasswordError').classList.remove('show');
 
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await createUserWithEmailAndPassword(auth, email, password);
         document.getElementById('signupSuccessMessage').classList.add('show');
         setTimeout(() => window.location.href = '/dashboard/', 2000);
     } catch (error) {
