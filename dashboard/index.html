@@ -1,1 +1,464 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Materio - Groceries & Nutrition Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --muted:#98a0b3;
+      --bg:#f6f7fb;
+      --accent:#16a34a; /* green-600 */
+      --accent-soft: rgba(22,163,74,0.08);
+      --card: rgba(255,255,255,0.98);
+    }
+    body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; background:var(--bg);}
+    .sidebar { width: 300px; }
+    .card { background:var(--card); border-radius:12px; box-shadow:0 10px 30px rgba(21,24,39,0.06); }
+    .pro-badge{ background: linear-gradient(90deg,#ecfdf3,#e6ffef); color:#065f46; font-weight:600; padding:4px 8px; border-radius:999px; font-size:12px; }
+    .active-pill{ background: linear-gradient(90deg,#16a34a,#10b981); color:white; padding:10px 18px; border-radius:999px; }
+    .small-dot{ width:6px;height:6px;border-radius:99px;background:#e6e9f2; }
+    .dot-active{ background:linear-gradient(90deg,#16a34a,#34d399); }
+    /* small three-dot menu circle */
+    .dots { width:8px;height:8px;border-radius:999px;background:#d6d9e6; }
+    .shadow-soft{ box-shadow: 0 6px 20px rgba(16,24,40,0.06); }
+    /* floating upgrade button */
+    .upgrade-btn{ position:fixed; right:28px; bottom:28px; background:linear-gradient(90deg,#16a34a,#10b981); color:white; padding:12px 20px; border-radius:999px; box-shadow:0 8px 30px rgba(22,163,74,0.18); }
+    .chart-ghost { stroke:#e6ffef; stroke-width:3; stroke-linecap:round; }
+    @media (max-width: 1100px) { .sidebar{ display:none; } }
+  </style>
+</head>
+<body class="antialiased">
+  <div class="flex min-h-screen">
+
+    <!-- Sidebar (unchanged visually) -->
+    <aside class="sidebar bg-white/50 p-6 border-r border-white/60">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-8 h-8 rounded-md bg-gradient-to-r from-green-500 to-green-400 flex items-center justify-center text-white font-bold">M</div>
+        <div class="font-semibold text-slate-700">MATERIO</div>
+      </div>
+
+      <div class="mt-6">
+        <div class="mb-3 px-2 py-1 rounded-lg active-pill inline-flex items-center gap-3"> 
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 10h18" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+          <span class="text-sm">Dashboards</span>
+          <span class="ml-2 bg-white text-sm text-green-600 rounded-full px-2 py-0.5 font-semibold">5</span>
+        </div>
+
+        <nav class="mt-4 space-y-2">
+          <a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/0 hover:bg-white/40">
+            <div class="w-3 h-3 rounded-full bg-transparent border border-slate-200"></div>
+            <span class="font-semibold text-slate-600">Overview</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+
+          <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 hover:text-slate-700">
+            <div class="w-3 h-3 rounded-full border border-slate-200"></div>
+            <span>Ingredients</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+
+          <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 hover:text-slate-700">
+            <div class="w-3 h-3 rounded-full border border-slate-200"></div>
+            <span>Recipes</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+
+          <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 hover:text-slate-700">
+            <div class="w-3 h-3 rounded-full border border-slate-200"></div>
+            <span>Groceries</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+
+          <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 hover:text-slate-700">
+            <div class="w-3 h-3 rounded-full border border-slate-200"></div>
+            <span>Meal Plans</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+
+          <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-500 hover:text-slate-700 mt-4">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="#c7cbe0" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Front Pages</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="mt-10 border-t pt-6 text-slate-500">
+        <div class="text-xs Uppercase mb-3 text-slate-400">Apps & Pages</div>
+        <ul class="space-y-2">
+          <li class="flex items-center gap-3"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 8h18" stroke="#c7cbe0" stroke-width="1.2" stroke-linecap="round"/></svg><span>Shopping List</span><span class="ml-auto pro-badge">Pro</span></li>
+          <li class="flex items-center gap-3"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 8h18" stroke="#c7cbe0" stroke-width="1.2" stroke-linecap="round"/></svg><span>Planner</span><span class="ml-auto pro-badge">Pro</span></li>
+          <li class="flex items-center gap-3"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 8h18" stroke="#c7cbe0" stroke-width="1.2" stroke-linecap="round"/></svg><span>Nutrition</span><span class="ml-auto pro-badge">Pro</span></li>
+          <li class="flex items-center gap-3 text-slate-500 mt-3"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M3 8h18" stroke="#c7cbe0" stroke-width="1.2" stroke-linecap="round"/></svg><span>Account Settings</span></li>
+        </ul>
+      </div>
+
+      <div class="mt-8">
+       <button class="w-full py-2 rounded-md bg-gradient-to-r from-[#16a34a] to-[#10b981] text-white font-semibold shadow-md">Upgrade to Pro</button>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="flex-1 p-8">
+      <!-- top bar -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-4">
+          <h2 class="text-lg font-semibold text-slate-600">Groceries</h2>
+          <div class="text-slate-400">/ Nutrition</div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="relative">
+            <input id="searchInput" class="w-96 pl-4 pr-10 py-2 rounded-full bg-white border border-slate-100 shadow-sm" placeholder="Search ingredients, recipes...">
+            <div class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">⌘K</div>
+          </div>
+          <div class="text-slate-500">🏠</div>
+          <div class="text-slate-500">🔔</div>
+          <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center"> <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23ecfdf2'/%3E%3C/svg%3E" alt="avatar"/></div>
+        </div>
+      </div>
+
+      <!-- cards grid -->
+      <div class="grid grid-cols-12 gap-6">
+        <!-- Calorie Summary card (keeps exact style) -->
+        <div class="col-span-4 card p-6">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-slate-600 font-semibold">Calorie Summary</div>
+              <div class="text-sm text-slate-400">Total kcal per 100g (sample)</div>
+              <div id="bigKcal" class="mt-4 text-3xl font-bold text-slate-800">-- kcal</div>
+              <div id="pctTarget" class="text-sm text-slate-500 mt-1">-- of daily target</div>
+              <button id="viewRecipes" class="mt-4 px-4 py-2 rounded-md bg-gradient-to-r from-blue-600 to-indigo-500 text-white text-sm font-semibold">View Recipes</button>
+            </div>
+            <div class="ml-4 flex items-center">
+              <!-- trophy svg kept as decorative -->
+              <svg width="92" height="92" viewBox="0 0 92 92"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset="1" stop-color="#ffb86b"/></linearGradient></defs><g fill="none" fill-rule="evenodd"><rect width="92" height="92" rx="12" fill="#fff"/><g transform="translate(10,10)"><path d="M35 8c-1 0-2 .9-2 2v9h-6c-3 0-6 3-6 6v7c0 3 3 6 6 6h4v6h22v-6h4c3 0 6-3 6-6v-7c0-3-3-6-6-6h-6V10c0-1.1-.9-2-2-2H35z" fill="url(#g)"/></g></g></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ingredients Overview (kept structure, changed content) -->
+        <div class="col-span-8 card p-6">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="font-semibold text-slate-700">Ingredients Overview</div>
+              <div class="text-sm text-slate-400">Calories, categories and quick stats</div>
+            </div>
+            <div class="dots"></div>
+          </div>
+
+          <div class="mt-6 grid grid-cols-4 gap-4">
+            <div class="p-3 rounded-lg bg-green-50 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-md bg-white shadow flex items-center justify-center">🥇</div>
+              <div>
+                <div class="text-sm text-slate-400">Top Ingredient</div>
+                <div id="topIngredient" class="font-semibold">—</div>
+              </div>
+            </div>
+            <div class="p-3 rounded-lg bg-purple-50 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-md bg-white shadow flex items-center justify-center">📦</div>
+              <div>
+                <div class="text-sm text-slate-400">Distinct Items</div>
+                <div id="distinctItems" class="font-semibold">—</div>
+              </div>
+            </div>
+            <div class="p-3 rounded-lg bg-yellow-50 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-md bg-white shadow flex items-center justify-center">⚖️</div>
+              <div>
+                <div class="text-sm text-slate-400">Avg kcal / 100g</div>
+                <div id="avgKcal" class="font-semibold">—</div>
+              </div>
+            </div>
+            <div class="p-3 rounded-lg bg-blue-50 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-md bg-white shadow flex items-center justify-center">💸</div>
+              <div>
+                <div class="text-sm text-slate-400">Monthly Budget</div>
+                <div id="budgetVal" class="font-semibold">$420</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calories Line (replace previous weekly SVG but keep card look) -->
+        <div class="col-span-5 card p-6">
+          <div class="flex items-start justify-between">
+            <div class="font-semibold text-slate-700">Calories Line (ingredients)</div>
+            <div class="dots"></div>
+          </div>
+
+          <div class="mt-6">
+     <div style="height:300px;">
+      <canvas id="lineChart" style="width:100%;height:100%;display:block;"></canvas>
+     </div>
+
+
+            <div class="mt-4 flex items-center justify-between">
+              <div id="lineSummary" class="text-2xl font-bold">-- kcal</div>
+              <div class="text-sm text-slate-400">Total kcal (sum of loaded items / 100g)</div>
+            </div>
+            <button id="detailBtn" class="mt-4 w-full py-2 rounded-md bg-gradient-to-r from-orange-600 to-yellow-500 text-white font-semibold">View Details</button>
+          </div>
+        </div>
+
+        <!-- Grocery Spend (replaces Total Earning) -->
+        <div class="col-span-4 card p-6">
+          <div class="flex items-start justify-between">
+            <div class="font-semibold text-slate-700">Grocery Spend</div>
+            <div class="dots"></div>
+          </div>
+
+          <div class="mt-4">
+            <div class="text-3xl font-bold" id="spentVal">$300</div>
+            <div class="text-sm text-slate-400 mt-2">Estimated spend this month</div>
+
+            <div class="mt-6 space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-md bg-gradient-to-r from-green-50 to-green-100 flex items-center justify-center">F</div>
+                  <div>
+                    <div class="font-medium">Fruits</div>
+                    <div class="text-sm text-slate-400">Apples, Berries</div>
+                  </div>
+                </div>
+                <div id="spendFruits" class="text-sm font-semibold">$120</div>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-md bg-gradient-to-r from-yellow-50 to-red-50 flex items-center justify-center">V</div>
+                  <div>
+                    <div class="font-medium">Veg</div>
+                    <div class="text-sm text-slate-400">Broccoli, Potato</div>
+                  </div>
+                </div>
+                <div id="spendVeg" class="text-sm font-semibold">$90</div>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-md bg-gradient-to-r from-gray-50 to-slate-50 flex items-center justify-center">P</div>
+                  <div>
+                    <div class="font-medium">Protein</div>
+                    <div class="text-sm text-slate-400">Chicken, Fish</div>
+                  </div>
+                </div>
+                <div id="spendProt" class="text-sm font-semibold">$90</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Small stat cards (right column) — calories focused -->
+        <div class="col-span-3 card p-4">
+          <div class="text-slate-600 font-semibold" id="totalMonthCalories">-- kcal</div>
+          <div class="text-sm text-slate-400">Total calories (month estimate)</div>
+          <div class="mt-4 h-16 flex items-center justify-center">
+            <!-- mini sparkline (keeps green stroke) -->
+            <svg viewBox="0 0 120 40" class="w-full h-full">
+              <polyline points="0,30 20,24 40,28 60,20 80,24 100,18 120,16" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="col-span-2 card p-4">
+          <div class="flex items-center justify-between">
+            <div class="text-slate-600 font-semibold">Avg / day</div>
+            <div class="dots"></div>
+          </div>
+          <div id="avgPerDay" class="mt-4 text-2xl font-bold">-- kcal</div>
+          <div class="text-sm text-green-500 mt-1">based on loaded ingredients</div>
+        </div>
+
+        <div class="col-span-2 card p-4">
+          <div class="text-slate-600 font-semibold">Nutrition Score</div>
+          <div id="nutriScore" class="text-2xl font-bold mt-2">--%</div>
+          <div class="text-sm text-slate-400 mt-2">Protein vs total kcal</div>
+        </div>
+
+        <div class="col-span-2 card p-4">
+          <div class="text-slate-600 font-semibold">Items Loaded</div>
+          <div id="itemsLoaded" class="text-2xl font-bold mt-2">--</div>
+          <div class="mt-3 text-sm text-slate-400">Distinct ingredients</div>
+        </div>
+
+        <!-- lower big card: Calories by Category (pie) - replaces Sales by Countries but keeps size) -->
+        <div class="col-span-6 card p-6">
+          <div class="font-semibold text-slate-700">Calories by Category</div>
+          <div class="mt-4 text-sm text-slate-400">Distribution of calories (per 100g) across categories</div>
+          <div class="mt-6 h-48 rounded-md flex items-center justify-center">
+            <canvas id="pieChart" class="w-full h-full" ></canvas>
+          </div>
+        </div>
+
+        <!-- Budget widgets (keeps layout, rename) -->
+        <div class="col-span-3 card p-6">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold text-slate-700">Monthly Budget</div>
+            <a class="text-sm text-green-600">Manage</a>
+          </div>
+          <div class="mt-4 text-2xl font-bold" id="budgetMain">$420</div>
+          <div class="mt-6 h-28 bg-slate-50 rounded-md flex items-center justify-center text-slate-300">[spend breakdown]</div>
+        </div>
+
+        <div class="col-span-3 card p-6">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold text-slate-700">Shopping List</div>
+            <a class="text-sm text-green-600">View All</a>
+          </div>
+          <div class="mt-4 text-2xl font-bold" id="shoppingCount">12</div>
+          <div class="mt-6 h-28 bg-slate-50 rounded-md flex items-center justify-center text-slate-300">[quick list]</div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <button class="upgrade-btn">Save Snapshot</button>
+
+  <!-- Script: fetch ingredients.json, parse calories and render charts (minimal UI changes) -->
+  <script>
+    const tryPaths = ['./ingredients.json', '../ingredients.json', '/ingredients.json'];
+    const fallback = [
+      { "FoodCategory":"CannedFruit", "FoodItem":"Applesauce", "per100grams":"100g", "Cals_per100grams":"62 cal", "KJ_per100grams":"260 kJ" },
+      { "FoodCategory":"CannedFruit", "FoodItem":"Canned Apricots", "per100grams":"100g", "Cals_per100grams":"48 cal", "KJ_per100grams":"202 kJ" },
+      { "FoodCategory":"CannedFruit", "FoodItem":"Canned Blackberries", "per100grams":"100g", "Cals_per100grams":"92 cal", "KJ_per100grams":"386 kJ" },
+      { "FoodCategory":"CannedFruit", "FoodItem":"Canned Blueberries", "per100grams":"100g", "Cals_per100grams":"88 cal", "KJ_per100grams":"370 kJ" },
+      { "FoodCategory":"Vegetable", "FoodItem":"Broccoli", "per100grams":"100g", "Cals_per100grams":"34 cal", "KJ_per100grams":"142 kJ" },
+      { "FoodCategory":"Protein", "FoodItem":"Chicken Breast", "per100grams":"100g", "Cals_per100grams":"165 cal", "KJ_per100grams":"690 kJ" },
+      { "FoodCategory":"Grain", "FoodItem":"Brown Rice", "per100grams":"100g", "Cals_per100grams":"123 cal", "KJ_per100grams":"515 kJ" },
+      { "FoodCategory":"Carb", "FoodItem":"Potato", "per100grams":"100g", "Cals_per100grams":"77 cal", "KJ_per100grams":"322 kJ" }
+    ];
+
+    const categoryMap = {
+      'CannedFruit': 'Fruit',
+      'Fruit': 'Fruit',
+      'Vegetable': 'Vegetables',
+      'Protein': 'Protein',
+      'Grain': 'Grain',
+      'Carb': 'Carbs'
+    };
+
+    function parseCals(str){
+      if(!str) return 0;
+      const m = (''+str).match(/([0-9]+\.?[0-9]*)/);
+      return m ? parseFloat(m[1]) : 0;
+    }
+
+    async function loadJSON(){
+      for(const p of tryPaths){
+        try{
+          const r = await fetch(p, {cache:'no-store'});
+          if(!r.ok) throw new Error('not ok '+p);
+          const j = await r.json();
+          if(Array.isArray(j) && j.length>0) return j;
+        }catch(e){
+          // try next
+        }
+      }
+      return fallback;
+    }
+
+    function aggregateByCategory(items){
+      const agg = {};
+      items.forEach(it=>{
+        const raw = it.FoodCategory || it.Category || 'Other';
+        const cat = categoryMap[raw] || raw || 'Other';
+        const c = parseCals(it.Cals_per100grams || it.calories || it.kcal || 0);
+        agg[cat] = (agg[cat] || 0) + c;
+      });
+      return agg;
+    }
+
+    function safeText(id, v){ const el = document.getElementById(id); if(el) el.textContent = v; }
+
+    window.addEventListener('load', async ()=>{
+      const items = await loadJSON();
+      // filter out empty objects
+      const cleaned = items.filter(it => it && (it.FoodItem || it.name || it.FoodCategory));
+      const names = cleaned.map(i => i.FoodItem || i.name || 'item');
+      const calsArray = cleaned.map(i => parseCals(i.Cals_per100grams));
+
+      // line chart: calories per ingredient
+      const lineCtx = document.getElementById('lineChart').getContext('2d');
+      new Chart(lineCtx, {
+        type: 'line',
+        data: {
+          labels: names,
+          datasets: [{
+            label: 'kcal / 100g',
+            data: calsArray,
+            borderColor: '#16a34a',
+            backgroundColor: 'rgba(16,163,74,0.08)',
+            tension: 0.25,
+            pointBackgroundColor: '#16a34a',
+            borderWidth: 2,
+            fill: true
+          }]
+        },
+      options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } },
+       plugins: { legend: { display: false } }
+         }
+      });
+
+      // pie chart: calories by category
+      const agg = aggregateByCategory(cleaned);
+      const pieLabels = Object.keys(agg);
+      const pieData = pieLabels.map(l => agg[l]);
+
+      const pieCtx = document.getElementById('pieChart').getContext('2d');
+      new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+          labels: pieLabels,
+          datasets: [{ data: pieData, backgroundColor: ['#16a34a','#34d399','#facc15','#60a5fa','#f97316','#a78bfa'] }]
+        },
+        options: { plugins:{ legend:{ position:'bottom' } }, maintainAspectRatio:false }
+      });
+
+      // UI counters and summaries
+      const totalKcal = calsArray.reduce((s,x)=>s+x,0);
+      const avg = Math.round((calsArray.length ? totalKcal / calsArray.length : 0));
+      const monthlyEstimate = Math.round(avg * 30); // mock assumption
+      const topIngredient = cleaned.reduce((a,b)=> parseCals(b.Cals_per100grams) > parseCals(a.Cals_per100grams) ? b : a, cleaned[0] || {FoodItem:'—'});
+      const proteinShare = agg['Protein'] || 0;
+      const nutriScore = cleaned.length ? Math.round((proteinShare / (totalKcal || 1)) * 100) : 0;
+
+      safeText('bigKcal', totalKcal ? (totalKcal + ' kcal') : '-- kcal');
+      safeText('pctTarget', avg ? Math.round((avg / 2000) * 100) + '% of 2000kcal' : '-- of daily target');
+      safeText('topIngredient', (topIngredient && (topIngredient.FoodItem||topIngredient.name)) || '—');
+      safeText('distinctItems', cleaned.length || '—');
+      safeText('avgKcal', avg ? (avg + ' kcal') : '-- kcal');
+      safeText('budgetVal', '$420');
+      safeText('lineSummary', totalKcal ? (totalKcal + ' kcal') : '-- kcal');
+      safeText('totalMonthCalories', monthlyEstimate ? (monthlyEstimate + ' kcal') : '-- kcal');
+      safeText('avgPerDay', avg ? (avg + ' kcal') : '-- kcal');
+      safeText('nutriScore', (isFinite(nutriScore) ? (Math.max(0, Math.min(100,nutriScore)) + '%') : '--%'));
+      safeText('itemsLoaded', cleaned.length || 0);
+      // fill spends (mock)
+      safeText('spentVal', '$300');
+      safeText('spendFruits', '$120');
+      safeText('spendVeg', '$90');
+      safeText('spendProt', '$90');
+      safeText('budgetMain', '$420');
+      safeText('shoppingCount', '12');
+
+      // preserve original click behavior where possible
+      document.getElementById('viewRecipes')?.addEventListener('click', ()=> alert('Open recipes (mock)'));
+      document.getElementById('detailBtn')?.addEventListener('click', ()=> alert('Open details (mock)'));
+    });
+  </script>
+</body>
+</html>
+
+
+
+
