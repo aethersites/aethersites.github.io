@@ -16,7 +16,6 @@ class SoftMinimalismLoginForm {
     init() {
         this.bindEvents();
         this.setupPasswordToggle();
-        this.setupSocialButtons();
         this.setupGentleEffects();
     }
     
@@ -43,15 +42,7 @@ class SoftMinimalismLoginForm {
             this.triggerGentleRipple(this.passwordToggle);
         });
     }
-    
-    setupSocialButtons() {
-        this.socialButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                const provider = button.querySelector('span').textContent.trim();
-                this.handleSocialLogin(provider, button);
-            });
-        });
-    }
+
     
     setupGentleEffects() {
         // Add soft hover effects on inputs
@@ -192,48 +183,18 @@ class SoftMinimalismLoginForm {
         this.setLoading(true);
         
         try {
-            // Simulate gentle authentication process
-            await new Promise(resolve => setTimeout(resolve, 2500));
-            
-            // Show soft success
-            this.showGentleSuccess();
-        } catch (error) {
-            this.showError('password', 'Sign in failed. Please try again.');
-        } finally {
-            this.setLoading(false);
-        }
-    }
-    
-    async handleSocialLogin(provider, button) {
-        console.log(`Signing in with ${provider}...`);
-        
-        // Gentle loading state
-        const originalHTML = button.innerHTML;
-        button.style.pointerEvents = 'none';
-        button.style.opacity = '0.7';
-        
-        const loadingHTML = `
-            <div class="social-background"></div>
-            <div class="gentle-spinner">
-                <div class="spinner-circle"></div>
-            </div>
-            <span>Connecting...</span>
-            <div class="social-glow"></div>
-        `;
-        
-        button.innerHTML = loadingHTML;
-        
-        try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            console.log(`Redirecting to ${provider}...`);
-            // window.location.href = `/auth/${provider.toLowerCase()}`;
-        } catch (error) {
-            console.error(`${provider} sign in error:`, error.message);
-        } finally {
-            button.style.pointerEvents = 'auto';
-            button.style.opacity = '1';
-            button.innerHTML = originalHTML;
-        }
+        const userCredential = await signInWithEmailAndPassword(
+            auth,
+            this.emailInput.value,
+            this.passwordInput.value
+        );
+        this.showGentleSuccess();
+        setTimeout(() => window.location.href = "dashboard.html", 2500);
+       } catch (error) {
+        this.showError('password', 'Sign in failed. Please try again.');
+       } finally {
+        this.setLoading(false);
+       }
     }
     
     setLoading(loading) {
@@ -296,8 +257,7 @@ class SoftMinimalismLoginForm {
   }
   // Import Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, onAuthStateChanged, signOut } 
-  from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 // Your Firebase config
   const firebaseConfig = {
