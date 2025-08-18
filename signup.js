@@ -3,10 +3,13 @@ import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com
 
 // Your Firebase config (copy from your main project)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  // ...rest of your config
+  apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+  authDomain: "goodplates-7ae36.firebaseapp.com",
+  projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
 };
 
 const app = initializeApp(firebaseConfig);
