@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <style>
+/* Soft Minimalism Login Form — Rewritten:
+   - Buttons use Tailwind green-600: #16a34a
+   - Page background is white
+   - Titles are black; most other text is dark grey
+*/
+
+:root{
+    --green: #16a34a;         /* Tailwind green-600 */
+    --title: #000000;        /* pure black for titles */
+    --text: #374151;         /* dark grey (approx. tailwind gray-700) */
+    --muted: #6b7280;        /* muted grey (approx. tailwind gray-500) */
+    --card-bg: rgba(255,255,255,0.95);
+    --accent-faint: rgba(22,163,74,0.08);
+    --shadow-1: rgba(2,6,23,0.04);
+}
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Page */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Inter', system-ui, sans-serif;
+    background: #ffffff; /* white background as requested */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    line-height: 1.5;
+    position: relative;
+    overflow: hidden;
+    color: var(--text);
+}
+
+/* Soft Background (decorative, low contrast) */
+.soft-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.floating-shapes {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+/* soft blobs kept but neutral/green-faint */
+.soft-blob {
+    position: absolute;
+    border-radius: 50% 40% 60% 30%;
+    background: linear-gradient(45deg, rgba(16,163,74,0.08), rgba(99,115,129,0.03));
+    animation: softFloat 12s ease-in-out infinite;
+    filter: blur(80px);
+    z-index: 0;
+}
+
+.blob-1 {
+    width: 300px;
+    height: 250px;
+    top: -10%;
+    left: -5%;
+    animation-delay: 0s;
+}
+
+.blob-2 {
+    width: 200px;
+    height: 180px;
+    top: 60%;
+    right: -5%;
+    animation-delay: -4s;
+}
+
+.blob-3 {
+    width: 180px;
+    height: 160px;
+    top: 20%;
+    right: 20%;
+    animation-delay: -8s;
+}
+
+.blob-4 {
+    width: 120px;
+    height: 100px;
+    bottom: 10%;
+    left: 15%;
+    animation-delay: -6s;
+}
+
+@keyframes softFloat {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+        border-radius: 50% 40% 60% 30%;
+    }
+    25% {
+        transform: translate(30px, -20px) rotate(90deg) scale(1.1);
+        border-radius: 40% 60% 30% 50%;
+    }
+    50% {
+        transform: translate(-20px, -30px) rotate(180deg) scale(0.9);
+        border-radius: 60% 30% 50% 40%;
+    }
+    75% {
+        transform: translate(-30px, 20px) rotate(270deg) scale(1.05);
+        border-radius: 30% 50% 40% 60%;
+    }
+}
+
+/* Layout */
+.login-container {
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Card */
+.soft-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 32px;
+    padding: 48px 40px;
+    box-shadow:
+        0 20px 40px var(--shadow-1),
+        0 8px 24px rgba(2,6,23,0.02),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+    border: 1px solid rgba(15,23,42,0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+/* subtle top hairline */
+.soft-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(16,163,74,0.06), transparent);
+}
+
+/* Header area */
+.comfort-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.gentle-logo {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-circle {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, rgba(16,163,74,0.06), rgba(16,163,74,0.03));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+        0 8px 16px rgba(16,163,74,0.06),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+    animation: gentleBreathe 4s ease-in-out infinite;
+}
+
+@keyframes gentleBreathe {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 8px 16px rgba(16,163,74,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 12px 20px rgba(16,163,74,0.08), inset 0 1px 0 rgba(255,255,255,0.7);
+    }
+}
+
+.comfort-icon {
+    color: var(--muted);
+    position: relative;
+    z-index: 2;
+}
+
+.gentle-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(16,163,74,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: glowPulse 3s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.06); }
+}
+
+/* Titles & subtitles */
+.comfort-title {
+    color: var(--title); /* black titles */
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+.gentle-subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 400;
+}
+
+/* Soft Form Fields */
+.soft-field {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.field-container {
+    position: relative;
+    background: rgba(255, 255, 255, 0.98);
+    border: 1.5px solid rgba(55,65,81,0.06);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.field-container:focus-within {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px var(--accent-faint);
+    background: rgba(255,255,255,1);
+}
+
+.soft-field input,
+.soft-field textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 18px 16px;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 400;
+    outline: none;
+    position: relative;
+    z-index: 2;
+    font-family: inherit;
+    -webkit-font-smoothing:antialiased;
+}
+
+.soft-field input::placeholder {
+    color: transparent;
+}
+
+.soft-field label {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 400;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 3;
+}
+
+.soft-field input:focus + label,
+.soft-field input:not(:placeholder-shown) + label,
+.soft-field textarea:focus + label,
+.soft-field textarea:not(:placeholder-shown) + label {
+    top: 12px;
+    font-size: 12px;
+    color: var(--green);
+    transform: translateY(0);
+    font-weight: 500;
+}
+
+.field-accent {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(22,163,74,0.9), rgba(22,163,74,0.6));
+    transition: width 0.3s ease;
+    border-radius: 2px;
+}
+
+.field-container:focus-within .field-accent {
+    width: 100%;
+}
+
+/* Password Toggle */
+.soft-field:has(.gentle-toggle) input {
+    padding-right: 56px;
+}
+
+.gentle-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 4;
+    padding: 8px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.toggle-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--muted);
+    transition: color 0.2s ease;
+}
+
+.gentle-toggle:hover {
+    background: rgba(16,163,74,0.06);
+}
+
+.gentle-toggle:hover .toggle-icon {
+    color: var(--green);
+}
+
+.eye-closed { display: none; }
+
+.gentle-toggle.toggle-active .eye-open { display: none; }
+.gentle-toggle.toggle-active .eye-closed { display: block; }
+
+/* Options row */
+.comfort-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.gentle-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 400;
+}
+
+.gentle-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.checkbox-soft {
+    width: 20px;
+    height: 20px;
+    margin-right: 12px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.check-circle {
+    width: 100%;
+    height: 100%;
+    border: 1.5px solid rgba(55,65,81,0.08);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.9);
+    transition: all 0.3s ease;
+    position: absolute;
+}
+
+.check-mark {
+    color: transparent;
+    transition: color 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.gentle-checkbox input[type="checkbox"]:checked + .checkbox-soft .check-circle {
+    background: linear-gradient(135deg, rgba(22,163,74,0.12), rgba(22,163,74,0.08));
+    border-color: rgba(22,163,74,0.9);
+    box-shadow: 0 2px 6px rgba(16,163,74,0.08);
+}
+
+.gentle-checkbox input[type="checkbox"]:checked + .checkbox-soft .check-mark {
+    color: var(--green);
+}
+
+/* Links */
+.comfort-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.comfort-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--muted);
+    transition: width 0.3s ease;
+}
+
+.comfort-link:hover::after {
+    width: 100%;
+}
+
+.comfort-link:hover {
+    color: var(--green);
+}
+
+/* Primary button — uses green-600 for background */
+.comfort-button {
+    width: 100%;
+    background: var(--green);
+    color: #ffffff; /* white for button text for contrast */
+    border: none;
+    border-radius: 16px;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    position: relative;
+    margin-bottom: 32px;
+    overflow: hidden;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    box-shadow: 0 6px 18px rgba(16,163,74,0.12);
+}
+
+.button-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--green) 0%, rgba(20,150,68,0.95) 100%);
+    transition: all 0.3s ease;
+    border-radius: 16px;
+    z-index: 0;
+}
+
+.comfort-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(16,163,74,0.14);
+    filter: brightness(1.03);
+}
+
+.comfort-button:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 14px rgba(16,163,74,0.1);
+}
+
+.button-text {
+    position: relative;
+    z-index: 2;
+    transition: opacity 0.3s ease;
+}
+
+.button-loader {
+    position: absolute;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.gentle-spinner {
+    width: 20px;
+    height: 20px;
+    position: relative;
+}
+
+.spinner-circle {
+    width: 100%;
+    height: 100%;
+    border: 2px solid rgba(55,65,81,0.12);
+    border-top: 2px solid #ffffff; /* white top to match button text */
+    border-radius: 50%;
+    animation: gentleSpin 1s linear infinite;
+}
+
+@keyframes gentleSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.comfort-button.loading .button-text { opacity: 0; }
+.comfort-button.loading .button-loader { opacity: 1; }
+
+.button-glow {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(135deg, rgba(22,163,74,0.12), rgba(22,163,74,0.06));
+    border-radius: 18px;
+    opacity: 0;
+    filter: blur(8px);
+    transition: opacity 0.3s ease;
+    z-index: -1;
+}
+
+.comfort-button:hover .button-glow { opacity: 0.6; }
+
+/* Divider */
+.gentle-divider {
+    display: flex;
+    align-items: center;
+    margin: 32px 0;
+    gap: 16px;
+}
+
+.divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(16,163,74,0.06), transparent);
+}
+
+.divider-text {
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 400;
+}
+
+/* Social buttons (secondary) — subtle green accent on hover */
+.comfort-social {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.social-soft {
+    flex: 1;
+    background: transparent;
+    color: var(--text);
+    border: 1.5px solid rgba(55,65,81,0.06);
+    border-radius: 12px;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    min-height: 48px;
+    position: relative;
+    overflow: hidden;
+}
+
+.social-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.98);
+    transition: all 0.3s ease;
+    z-index: 0;
+}
+
+.social-soft:hover {
+    border-color: rgba(22,163,74,0.9);
+    transform: translateY(-2px);
+}
+
+.social-soft:hover .social-background {
+    background: var(--accent-faint);
+}
+
+.social-soft span,
+.social-soft svg {
+    position: relative;
+    z-index: 2;
+}
+
+.social-glow {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: rgba(22,163,74,0.06);
+    border-radius: 13px;
+    opacity: 0;
+    filter: blur(6px);
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.social-soft:hover .social-glow { opacity: 1; }
+
+/* Signup / small text */
+.comfort-signup {
+    text-align: center;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.signup-text { margin-right: 6px; }
+.signup-link { font-weight: 600; color: var(--green); }
+
+/* Error & Success states */
+.gentle-error {
+    color: #dc2626; /* red-600 */
+    font-size: 13px;
+    font-weight: 400;
+    margin-top: 6px;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 5;
+}
+
+.gentle-error.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.soft-field.error .field-container {
+    border-color: #dc2626;
+    background: rgba(220,38,38,0.03);
+}
+
+.soft-field.error label { color: #dc2626; }
+
+/* Success */
+.gentle-success {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+}
+
+.gentle-success.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.success-bloom {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bloom-rings { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+.bloom-ring {
+    position: absolute;
+    border: 2px solid rgba(16,163,74,0.12);
+    border-radius: 50%;
+    animation: bloomExpand 1.2s ease-out forwards;
+    opacity: 0;
+}
+
+.ring-1 { width: 60px; height: 60px; top: 20px; left: 20px; animation-delay: 0s; }
+.ring-2 { width: 80px; height: 80px; top: 10px; left: 10px; animation-delay: 0.2s; }
+.ring-3 { width: 100px; height: 100px; top: 0; left: 0; animation-delay: 0.4s; }
+
+@keyframes bloomExpand {
+    0% { opacity: 0; transform: scale(0); }
+    50% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0.6; transform: scale(1); }
+}
+
+.success-icon {
+    position: relative;
+    z-index: 2;
+    color: var(--green);
+    animation: iconBloom 0.6s ease-out 0.6s forwards;
+    opacity: 0;
+}
+
+@keyframes iconBloom {
+    0% { opacity: 0; transform: scale(0); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+.success-title {
+    color: var(--title);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+}
+
+.success-desc {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 400;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+    body { padding: 16px; }
+
+    .soft-card {
+        padding: 36px 28px;
+        border-radius: 24px;
+    }
+
+    .comfort-title { font-size: 1.75rem; }
+
+    .gentle-logo { width: 64px; height: 64px; }
+    .logo-circle { width: 52px; height: 52px; }
+
+    .comfort-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .comfort-social { flex-direction: column; }
+
+    .floating-shapes { opacity: 0.5; }
+    .soft-blob { filter: blur(60px); }
+}
+
+     </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soft Minimalism Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="soft-background">
+        <div class="floating-shapes">
+            <div class="soft-blob blob-1"></div>
+            <div class="soft-blob blob-2"></div>
+            <div class="soft-blob blob-3"></div>
+            <div class="soft-blob blob-4"></div>
+        </div>
+    </div>
+
+    <div class="login-container">
+        <div class="soft-card">
+            <div class="comfort-header">
+                <h1 class="comfort-title">Welcome back</h1>
+                <p class="gentle-subtitle">Sign in to your peaceful space</p>
+            </div>
+            
+            <form class="comfort-form" id="loginForm" novalidate>
+                <div class="soft-field">
+                    <div class="field-container">
+                        <input type="email" id="email" name="email" required autocomplete="email">
+                        <label for="email">Email address</label>
+                        <div class="field-accent"></div>
+                    </div>
+                    <span class="gentle-error" id="emailError"></span>
+                </div>
+
+                <div class="soft-field">
+                    <div class="field-container">
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                        <label for="password">Password</label>
+                        <button type="button" class="gentle-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+                            <div class="toggle-icon">
+                                <svg class="eye-open" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M10 3c-4.5 0-8.3 3.8-9 7 .7 3.2 4.5 7 9 7s8.3-3.8 9-7c-.7-3.2-4.5-7-9-7z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                    <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                                </svg>
+                                <svg class="eye-closed" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M3 3l14 14M8.5 8.5a3 3 0 004 4m2.5-2.5C15 10 12.5 7 10 7c-.5 0-1 .1-1.5.3M10 13c-2.5 0-4.5-2-5-3 .3-.6.7-1.2 1.2-1.7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </button>
+                        <div class="field-accent"></div>
+                    </div>
+                    <span class="gentle-error" id="passwordError"></span>
+                </div>
+
+                <div class="comfort-options">
+                    <label class="gentle-checkbox">
+                        <input type="checkbox" id="remember" name="remember">
+                        <span class="checkbox-soft">
+                            <div class="check-circle"></div>
+                            <svg class="check-mark" width="12" height="10" viewBox="0 0 12 10" fill="none">
+                                <path d="M1 5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </span>
+                        <span class="checkbox-text">Remember me</span>
+                    </label>
+                    <a href="#" class="comfort-link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="comfort-button">
+                    <div class="button-background"></div>
+                    <span class="button-text">Sign in</span>
+                    <div class="button-loader">
+                        <div class="gentle-spinner">
+                            <div class="spinner-circle"></div>
+                        </div>
+                    </div>
+                    <div class="button-glow"></div>
+                </button>
+            </form>
+
+            <div class="gentle-divider">
+                <div class="divider-line"></div>
+                <span class="divider-text">or continue with</span>
+                <div class="divider-line"></div>
+            </div>
+
+            <div class="comfort-social">
+                <button type="button" class="social-soft">
+                    <div class="social-background"></div>
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path d="M9 7.4v3.2h4.6c-.2 1-.8 1.8-1.6 2.4v2h2.6c1.5-1.4 2.4-3.4 2.4-5.8 0-.6 0-1.1-.1-1.6H9z" fill="#4285F4"/>
+                        <path d="M9 17c2.2 0 4-0.7 5.4-1.9l-2.6-2c-.7.5-1.6.8-2.8.8-2.1 0-3.9-1.4-4.6-3.4H1.7v2.1C3.1 15.2 5.8 17 9 17z" fill="#34A853"/>
+                        <path d="M4.4 10.5c-.2-.5-.2-1.1 0-1.6V6.8H1.7c-.6 1.2-.6 2.6 0 3.8l2.7-2.1z" fill="#FBBC04"/>
+                        <path d="M9 4.2c1.2 0 2.3.4 3.1 1.2l2.3-2.3C12.9 1.8 11.1 1 9 1 5.8 1 3.1 2.8 1.7 5.4l2.7 2.1C5.1 5.6 6.9 4.2 9 4.2z" fill="#EA4335"/>
+                    </svg>
+                    <span>Google</span>
+                    <div class="social-glow"></div>
+                </button>
+                
+                <button type="button" class="social-soft">
+                    <div class="social-background"></div>
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="#1877F2">
+                        <path d="M18 9C18 4.03 13.97 0 9 0S0 4.03 0 9c0 4.49 3.29 8.21 7.59 9v-6.37H5.31V9h2.28V7.02c0-2.25 1.34-3.49 3.39-3.49.98 0 2.01.18 2.01.18v2.21h-1.13c-1.11 0-1.46.69-1.46 1.4V9h2.49l-.4 2.63H10.4V18C14.71 17.21 18 13.49 18 9z"/>
+                    </svg>
+                    <span>Facebook</span>
+                    <div class="social-glow"></div>
+                </button>
+            </div>
+
+            <div class="comfort-signup">
+                <span class="signup-text">Don't have an account?</span>
+                <a href="#" class="comfort-link signup-link">Sign up</a>
+            </div>
+
+            <div class="gentle-success" id="successMessage">
+                <div class="success-bloom">
+                    <div class="bloom-rings">
+                        <div class="bloom-ring ring-1"></div>
+                        <div class="bloom-ring ring-2"></div>
+                        <div class="bloom-ring ring-3"></div>
+                    </div>
+                    <div class="success-icon">
+                        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                            <path d="M8 14l5 5 11-11" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                </div>
+                <h3 class="success-title">Welcome!</h3>
+                <p class="success-desc">Taking you to your dashboard...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../shared/js/form-utils.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
