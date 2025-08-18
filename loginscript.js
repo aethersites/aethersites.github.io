@@ -189,7 +189,7 @@ class SoftMinimalismLoginForm {
             this.passwordInput.value
         );
         this.showGentleSuccess();
-        setTimeout(() => window.location.href = "dashboard.html", 2500);
+        setTimeout(() => window.location.href = "/dashboard/", 2500);
        } catch (error) {
         this.showError('password', 'Sign in failed. Please try again.');
        } finally {
@@ -209,31 +209,30 @@ class SoftMinimalismLoginForm {
     }
     
     showGentleSuccess() {
-        // Hide form with soft transition
-        this.form.style.transform = 'scale(0.95)';
-        this.form.style.opacity = '0';
-        this.form.style.filter = 'blur(1px)';
+    // Hide form with soft transition
+    this.form.style.transform = 'scale(0.95)';
+    this.form.style.opacity = '0';
+    this.form.style.filter = 'blur(1px)';
+    
+    setTimeout(() => {
+        this.form.style.display = 'none';
+        document.querySelector('.comfort-social').style.display = 'none';
+        document.querySelector('.comfort-signup').style.display = 'none';
+        document.querySelector('.gentle-divider').style.display = 'none';
         
-        setTimeout(() => {
-            this.form.style.display = 'none';
-            document.querySelector('.comfort-social').style.display = 'none';
-            document.querySelector('.comfort-signup').style.display = 'none';
-            document.querySelector('.gentle-divider').style.display = 'none';
-            
-            // Show gentle success
-            this.successMessage.classList.add('show');
-            
-            // Add success glow to card
-            this.triggerSuccessGlow();
-            
-        }, 300);
+        // Show gentle success animation/message
+        this.successMessage.classList.add('show');
         
-        // Redirect after success
-        setTimeout(() => {
-            console.log('Welcome! Taking you to your dashboard...');
-            // window.location.href = '/dashboard';
-        }, 3500);
-    }
+        // Add success glow to card
+        this.triggerSuccessGlow();
+
+    }, 300);
+    
+    // Redirect after success
+    setTimeout(() => {
+        window.location.href = "/dashboard/";
+    }, 3500);
+  }
     
     triggerSuccessGlow() {
         // Add gentle glow effect to the entire card
