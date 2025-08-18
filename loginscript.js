@@ -290,8 +290,69 @@ class SoftMinimalismLoginForm {
                 inset 0 1px 0 rgba(255, 255, 255, 0.8)
             `;
         }, 2000);
+
+      
     }
   }
+  // Import Firebase SDKs
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, onAuthStateChanged, signOut } 
+  from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+// Your Firebase config
+  const firebaseConfig = {
+      apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Providers
+const googleProvider = new GoogleAuthProvider();
+const facebookProvider = new FacebookAuthProvider();
+
+// Social login buttons
+  document.getElementById("googleButton")?.addEventListener("click", () => {
+  signInWithPopup(auth, googleProvider)
+    .then(result => {
+      console.log("Google login:", result.user.email);
+      window.location.href = "dashboard.html";
+    })
+    .catch(console.error);
+  });
+
+  document.getElementById("facebookButton")?.addEventListener("click", () => {
+  signInWithPopup(auth, facebookProvider)
+    .then(result => {
+      console.log("Facebook login:", result.user.email);
+      window.location.href = "dashboard.html";
+    })
+    .catch(console.error);
+  });
+
+// Auth state listener (protect dashboard)
+  onAuthStateChanged(auth, user => {
+  if (user) {
+    console.log("Logged in:", user.email);
+  } else {
+    console.log("Not logged in");
+    if (window.location.pathname.includes("dashboard.html")) {
+      window.location.href = "index.html";
+    }
+  }
+  });
+
+// Logout button
+document.getElementById("logout")?.addEventListener("click", () => {
+  signOut(auth).then(() => window.location.href = "index.html");
+  });
 
 // Initialize the soft form when DOM is loaded
   document.addEventListener('DOMContentLoaded', () => {
