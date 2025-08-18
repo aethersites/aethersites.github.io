@@ -261,7 +261,7 @@ import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, sig
 
 // Your Firebase config
   const firebaseConfig = {
-      apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
     authDomain: "goodplates-7ae36.firebaseapp.com",
     projectId: "goodplates-7ae36",
     storageBucket: "goodplates-7ae36.firebasestorage.app",
