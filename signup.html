@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="soft-card">
+            <div class="comfort-header">
+                <h1 class="comfort-title">Create Account</h1>
+                <p class="gentle-subtitle">Join your peaceful space</p>
+            </div>
+            <form class="comfort-form" id="signupForm" novalidate>
+                <div class="soft-field">
+                    <div class="field-container">
+                        <input type="email" id="signupEmail" name="email" required autocomplete="email" placeholder=" ">
+                        <label for="signupEmail">Email address</label>
+                        <div class="field-accent"></div>
+                    </div>
+                    <span class="gentle-error" id="signupEmailError"></span>
+                </div>
+                <div class="soft-field">
+                    <div class="field-container">
+                        <input type="password" id="signupPassword" name="password" required autocomplete="new-password" placeholder=" ">
+                        <label for="signupPassword">Password</label>
+                        <div class="field-accent"></div>
+                    </div>
+                    <span class="gentle-error" id="signupPasswordError"></span>
+                </div>
+                <button type="submit" class="comfort-button">
+                    <span class="button-text">Sign up</span>
+                </button>
+            </form>
+            <div class="comfort-signup">
+                <span class="signup-text">Already have an account?</span>
+                <a href="index.html" class="comfort-link signup-link">Sign in</a>
+            </div>
+            <div class="gentle-success" id="signupSuccessMessage">
+                <h3 class="success-title">Account created!</h3>
+                <p class="success-desc">Redirecting to dashboard...</p>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="signup.js"></script>
+</body>
+</html>
