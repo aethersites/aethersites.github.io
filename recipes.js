@@ -148,7 +148,7 @@ const recipes = [
     mealtype: "Lunch"
   },
   {
-  id: 1,
+  id: 7,
   title: "Fluffy Blueberry Pancakes",
   rating: 4.8,
   time: 25,
@@ -180,7 +180,7 @@ const recipes = [
   mealtype: "Breakfast"
 },
 {
-  id: 2,
+  id: 8,
   title: "Avocado Toast with Poached Egg",
   rating: 4.7,
   time: 15,
@@ -210,7 +210,7 @@ const recipes = [
   mealtype: "Breakfast"
 },
 {
-  id: 3,
+  id: 9,
   title: "Greek Yogurt Parfait",
   rating: 4.5,
   time: 10,
@@ -238,7 +238,7 @@ const recipes = [
   mealtype: "Breakfast"
 },
 {
-  id: 4,
+  id: 10,
   title: "Savory Breakfast Burrito",
   rating: 4.9,
   time: 30,
