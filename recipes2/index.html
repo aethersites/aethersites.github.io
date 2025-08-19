@@ -99,7 +99,7 @@
     /* ===== Sidebar / Filters ===== */
     .sidebar{
       background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
-      padding:18px; height:calc(100vh - 92px); overflow:auto; box-shadow: var(--shadow-soft);
+      padding:18px; height:calc(100vh - 92px); overflow:auto; box-shadow: var(--shadow-soft);  margin-left:24px;
     }
     .title-lg{font-size:18px; font-weight:700; color:var(--fg); margin:0}
     .filter-block{ padding:14px; border-radius:10px; background:linear-gradient(180deg, rgba(250,250,250,0.6), rgba(255,255,255,0.6)); border:1px solid rgba(15,23,42,0.03); margin-bottom:12px }
@@ -117,6 +117,11 @@
 
     /* compatibility: preserve original .block selectors used in functional file */
     .sidebar .block{ padding:18px; border-bottom:1px solid var(--border); margin-bottom:0; background:transparent; border:0 }
+    .sidebar .block > .flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center; /* this aligns the button with the text vertically */
+       } 
     .block .input{ border-radius:10px; }
 
     .small{font-size:13px}
@@ -188,6 +193,7 @@
         <h2 class="title-lg">Filters</h2>
         <button class="btn ghost small" data-toggle="sidebar">✖️</button>
       </div>
+       <br>
       <div class="mt-2">
         <div class="searchbar" style="position:relative">
           <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
@@ -425,6 +431,7 @@
       from { opacity:0; transform:scale(0.96); }
       to { opacity:1; transform:scale(1); }
     }
+    
   </style>
 
   <!-- ===== end modal ===== -->
