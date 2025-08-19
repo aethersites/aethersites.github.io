@@ -1,254 +1,315 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recipes UI — Pure HTML/CSS</title>
+
+  <!-- design font (optional, from prototype) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    /* ===== Tailwind-ish design tokens ===== */
+    /* ===== Design tokens (adapted for compatibility) ===== */
     :root{
       --bg: #ffffff;
-      --fg: #0f172a;               /* slate-900 */
-      --muted: #6b7280;            /* gray-500 */
-      --muted-2: #9ca3af;          /* gray-400 */
-      --border: #e5e7eb;           /* gray-200 */
-      --surface: #ffffff;          /* white */
-      --surface-2: #f3f4f6;        /* gray-100 */
-      --primary: #16a34a;          /* green-600 */
-      --primary-700: #15803d;      /* green-700 */
-      --primary-100: #dcfce7;      /* green-100 */
-      --ring: rgba(16,185,129,.35);
-      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(2,6,23,.06);
-      --radius: 16px;
+      --fg: #0f172a;
+      --muted: #6b7280;
+      --muted-2: #9ca3af;
+      --border: #e6e9ee;
+      --surface: #ffffff;
+      --surface-2: #f7f8fa;
+      --primary: #16a34a;
+      --primary-700: #15803d;
+      --primary-100: #dcfce7;
+      --ring: rgba(16,185,129,0.18);
+      --shadow-soft: 0 8px 24px rgba(2,6,23,0.06);
+      --shadow-2: 0 16px 48px rgba(2,6,23,0.08);
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius: var(--radius-lg); /* keep compatibility with old --radius usage */
+      --container: 1200px;
+      --glass: rgba(255,255,255,0.72);
     }
 
-    /* ===== Resets + base ===== */
+    /* ===== Base / resets ===== */
     *{box-sizing:border-box}
-    html,body{height:100%}
+    html,body{height:100%; margin:0}
     body{
-      margin:0; font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
-      color:var(--fg); background:var(--bg);
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:var(--fg);
+      background:linear-gradient(180deg,#fbfcfd 0%, var(--bg) 100%);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      -webkit-tap-highlight-color: transparent;
     }
-    img{max-width:100%; display:block}
     a{color:inherit; text-decoration:none}
-    .container{max-width:1200px; margin:0 auto; padding:0 24px}
+    img{max-width:100%; display:block}
+    .container{max-width:var(--container); margin:0 auto; padding:0 20px}
 
-    /* ===== Utilities ===== */
-    .flex{display:flex}
-    .items-center{align-items:center}
-    .justify-between{justify-content:space-between}
-    .gap-1{gap:.25rem} .gap-2{gap:.5rem} .gap-3{gap:.75rem} .gap-4{gap:1rem} .gap-6{gap:1.5rem} .gap-8{gap:2rem}
-    .w-100{width:100%}
+    /* ===== Topnav styling (keeps your header clean) ===== */
+    .gp-topnav,
+    .topnav {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 20px; gap:12px;
+      background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.82));
+      border-bottom:1px solid rgba(15,23,42,0.03);
+      position:sticky; top:0; z-index:60; backdrop-filter: blur(6px);
+    }
+    .gp-container{ max-width:var(--container); margin:0 auto; padding:8px 20px; display:flex; align-items:center; gap:12px; justify-content:space-between; }
+    .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
+    .gp-logo-sq{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; background:linear-gradient(90deg,var(--primary),var(--primary-700)); box-shadow:0 8px 20px rgba(22,163,74,0.12) }
+    .gp-name{ font-weight:800; color:var(--fg); }
+    .gp-sub{ font-size:12px; color:var(--muted) }
+
+    .gp-links ul{ list-style:none; padding:0; margin:0; display:flex; gap:20px; align-items:center; }
+    .gp-links a{ display:inline-flex; align-items:center; padding:8px 10px; border-radius:10px; color:var(--fg); font-weight:600; transition:all .12s ease; border:1px solid transparent; font-size:15px }
+    .gp-links a:hover{ background:var(--primary-100); color:var(--primary); transform:translateY(-2px); box-shadow:var(--shadow-soft) }
+
+    .gp-actions{ display:flex; gap:8px; align-items:center; margin-left:auto }
+    .icon-btn{ width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--border); background:var(--surface); cursor:pointer; }
+    .icon-btn:hover{ box-shadow:var(--shadow-soft); transform:translateY(-2px) }
+
+    .gp-cta{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:8px 18px; min-width:120px; border-radius:999px;
+      background:linear-gradient(90deg,var(--primary),var(--primary-700)); color:white; font-weight:700; text-decoration:none;
+      box-shadow:0 8px 20px rgba(22,163,74,0.12);
+    }
+    .gp-cta:hover{ transform:translateY(-2px); filter:brightness(.96) }
+
+    .gp-hamburger{ display:none; width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
+    .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
+
+    @media (max-width:1100px){
+      .gp-links{ display:none }
+      .gp-hamburger{ display:inline-flex }
+      .gp-cta{ display:none }
+    }
+
+    /* ===== Layout (content + sidebar) ===== */
+    .layout{ display:grid; grid-template-columns:320px 1fr; gap:28px; padding:28px 0; align-items:start; }
+    @media (max-width:1100px){
+      .layout{ grid-template-columns:1fr }
+      .sidebar{ display:none }
+      .open-sidebar{ display:block; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.35) }
+      .sidebar.panel{ position:fixed; left:0; top:0; bottom:0; height:100%; transform:translateX(0); box-shadow: var(--shadow-2); }
+    }
+
+    /* ===== Sidebar / Filters ===== */
+    .sidebar{
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+      padding:18px; height:calc(100vh - 92px); overflow:auto; box-shadow: var(--shadow-soft);
+    }
+    .title-lg{font-size:18px; font-weight:700; color:var(--fg); margin:0}
+    .filter-block{ padding:14px; border-radius:10px; background:linear-gradient(180deg, rgba(250,250,250,0.6), rgba(255,255,255,0.6)); border:1px solid rgba(15,23,42,0.03); margin-bottom:12px }
+    .filter-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
+    .input{ width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:14px; background:var(--surface) }
+    .chip{ display:flex; align-items:center; gap:10px; font-size:14px; padding:8px 10px; border-radius:999px; background:var(--surface-2); cursor:pointer; border:1px solid transparent }
+    .chip input{ width:16px; height:16px }
+    .chip:hover{ transform:translateY(-2px) }
+
+    .range{ width:100% }
+    .btn{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--fg); padding:8px 14px; border-radius:10px; cursor:pointer; transition:all .14s ease; font-weight:600 }
+    .btn:hover{ transform:translateY(-2px); box-shadow:var(--shadow-soft) }
+    .btn.primary{ background:linear-gradient(90deg,var(--primary),var(--primary-700)); color:white; border:0 }
+    .btn.ghost{ background:transparent; border:1px dashed rgba(15,23,42,0.04) }
+
+    /* compatibility: preserve original .block selectors used in functional file */
+    .sidebar .block{ padding:18px; border-bottom:1px solid var(--border); margin-bottom:0; background:transparent; border:0 }
+    .block .input{ border-radius:10px; }
+
+    .small{font-size:13px}
+    .muted{ color:var(--muted); font-size:13px }
+    .muted-2{ color:var(--muted-2) }
+
+    /* ===== Grid & cards (kept and improved) ===== */
+    .grid{ display:grid; gap:24px; padding-left:10px; padding-right:10px; }
+    .grid.cols-2{ grid-template-columns:repeat(2,1fr) }
+    .grid.cols-3{ grid-template-columns:repeat(3,1fr) }
+    .grid.cols-4{ grid-template-columns:repeat(4,1fr) }
+
+    .card{
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-2) }
+    .card .card-media{ height:192px; background: linear-gradient(135deg,#ecfdf5,#f0fdf4); display:flex; align-items:center; justify-content:center; position:relative; }
+    .card .card-body{ padding:16px 16px 20px }
+
+    .badge{ padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; background:var(--primary-100); color:var(--primary) }
+    .pill{ border-radius:999px; padding:6px 12px; font-weight:700; font-size:13px; background:var(--surface-2) }
+
+    /* ===== Modal (styled) ===== */
+    .modal-backdrop, #recipeModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:24px }
+    .modal{ width:100%; max-width:920px; background:var(--surface); border-radius:16px; overflow:hidden; box-shadow:var(--shadow-2) }
+    .modal .modal-media{ height:320px; background:#ddd; object-fit:cover }
+    .modal .content{ padding:28px }
+    .modal .close-btn, #closeModal{ position:absolute; right:18px; top:18px; background:rgba(0,0,0,0.6); color:#fff; border:0; padding:8px 12px; border-radius:10px; cursor:pointer }
+
+    /* small helpers */
     .text-center{text-align:center}
-    .muted{color:var(--muted)}
-    .border{border:1px solid var(--border)}
-    .rounded{border-radius:var(--radius)}
-    .shadow{box-shadow:var(--shadow)}
-    .section{padding:48px 0}
-    .hidden{display:none}
+    .title-2xl{ font-size:32px; font-weight:800 }
+    .mb-0{ margin-bottom:0 } .mb-1{ margin-bottom:6px } .mb-2{ margin-bottom:12px } .mb-3{ margin-bottom:18px }
 
-    /* ===== Buttons ===== */
-    .btn{appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--fg);
-      padding:8px 14px; border-radius:12px; cursor:pointer; transition:.15s ease; box-shadow:0 1px 0 rgba(0,0,0,.02)}
-    .btn:hover{transform:translateY(-1px); box-shadow:var(--shadow)}
-    .btn:focus{outline:none; box-shadow:0 0 0 4px var(--ring)}
-    .btn.primary{background:var(--primary); color:#fff; border-color:transparent}
-    .btn.primary:hover{background:var(--primary-700)}
-    .btn.ghost{background:transparent}
+    /* accessibility */
+    :focus{ outline:none }
+    :focus-visible{ box-shadow:0 0 0 4px var(--ring); border-radius:8px }
 
-    /* ===== Badges ===== */
-    .badge{display:inline-flex; align-items:center; gap:.5ch; font-size:12px; border:1px solid var(--border); padding:4px 10px; border-radius:999px; background:var(--surface)}
-    .badge.primary{background:var(--primary-100); color:var(--primary); border-color:rgba(22,163,74,.25)}
-    .badge.pill{border-radius:999px}
-
-    /* ===== Cards ===== */
-    .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden}
-.card .card-media {
-  height: 192px;
-  background: linear-gradient(135deg,#ecfdf5,#f0fdf4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative; /* 👈 This keeps absolutely-positioned elements inside */
-}
-    .grid {
-    padding-left: 10px;
-    padding-right: 10px;
-  }
-    .card .card-body{padding:16px 16px 20px}
-    .card:hover{box-shadow:var(--shadow); transform:translateY(-2px); transition:transform .2s ease, box-shadow .2s ease}
-
-    /* ===== Sidebar ===== */
-    .layout{display:grid; grid-template-columns: 320px 1fr}
-    .sidebar{background:var(--surface); border-right:1px solid var(--border); max-height:calc(100vh - 57px); overflow:auto}
-    .sidebar .block{padding:24px; border-bottom:1px solid var(--border)}
-    .sidebar h3{margin:0 0 8px; font-size:14px}
-    .input{width:100%; border:1px solid var(--border); border-radius:12px; padding:10px 12px}
-    .range{width:100%}
-    .chip{display:flex; align-items:center; gap:8px; font-size:14px}
-    .stars{letter-spacing:1px; color:#f59e0b}
-
-    /* ===== Grids ===== */
-    .grid{display:grid; gap:24px}
-    @media(min-width:768px){
-      .grid.cols-2{grid-template-columns:repeat(2,1fr)}
-      .grid.cols-3{grid-template-columns:repeat(3,1fr)}
-      .grid.cols-4{grid-template-columns:repeat(4,1fr)}
-      .layout{grid-template-columns:320px 1fr}
+    /* tag pill styles (moved from bottom style block) */
+    .tag {
+      padding:6px 14px;
+      border-radius:30px;
+      font-size:14px;
+      font-weight:600;
+      color:white;
+      cursor:pointer;
+      transition:all 0.25s ease;
+      display:inline-block;
     }
-    @media(max-width:900px){
-      .layout{grid-template-columns:1fr}
-      .sidebar{display:none}
-      .sidebar.open{display:block}
-    }
-
-    /* ===== Helpers ===== */
-    .mb-0{margin-bottom:0} .mb-1{margin-bottom:6px} .mb-2{margin-bottom:12px} .mb-3{margin-bottom:18px} .mb-4{margin-bottom:24px}
-    .mt-0{margin-top:0} .mt-2{margin-top:12px} .mt-3{margin-top:18px} .mt-4{margin-top:24px}
-    .py-6{padding-top:24px; padding-bottom:24px}
-    .pill{border-radius:999px}
-    .small{font-size:12px}
-    .title-lg{font-size:24px; font-weight:700}
-    .title-2xl{font-size:32px; font-weight:800}
-
-    /* icon buttons */
-    .icon-btn{width:34px; height:34px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--border); background:#fff}
-
-    /* clamp */
-    .clamp-2{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+    .tag:hover { opacity:0.85; transform:translateY(-2px); }
+    .tag:nth-child(1n) { background:#FF6B6B; } /* red */
+    .tag:nth-child(2n) { background:#4ECDC4; } /* teal */
+    .tag:nth-child(3n) { background:#FFD93D; color:#222; } /* yellow */
+    .tag:nth-child(4n) { background:#1A73E8; } /* blue */
+    .tag:nth-child(5n) { background:#9B59B6; } /* purple */
   </style>
+</head>
+<body>
 
   <!-- Main layout with sidebar -->
 
-<!-- Layout wrapper -->
-<div class="layout">
-    <!-- Sidebar (filters) -->
-<aside id="sidebar" class="sidebar">
-  <div class="block">
-    <div class="flex items-center justify-between">
-      <h2 class="title-lg">Filters</h2>
-      <button class="btn ghost small" data-toggle="sidebar">✖️</button>
-    </div>
-    <div class="mt-2">
-      <div class="searchbar" style="position:relative">
-        <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
-        <!-- ✅ must have id="filter-search" -->
-        <input class="input" type="text" id="filter-search" placeholder="Search recipes..." style="padding-left:36px" />
+  <!-- Layout wrapper -->
+  <div class="layout">
+      <!-- Sidebar (filters) -->
+  <aside id="sidebar" class="sidebar">
+    <div class="block">
+      <div class="flex items-center justify-between">
+        <h2 class="title-lg">Filters</h2>
+        <button class="btn ghost small" data-toggle="sidebar">✖️</button>
       </div>
-    </div>
-  </div>
-
-  <div class="block">
-    <h3>Rating</h3>
-    <div class="grid" style="gap:10px">
-      <!-- ✅ must use data-filter="rating" -->
-      <label class="chip"><input type="checkbox" data-filter="rating" value="5"/> <span class="stars">★★★★★</span> &nbsp;&amp; up</label>
-      <label class="chip"><input type="checkbox" data-filter="rating" value="4"/> <span class="stars">★★★★☆</span> &nbsp;&amp; up</label>
-      <label class="chip"><input type="checkbox" data-filter="rating" value="3"/> <span class="stars">★★★☆☆</span> &nbsp;&amp; up</label>
-      <label class="chip"><input type="checkbox" data-filter="rating" value="2"/> <span class="stars">★★☆☆☆</span> &nbsp;&amp; up</label>
-      <label class="chip"><input type="checkbox" data-filter="rating" value="1"/> <span class="stars">★☆☆☆☆</span> &nbsp;&amp; up</label>
-    </div>
-  </div>
-
-  <div class="block">
-    <h3>Prep Time (minutes)</h3>
-    <!-- ✅ must have id="filter-prepTime" -->
-    <input class="range" type="range" id="filter-prepTime" min="5" max="180" step="5" value="60" />
-    <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
-  </div>
-
-  <div class="block">
-    <h3>Calories</h3>
-    <div class="grid" style="gap:10px">
-      <!-- ✅ must use data-filter="calories" -->
-      <label class="chip"><input type="checkbox" data-filter="calories" value="under-200"/> Under 200 calories</label>
-      <label class="chip"><input type="checkbox" data-filter="calories" value="200-400"/> 200-400 calories</label>
-      <label class="chip"><input type="checkbox" data-filter="calories" value="400-600"/> 400-600 calories</label>
-      <label class="chip"><input type="checkbox" data-filter="calories" value="600-800"/> 600-800 calories</label>
-      <label class="chip"><input type="checkbox" data-filter="calories" value="800-plus"/> 800+ calories</label>
-    </div>
-  </div>
-
-  <div class="block">
-    <h3>Diet Type</h3>
-    <div class="grid" style="gap:10px">
-      <!-- ✅ must use data-filter="tags" -->
-      <label class="chip"><input type="checkbox" data-filter="tags" value="Vegetarian"/> Vegetarian</label>
-      <label class="chip"><input type="checkbox" data-filter="tags" value="Vegan"/> Vegan</label>
-      <label class="chip"><input type="checkbox" data-filter="tags" value="Gluten-Free"/> Gluten-Free</label>
-      <label class="chip"><input type="checkbox" data-filter="tags" value="Keto"/> Keto</label>
-      <label class="chip"><input type="checkbox" data-filter="tags" value="Paleo"/> Paleo</label>
-      <label class="chip"><input type="checkbox" data-filter="tags" value="Halal"/> Halal</label>
-    </div>
-  </div>
-
-  <div class="block">
-    <h3>Ingredients</h3>
-    <!-- ✅ must have id="filter-ingredients" -->
-    <input class="range" type="range" id="filter-ingredients" min="3" max="20" step="1" value="10" />
-    <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
-  </div>
-
-  <div class="block">
-    <!-- ✅ must have id="clearFilters" -->
-    <button id="clearFilters" class="btn w-100">Clear All Filters</button>
-  </div>
-</aside>
-
-  <!-- Main content -->
-  <main>
-    <div class="main-header">
-      <div class="container flex items-center justify-between">
-        <div class="flex items-center gap-4">
-          <button class="btn" data-open="sidebar" aria-label="Open filters" style="display:none">⚙️ Filters</button>
-          <div>
-            <h1 class="title-lg">All Recipes</h1>
-            <div class="muted small">Showing <span id="totalRecipes"></span> recipes</div>
-          </div>
+      <div class="mt-2">
+        <div class="searchbar" style="position:relative">
+          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
+          <!-- ✅ must have id="filter-search" -->
+          <input class="input" type="text" id="filter-search" placeholder="Search recipes..." style="padding-left:36px" />
         </div>
       </div>
     </div>
 
-    <!-- Featured Recipes -->
-    <section class="section">
-      <div class="container">
-        <div class="flex items-center justify-between mb-3">
-          <div></div>
-          <div class="flex gap-2">
+    <div class="block">
+      <h3>Rating</h3>
+      <div class="grid" style="gap:10px">
+        <!-- ✅ must use data-filter="rating" -->
+        <label class="chip"><input type="checkbox" data-filter="rating" value="5"/> <span class="stars">★★★★★</span> &nbsp;&amp; up</label>
+        <label class="chip"><input type="checkbox" data-filter="rating" value="4"/> <span class="stars">★★★★☆</span> &nbsp;&amp; up</label>
+        <label class="chip"><input type="checkbox" data-filter="rating" value="3"/> <span class="stars">★★★☆☆</span> &nbsp;&amp; up</label>
+        <label class="chip"><input type="checkbox" data-filter="rating" value="2"/> <span class="stars">★★☆☆☆</span> &nbsp;&amp; up</label>
+        <label class="chip"><input type="checkbox" data-filter="rating" value="1"/> <span class="stars">★☆☆☆☆</span> &nbsp;&amp; up</label>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>Prep Time (minutes)</h3>
+      <!-- ✅ must have id="filter-prepTime" -->
+      <input class="range" type="range" id="filter-prepTime" min="5" max="180" step="5" value="60" />
+      <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
+    </div>
+
+    <div class="block">
+      <h3>Calories</h3>
+      <div class="grid" style="gap:10px">
+        <!-- ✅ must use data-filter="calories" -->
+        <label class="chip"><input type="checkbox" data-filter="calories" value="under-200"/> Under 200 calories</label>
+        <label class="chip"><input type="checkbox" data-filter="calories" value="200-400"/> 200-400 calories</label>
+        <label class="chip"><input type="checkbox" data-filter="calories" value="400-600"/> 400-600 calories</label>
+        <label class="chip"><input type="checkbox" data-filter="calories" value="600-800"/> 600-800 calories</label>
+        <label class="chip"><input type="checkbox" data-filter="calories" value="800-plus"/> 800+ calories</label>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>Diet Type</h3>
+      <div class="grid" style="gap:10px">
+        <!-- ✅ must use data-filter="tags" -->
+        <label class="chip"><input type="checkbox" data-filter="tags" value="Vegetarian"/> Vegetarian</label>
+        <label class="chip"><input type="checkbox" data-filter="tags" value="Vegan"/> Vegan</label>
+        <label class="chip"><input type="checkbox" data-filter="tags" value="Gluten-Free"/> Gluten-Free</label>
+        <label class="chip"><input type="checkbox" data-filter="tags" value="Keto"/> Keto</label>
+        <label class="chip"><input type="checkbox" data-filter="tags" value="Paleo"/> Paleo</label>
+        <label class="chip"><input type="checkbox" data-filter="tags" value="Halal"/> Halal</label>
+      </div>
+    </div>
+
+    <div class="block">
+      <h3>Ingredients</h3>
+      <!-- ✅ must have id="filter-ingredients" -->
+      <input class="range" type="range" id="filter-ingredients" min="3" max="20" step="1" value="10" />
+      <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
+    </div>
+
+    <div class="block">
+      <!-- ✅ must have id="clearFilters" -->
+      <button id="clearFilters" class="btn w-100">Clear All Filters</button>
+    </div>
+  </aside>
+
+    <!-- Main content -->
+    <main>
+      <div class="main-header">
+        <div class="container flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <button class="btn" data-open="sidebar" aria-label="Open filters" style="display:none">⚙️ Filters</button>
+            <div>
+              <h1 class="title-lg">All Recipes</h1>
+              <div class="muted small">Showing <span id="totalRecipes"></span> recipes</div>
+            </div>
           </div>
         </div>
+      </div>
 
-        <!-- your recipe grid continues... -->
-
+      <!-- Featured Recipes -->
+      <section class="section">
+        <div class="container">
+          <div class="flex items-center justify-between mb-3">
+            <div></div>
             <div class="flex gap-2">
             </div>
           </div>
 
-         <div id="recipeGrid" class="grid cols-3"></div>
+          <!-- your recipe grid continues... -->
+
+              <div class="flex gap-2">
+              </div>
+            </div>
+
+           <div id="recipeGrid" class="grid cols-3"></div>
 
 
-          <div class="text-center mt-4">
-            <button class="btn">Load More Recipes</button>
-          </div>
-          <br>
-    </div>
+            <div class="text-center mt-4">
+              <button class="btn">Load More Recipes</button>
+            </div>
+            <br>
 
-      <!-- Explore Categories -->
-      <section class="section hero">
-        <div class="container">
-          <div class="text-center mb-4">
-            <h2 class="title-2xl mb-1">Explore Recipe Categories</h2>
-            <p class="muted">From quick breakfast ideas to elaborate dinner parties, discover recipes organized by meal type and occasion.</p>
+        <!-- Explore Categories -->
+        <section class="section hero">
+          <div class="container">
+            <div class="text-center mb-4">
+              <h2 class="title-2xl mb-1">Explore Recipe Categories</h2>
+              <p class="muted">From quick breakfast ideas to elaborate dinner parties, discover recipes organized by meal type and occasion.</p>
+            </div>
+            <div class="grid cols-4">
+              <div class="card"><div class="card-body text-center"><div style="font-size:36px">🌅</div><div class="mb-1" style="font-weight:600">Breakfast</div><p class="muted small mb-2">Start your day right with healthy breakfast recipes</p><span class="badge" style="background:#fff7ed; border-color:#fed7aa; color:#9a3412">850 recipes</span></div></div>
+              <div class="card"><div class="card-body text-center"><div style="font-size:36px">🥗</div><div class="mb-1" style="font-weight:600">Lunch</div><p class="muted small mb-2">Quick and satisfying midday meals</p><span class="badge" style="background:#ecfdf5; border-color:#bbf7d0; color:#166534">1200 recipes</span></div></div>
+              <div class="card"><div class="card-body text-center"><div style="font-size:36px">🍽️</div><div class="mb-1" style="font-weight:600">Dinner</div><p class="muted small mb-2">Hearty dinner recipes for the whole family</p><span class="badge" style="background:#eff6ff; border-color:#bfdbfe; color:#1e3a8a">1800 recipes</span></div></div>
+              <div class="card"><div class="card-body text-center"><div style="font-size:36px">🍰</div><div class="mb-1" style="font-weight:600">Desserts</div><p class="muted small mb-2">Sweet treats and indulgent desserts</p><span class="badge" style="background:#fdf2f8; border-color:#fbcfe8; color:#9d174d">650 recipes</span></div></div>
+            </div>
           </div>
-          <div class="grid cols-4">
-            <div class="card"><div class="card-body text-center"><div style="font-size:36px">🌅</div><div class="mb-1" style="font-weight:600">Breakfast</div><p class="muted small mb-2">Start your day right with healthy breakfast recipes</p><span class="badge" style="background:#fff7ed; border-color:#fed7aa; color:#9a3412">850 recipes</span></div></div>
-            <div class="card"><div class="card-body text-center"><div style="font-size:36px">🥗</div><div class="mb-1" style="font-weight:600">Lunch</div><p class="muted small mb-2">Quick and satisfying midday meals</p><span class="badge" style="background:#ecfdf5; border-color:#bbf7d0; color:#166534">1200 recipes</span></div></div>
-            <div class="card"><div class="card-body text-center"><div style="font-size:36px">🍽️</div><div class="mb-1" style="font-weight:600">Dinner</div><p class="muted small mb-2">Hearty dinner recipes for the whole family</p><span class="badge" style="background:#eff6ff; border-color:#bfdbfe; color:#1e3a8a">1800 recipes</span></div></div>
-            <div class="card"><div class="card-body text-center"><div style="font-size:36px">🍰</div><div class="mb-1" style="font-weight:600">Desserts</div><p class="muted small mb-2">Sweet treats and indulgent desserts</p><span class="badge" style="background:#fdf2f8; border-color:#fbcfe8; color:#9d174d">650 recipes</span></div></div>
-          </div>
-        </div>
+        </section>
+
       </section>
+    </main>
+  </div>
 
   <script>
     // Mobile: show open-filters button if sidebar is hidden via CSS
@@ -281,117 +342,94 @@
   </script>
 
   <!-- ===== Improved Recipe Modal ===== -->
-<div id="recipeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); justify-content:center; align-items:center; z-index:9999; overflow-y:auto; padding:40px;">
-  <div style="
-    background:white; 
-    border-radius:20px; 
-    max-width:900px; 
-    max-height:calc(100vh - 30px);
-    width:100%; 
-    box-shadow:0 16px 48px rgba(0,0,0,.32);
-    font-size:18px;
-    overflow:hidden;
-    animation: fadeInScale .35s ease;
+  <div id="recipeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); justify-content:center; align-items:center; z-index:9999; overflow-y:auto; padding:40px;">
+    <div style="
+      background:white;
+      border-radius:20px;
+      max-width:900px;
+      max-height:calc(100vh - 30px);
+      width:100%;
+      box-shadow:0 16px 48px rgba(0,0,0,.32);
+      font-size:18px;
+      overflow:hidden;
+      animation: fadeInScale .35s ease;
+    ">
+
+      <!-- Header Image -->
+      <div style="position:relative; height:300px; overflow:hidden;">
+        <img id="modalImage" src="" alt="" style="width:100%; height:100%; object-fit:cover;" />
+        <button id="closeModal" style="
+          position:absolute;
+          top:16px; right:16px;
+          background:rgba(0,0,0,0.65);
+          color:white;
+          border:none;
+          padding:8px 14px;
+          font-size:16px;
+          border-radius:12px;
+          cursor:pointer;
+        ">✕</button>
+      </div>
+
+      <!-- Content -->
+      <div style="padding:28px 32px 36px 32px;">
+
+        <!-- Title -->
+        <h2 id="modalTitle" style="margin:0 0 12px 0; font-size:32px; font-weight:800; line-height:1.2;"></h2>
+
+        <!-- Tags -->
+        <div id="modalTags" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
+
+        <!-- Info Filters -->
+        <div id="modalFilters" style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:32px; font-size:16px; color:#444;">
+          <!-- Dynamically filled: ⏱ 25 min | 🍽 4 servings | 🔥 420 cal | ⭐ 4.8 -->
+        </div>
+
+  <!-- Ingredients + Instructions -->
+  <div id="modalBody" style="
+    max-height:400px;
+    overflow-y:auto;
+    padding-right:8px;
   ">
-    
-    <!-- Header Image -->
-    <div style="position:relative; height:300px; overflow:hidden;">
-      <img id="modalImage" src="" alt="" style="width:100%; height:100%; object-fit:cover;" />
-      <button id="closeModal" style="
-        position:absolute; 
-        top:16px; right:16px; 
-        background:rgba(0,0,0,0.65); 
-        color:white; 
-        border:none; 
-        padding:8px 14px; 
-        font-size:16px; 
-        border-radius:12px; 
-        cursor:pointer;
-      ">✕</button>
+    <!-- Ingredients -->
+    <div>
+      <h3 style="margin:0 0 12px 0; font-size:22px;">Ingredients</h3>
+      <ul id="modalIngredients" style="
+        margin:0;
+        padding:0;
+        list-style:none;
+        color:#555;
+        font-size:16px;
+        line-height:1.6;
+      "></ul>
     </div>
 
-    <!-- Content -->
-    <div style="padding:28px 32px 36px 32px;">
-      
-      <!-- Title -->
-      <h2 id="modalTitle" style="margin:0 0 12px 0; font-size:32px; font-weight:800; line-height:1.2;"></h2>
-      
-      <!-- Tags -->
-      <div id="modalTags" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
+    <!-- Instructions -->
+    <div style="margin-top:28px;">
+      <h3 style="margin:0 0 12px 0; font-size:22px;">Instructions</h3>
+      <div id="modalInstructions" style="
+    margin:0;
+    color:#555;
+    font-size:16px;
+    line-height:1.7;
+      "></div>
+    </div>
+     </div>
+        </div>
 
-      <!-- Info Filters -->
-      <div id="modalFilters" style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:32px; font-size:16px; color:#444;">
-        <!-- Dynamically filled: ⏱ 25 min | 🍽 4 servings | 🔥 420 cal | ⭐ 4.8 -->
       </div>
-
-<!-- Ingredients + Instructions -->
-<div id="modalBody" style="
-  max-height:400px; 
-  overflow-y:auto; 
-  padding-right:8px;
-">
-  <!-- Ingredients -->
-  <div>
-    <h3 style="margin:0 0 12px 0; font-size:22px;">Ingredients</h3>
-    <ul id="modalIngredients" style="
-      margin:0; 
-      padding:0; 
-      list-style:none; 
-      color:#555; 
-      font-size:16px; 
-      line-height:1.6;
-    "></ul>
-  </div>
-
-  <!-- Instructions -->
-  <div style="margin-top:28px;">
-    <h3 style="margin:0 0 12px 0; font-size:22px;">Instructions</h3>
-    <div id="modalInstructions" style="
-  margin:0; 
-  color:#555; 
-  font-size:16px; 
-  line-height:1.7;
-    "></div>
-  </div>
-   </div>
-      </div>
-
-    </div>
     </div>
 
-<!-- Add Some Styles -->
-<style>
-  @keyframes fadeInScale {
-    from { opacity:0; transform:scale(0.96); }
-    to { opacity:1; transform:scale(1); }
-  }
-
-  .tag {
-    padding:6px 14px;
-    border-radius:30px;
-    font-size:14px;
-    font-weight:600;
-    color:white;
-    cursor:pointer;
-    transition:all 0.25s ease;
-  }
-
-  .tag:hover {
-    opacity:0.85;
-    transform:translateY(-2px);
-  }
-
-  /* Nice category colors */
-  .tag:nth-child(1n) { background:#FF6B6B; } /* red */
-  .tag:nth-child(2n) { background:#4ECDC4; } /* teal */
-  .tag:nth-child(3n) { background:#FFD93D; color:#222; } /* yellow with dark text */
-  .tag:nth-child(4n) { background:#1A73E8; } /* blue */
-  .tag:nth-child(5n) { background:#9B59B6; } /* purple */
-</style>
+  <style>
+    @keyframes fadeInScale {
+      from { opacity:0; transform:scale(0.96); }
+      to { opacity:1; transform:scale(1); }
+    }
+  </style>
 
   <!-- ===== end modal ===== -->
 
-   <script src="../recipes.js"></script>
+  <script src="../recipes.js"></script>
   <script src="../scripts.js"></script>
 </body>
 </html>
