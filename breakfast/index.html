@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -30,7 +31,7 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
+      margin: 0;
       font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
       color:var(--fg);
       background:linear-gradient(180deg,#fbfcfd 0%, #ffffff 100%);
@@ -158,8 +159,8 @@
     <img src="favicon.png" alt="GoodPlates logo" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">
 </div>
 
-      <div class="gp-brand-text" style="text-decoration:none;color:inherit">
-        <div class="gp-name">GoodPlates</div>
+     <div class="gp-brand-text" style="text-decoration:none;color:inherit">
+        <div class="gp-name"><a href="/index.html" style="color:inherit;text-decoration:none;">GoodPlates</a></div>
         <div class="gp-sub small muted">Recipes & meal ideas</div>
       </div>
     </a>
@@ -194,8 +195,10 @@
     <div class="gp-mobile-panel" role="document">
       <div class="gp-mobile-head">
         <div class="gp-mobile-brand" style="display:flex;align-items:center;gap:10px">
-          <div class="gp-logo-sq" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;background:linear-gradient(90deg,#16a34a,#15803d)">G</div>
-          <div class="gp-name">GoodPlates</div>
+          <a href="/index.html">
+            <div class="gp-logo-sq" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;background:linear-gradient(90deg,#16a34a,#15803d)">G</div>
+          </a>
+          <div class="gp-name"><a href="/index.html" style="color:inherit;text-decoration:none;">GoodPlates</a></div>
         </div>
         <button id="gpMobileClose" class="icon-btn" aria-label="Close menu">✕</button>
       </div>
@@ -215,8 +218,6 @@
         <a href="/login-form/" class="gp-cta cta" style="width:100%; display:inline-block; text-align:center">Login</a>
       </div>
     </div>
-
-    <!-- overlay click closes -->
     <div class="gp-mobile-overlay" tabindex="-1" data-close></div>
   </aside>
 
@@ -237,9 +238,8 @@
 
     /* container + topbar */
     .gp-topnav{ position:sticky; top:0; z-index:80; backdrop-filter: blur(6px); background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.82)); border-bottom:1px solid rgba(15,23,42,0.03) }
-    .gp-container{ max-width:var(--container); margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:20px; justify-content:space-between; }
-
-    /* brand */
+    .gp-container{ max-width:var(--container); margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:20px; justify-content:flex-start; }
+    
     .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
     .gp-logo-sq{ width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; background:linear-gradient(90deg,var(--primary),var(--primary-700)); box-shadow:0 8px 20px rgba(22,163,74,0.12) }
     .gp-name{ font-weight:800; color:var(--fg); }
@@ -247,7 +247,7 @@
 
     /* links (desktop) — increased spacing by larger gap */
     .gp-links ul{ list-style:none; padding:0; margin:0; display:flex; gap:28px; align-items:center; }
-    .gp-links a{ display:inline-flex; align-items:center; padding:10px 12px; border-radius:10px; color:var(--fg); font-weight:600; transition:all .12s ease; border:1px solid transparent; font-size:16px }
+    .gp-links a{ display:inline-flex; align-items:center; padding:10px 12px; border-radius:10px; color:var(--fg); font-weight:600; transition:all .12s ease; border:1px solid transparent; font-size:15px }
     .gp-links a:hover{ background:var(--primary-100); color:var(--primary); transform:translateY(-2px); box-shadow:var(--shadow-soft) }
 
     /* actions */
