@@ -684,14 +684,14 @@
   </style>
   <!-- ===== end modal ===== -->
 
-  <script src="../recipes.js"></script>
-<script>
-// Filter to only breakfast recipes as baseline
-window.recipes = (window.recipes || []).filter(r => {
-  const v = (r.mealtype ?? r.mealType ?? '').toString().trim().toLowerCase();
-  return v === 'breakfast';
-});
-</script>
-   <script src="../scripts.js"></script>
+      <script src="../recipes.js"></script>
+    <script>
+    // Filter to only breakfast recipes as baseline
+    window.recipes = (recipes || []).filter(r => {
+      const v = (r.mealtype ?? r.mealType ?? '').toString().trim().toLowerCase();
+      return v === 'breakfast';
+    });
+    </script>
+    <script src="../scripts.js"></script>
 </body>
 </html>
