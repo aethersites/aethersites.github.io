@@ -682,7 +682,12 @@
     }
     
   </style>
-
+    <script>
+    window.recipes = (window.recipes || []).filter(r => {
+      const v = (r.mealtype ?? r.mealType ?? '').toString().trim().toLowerCase();
+      return v === 'breakfast';
+     });
+   </script>
   <!-- ===== end modal ===== -->
 
   <script src="../recipes.js"></script>
