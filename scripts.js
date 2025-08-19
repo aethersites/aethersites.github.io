@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ${r.tags.map(t => `<span class="badge small">${t}</span>`).join(" ")}
           </div>
           <div class="flex gap-2">
-            <button class="btn w-100 primary" data-id="${r.id}">View Recipe</button>
+            <button class="btn w-100 primary" data-id="${r.idx}">View Recipe</button>
           </div>
         </div>
       `;
@@ -45,8 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Open modal with recipe details
   recipeGrid.addEventListener("click", e => {
     if (e.target.matches("button[data-id]")) {
-      const id = parseInt(e.target.dataset.id, 10);
-      const r = recipes.find(x => x.id === id);
+const id = parseInt(e.target.dataset.id, 10);
+const r = currentFilteredRecipes[id]; // currentFilteredRecipes is the array you just rendered
       if (!r) return;
       modalTitle.textContent = r.title;
       modalImage.src = r.image;
