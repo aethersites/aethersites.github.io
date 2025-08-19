@@ -205,7 +205,7 @@ const recipes = [
     7. Serve immediately while warm.
   `,
   tags: ["Healthy", "Protein-Packed"],
-  image: "https://images.pexels.com/photos/5665660/pexels-photo-5665660.jpeg",
+  image: "https://www.shutterstock.com/image-photo/benedict-eggs-on-avocado-toast-600nw-2439635221.jpg",
   cuisine: "Modern European",
   mealtype: "Breakfast"
 },
