@@ -557,9 +557,14 @@
       };
     })();
   </script>
- <script>
-   const breakfastRecipes = recipes.filter(r => r.mealtype === "Breakfast");
- </script>
+    <script>
+  // Narrow down recipes to breakfast only.
+    window.recipes = (window.recipes || []).filter(r => {
+      const v = (r.mealtype ?? r.mealType ?? '').toString().trim().toLowerCase();
+      return v === 'breakfast';
+     });
+   </script>
+  
   <!-- Keep your existing scripts (they will still find the same IDs) -->
   <script src="../recipes.js"></script>
   <script src="../scripts.js"></script>
