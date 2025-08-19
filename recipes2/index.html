@@ -576,7 +576,7 @@
   </script>
 
   <!-- ===== Improved Recipe Modal ===== -->
-  <div id="recipeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); justify-content:center; align-items:center; z-index:9999; overflow-y:auto; padding:40px;">
+  <div id="recipeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); justify-content:center; align-items:center; z-index:9999;">
     <div style="
       background:white;
       border-radius:20px;
@@ -585,7 +585,7 @@
       width:100%;
       box-shadow:0 16px 48px rgba(0,0,0,.32);
       font-size:18px;
-      overflow:auto;
+      overflow:hidden;
       animation: fadeInScale .35s ease;
     ">
 
@@ -620,11 +620,11 @@
         </div>
 
   <!-- Ingredients + Instructions -->
-  <div id="modalBody" style="
-    max-height:400px;
-    overflow-y:auto;
-    padding-right:8px;
-  ">
+ <div id="modalBody" style="
+  max-height:calc(100vh - 400px); /* adjust based on your modal header height! */
+  overflow-y:auto;
+  padding-right:8px;
+">
     <!-- Ingredients -->
     <div>
       <h3 style="margin:0 0 12px 0; font-size:22px;">Ingredients</h3>
