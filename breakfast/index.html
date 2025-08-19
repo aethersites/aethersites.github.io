@@ -689,7 +689,7 @@
     // Filter to only breakfast recipes as baseline
     window.recipes = (recipes || []).filter(r => {
       const v = (r.mealtype ?? r.mealType ?? '').toString().trim().toLowerCase();
-      return v === 'breakfast';
+      return v === 'Breakfast';
     });
     </script>
     <script src="../scripts.js"></script>
