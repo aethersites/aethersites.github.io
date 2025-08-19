@@ -92,18 +92,38 @@
     .hero-text h1{ font-size:28px; margin:6px 0; font-weight:800; letter-spacing:-0.6px }
 
     /* ===== Recipe grid & cards ===== */
-    .grid { display:grid; gap:20px }
-    @media(min-width:768px){ .grid.cols-2{grid-template-columns:repeat(2,1fr)} .grid.cols-3{grid-template-columns:repeat(3,1fr)} .grid.cols-4{grid-template-columns:repeat(4,1fr)} }
-    .card{
-      background:var(--surface); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow:var(--shadow-soft);
-      display:flex; flex-direction:column;
-    }
-    .card-media{ height:170px; background:linear-gradient(135deg,#ecfdf5,#f0fdf4); position:relative; display:flex; align-items:center; justify-content:center; }
-    .card-content{ padding:14px 16px 18px; display:flex; flex-direction:column; gap:8px }
-    .card-title{ font-weight:700; font-size:16px; color:var(--fg) }
-    .card-sub{ color:var(--muted); font-size:13px }
-    .card-footer{ margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:10px }
 
+    /* ===== Cards ===== */
+    .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden}
+.card .card-media {
+  height: 192px;
+  background: linear-gradient(135deg,#ecfdf5,#f0fdf4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* 👈 This keeps absolutely-positioned elements inside */
+}
+    .grid {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+    .card .card-body{padding:16px 16px 20px}
+    .card:hover{box-shadow:var(--shadow); transform:translateY(-2px); transition:transform .2s ease, box-shadow .2s ease}
+
+
+    /* ===== Grids ===== */
+    .grid{display:grid; gap:24px}
+    @media(min-width:768px){
+      .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+      .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+      .grid.cols-4{grid-template-columns:repeat(4,1fr)}
+      .layout{grid-template-columns:320px 1fr}
+    }
+    @media(max-width:900px){
+      .layout{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .sidebar.open{display:block}
+    }
     .badge{ padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; background:var(--primary-100); color:var(--primary) }
 
     /* ===== Modal ===== */
