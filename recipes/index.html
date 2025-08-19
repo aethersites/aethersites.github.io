@@ -67,14 +67,7 @@
   </ul>
 </nav>
 
-</body>
-</html>
 
-
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recipes UI — Pure HTML/CSS</title>
   <style>
@@ -144,6 +137,10 @@
   justify-content: center;
   position: relative; /* 👈 This keeps absolutely-positioned elements inside */
 }
+    .grid {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
     .card .card-body{padding:16px 16px 20px}
     .card:hover{box-shadow:var(--shadow); transform:translateY(-2px); transition:transform .2s ease, box-shadow .2s ease}
 
@@ -207,7 +204,6 @@
     /* clamp */
     .clamp-2{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
   </style>
-</head>
 
   <!-- Main layout with sidebar -->
 
@@ -232,7 +228,6 @@
             <div>
               <div class="card card-media rounded" style="height:320px">
                     <img src="https://burst.shopifycdn.com/photos/flatlay-iron-skillet-with-meat-and-other-food.jpg?width=1000&format=pjpg&exif=0&iptc=0" alt="Delicious food" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
-
                 <div style="font-size:64px; opacity:.25"></div>
               </div>
             </div>
@@ -240,92 +235,80 @@
         </div>
       </section>
 
-      <!-- Browse by Cuisine -->
-      <section class="section" style="padding-top:24px">
-          
-        <div class="container">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="title-lg">Browse by Cuisine</h2>
-            <button class="btn">🪄 More Filters</button>
-          </div>
-          <div class="grid cols-3">
-            <!-- 6 cuisine cards -->
-            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🇮🇹</div><div class="mb-1">Italian</div><div class="small muted">1240 recipes</div></div></div>
-            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🥢</div><div class="mb-1">Asian</div><div class="small muted">980 recipes</div></div></div>
-            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🌮</div><div class="mb-1">Mexican</div><div class="small muted">760 recipes</div></div></div>
-            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🫒</div><div class="mb-1">Mediterranean</div><div class="small muted">650 recipes</div></div></div>
-            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🇮🇳</div><div class="mb-1">Indian</div><div class="small muted">540 recipes</div></div></div>
-            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🇫🇷</div><div class="mb-1">French</div><div class="small muted">420 recipes</div></div></div>
-          </div>
-        </div>
-      </section>
 <!-- Layout wrapper -->
 <div class="layout">
-  <!-- Sidebar (filters) -->
-  <aside id="sidebar" class="sidebar">
-    <div class="block">
-      <div class="flex items-center justify-between">
-        <h2 class="title-lg">Filters</h2>
-        <button class="btn ghost small" data-toggle="sidebar">✖️</button>
-      </div>
-      <div class="mt-2">
-        <div class="searchbar" style="position:relative">
-          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
-          <input class="input" placeholder="Search recipes..." style="padding-left:36px" />
-        </div>
-      </div>
+    <!-- Sidebar (filters) -->
+<aside id="sidebar" class="sidebar">
+  <div class="block">
+    <div class="flex items-center justify-between">
+      <h2 class="title-lg">Filters</h2>
+      <button class="btn ghost small" data-toggle="sidebar">✖️</button>
     </div>
-
-    <div class="block">
-      <h3>Rating</h3>
-      <div class="grid" style="gap:10px">
-        <label class="chip"><input type="checkbox"/> <span class="stars">★★★★★</span> <span class="muted">&nbsp;&amp; up</span></label>
-        <label class="chip"><input type="checkbox"/> <span class="stars">★★★★☆</span> <span class="muted">&nbsp;&amp; up</span></label>
-        <label class="chip"><input type="checkbox"/> <span class="stars">★★★☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
-        <label class="chip"><input type="checkbox"/> <span class="stars">★★☆☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
-        <label class="chip"><input type="checkbox"/> <span class="stars">★☆☆☆☆</span> <span class="muted">&nbsp;&amp; up</span></label>
+    <div class="mt-2">
+      <div class="searchbar" style="position:relative">
+        <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
+        <!-- ✅ must have id="filter-search" -->
+        <input class="input" type="text" id="filter-search" placeholder="Search recipes..." style="padding-left:36px" />
       </div>
     </div>
+  </div>
 
-    <div class="block">
-      <h3>Prep Time (minutes)</h3>
-      <input class="range" type="range" min="5" max="180" step="5" value="60" />
-      <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
+  <div class="block">
+    <h3>Rating</h3>
+    <div class="grid" style="gap:10px">
+      <!-- ✅ must use data-filter="rating" -->
+      <label class="chip"><input type="checkbox" data-filter="rating" value="5"/> <span class="stars">★★★★★</span> &nbsp;&amp; up</label>
+      <label class="chip"><input type="checkbox" data-filter="rating" value="4"/> <span class="stars">★★★★☆</span> &nbsp;&amp; up</label>
+      <label class="chip"><input type="checkbox" data-filter="rating" value="3"/> <span class="stars">★★★☆☆</span> &nbsp;&amp; up</label>
+      <label class="chip"><input type="checkbox" data-filter="rating" value="2"/> <span class="stars">★★☆☆☆</span> &nbsp;&amp; up</label>
+      <label class="chip"><input type="checkbox" data-filter="rating" value="1"/> <span class="stars">★☆☆☆☆</span> &nbsp;&amp; up</label>
     </div>
+  </div>
 
-    <div class="block">
-      <h3>Calories</h3>
-      <div class="grid" style="gap:10px">
-        <label class="chip"><input type="checkbox"/> Under 200 calories</label>
-        <label class="chip"><input type="checkbox"/> 200-400 calories</label>
-        <label class="chip"><input type="checkbox"/> 400-600 calories</label>
-        <label class="chip"><input type="checkbox"/> 600-800 calories</label>
-        <label class="chip"><input type="checkbox"/> 800+ calories</label>
-      </div>
-    </div>
+  <div class="block">
+    <h3>Prep Time (minutes)</h3>
+    <!-- ✅ must have id="filter-prepTime" -->
+    <input class="range" type="range" id="filter-prepTime" min="5" max="180" step="5" value="60" />
+    <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
+  </div>
 
-    <div class="block">
-      <h3>Diet Type</h3>
-      <div class="grid" style="gap:10px">
-        <label class="chip"><input type="checkbox"/> Vegetarian</label>
-        <label class="chip"><input type="checkbox"/> Vegan</label>
-        <label class="chip"><input type="checkbox"/> Gluten-Free</label>
-        <label class="chip"><input type="checkbox"/> Keto</label>
-        <label class="chip"><input type="checkbox"/> Paleo</label>
-        <label class="chip"><input type="checkbox"/> Halal</label>
-      </div>
+  <div class="block">
+    <h3>Calories</h3>
+    <div class="grid" style="gap:10px">
+      <!-- ✅ must use data-filter="calories" -->
+      <label class="chip"><input type="checkbox" data-filter="calories" value="under-200"/> Under 200 calories</label>
+      <label class="chip"><input type="checkbox" data-filter="calories" value="200-400"/> 200-400 calories</label>
+      <label class="chip"><input type="checkbox" data-filter="calories" value="400-600"/> 400-600 calories</label>
+      <label class="chip"><input type="checkbox" data-filter="calories" value="600-800"/> 600-800 calories</label>
+      <label class="chip"><input type="checkbox" data-filter="calories" value="800-plus"/> 800+ calories</label>
     </div>
+  </div>
 
-    <div class="block">
-      <h3>Ingredients</h3>
-      <input class="range" type="range" min="3" max="20" step="1" value="10" />
-      <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
+  <div class="block">
+    <h3>Diet Type</h3>
+    <div class="grid" style="gap:10px">
+      <!-- ✅ must use data-filter="tags" -->
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Vegetarian"/> Vegetarian</label>
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Vegan"/> Vegan</label>
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Gluten-Free"/> Gluten-Free</label>
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Keto"/> Keto</label>
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Paleo"/> Paleo</label>
+      <label class="chip"><input type="checkbox" data-filter="tags" value="Halal"/> Halal</label>
     </div>
+  </div>
 
-    <div class="block">
-      <button class="btn w-100">Clear All Filters</button>
-    </div>
-  </aside>
+  <div class="block">
+    <h3>Ingredients</h3>
+    <!-- ✅ must have id="filter-ingredients" -->
+    <input class="range" type="range" id="filter-ingredients" min="3" max="20" step="1" value="10" />
+    <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
+  </div>
+
+  <div class="block">
+    <!-- ✅ must have id="clearFilters" -->
+    <button id="clearFilters" class="btn w-100">Clear All Filters</button>
+  </div>
+</aside>
 
   <!-- Main content -->
   <main>
@@ -335,13 +318,8 @@
           <button class="btn" data-open="sidebar" aria-label="Open filters" style="display:none">⚙️ Filters</button>
           <div>
             <h1 class="title-lg">All Recipes</h1>
-            <div class="muted small">Showing 2,450 recipes</div>
+            <div class="muted small">Showing <span id="totalRecipes"></span> recipes</div>
           </div>
-        </div>
-        <div class="flex gap-2">
-          <button class="btn">Newest</button>
-          <button class="btn">Popular</button>
-          <button class="btn primary">Rating</button>
         </div>
       </div>
     </div>
@@ -361,224 +339,14 @@
             </div>
           </div>
 
-          <div class="grid cols-3">
-            <!-- Card 1 -->
-            <article class="card">
-              <div class="card-media">
-                <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
-                  <button class="icon-btn" title="Like">❤️</button>
-                  <button class="icon-btn" title="Save">🔖</button>
-                </div>
-  <img src="https://media.istockphoto.com/id/1194750269/photo/fresh-quinoa-tabbouleh-salad.jpg?s=612x612&w=0&k=20&c=Jo7y2fl9RKIMBXteG83NZUpl57HpvEd4GiCfj-gh8yM=" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
-              </div>
-              <div class="card-body">
-                <div class="flex items-center justify-between">
-                  <h3 class="mb-1">Mediterranean Quinoa Bowl</h3>
-                  <div class="small">⭐ 4.8</div>
-                </div>
-                <p class="muted small clamp-2">Fresh and healthy bowl with quinoa, roasted vegetables, and tahini dressing</p>
-                <div class="muted small mt-2 mb-2">⏱️ 25 min · 👥 4 · 🔥 420 cal</div>
-                <div class="mb-2">
-                  <span class="badge small">Vegetarian</span>
-                  <span class="badge small">Gluten-Free</span>
-                </div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="small" style="font-weight:600">Servings:</span>
-                  <div class="flex items-center gap-2" data-servings>
-                    <button class="btn small" data-action="dec" data-target="s1">−</button>
-                    <span id="s1" class="small" data-serving data-default="4">4</span>
-                    <button class="btn small" data-action="inc" data-target="s1">＋</button>
-                  </div>
-                </div>
-                <div class="flex gap-2">
-                  <button class="btn w-100 primary">View Recipe</button>
-                  <button class="btn" title="Chef">👨‍🍳</button>
-                </div>
-              </div>
-            </article>
+         <div id="recipeGrid" class="grid cols-3"></div>
 
-            <!-- Card 2 -->
-            <article class="card">
-              <div class="card-media">
-                <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
-                  <button class="icon-btn">❤️</button>
-                  <button class="icon-btn">🔖</button>
-                </div>
-  <img src="https://images.pexels.com/photos/33435594/pexels-photo-33435594.jpeg" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
-              </div>
-              <div class="card-body">
-                <div class="flex items-center justify-between">
-                  <h3 class="mb-1">Spicy Thai Green Curry</h3>
-                  <div class="small">⭐ 4.9</div>
-                </div>
-                <p class="muted small clamp-2">Authentic Thai curry with coconut milk, vegetables, and aromatic herbs</p>
-                <div class="muted small mt-2 mb-2">⏱️ 30 min · 👥 3 · 🔥 380 cal</div>
-                <div class="mb-2">
-                  <span class="badge small">Spicy</span>
-                  <span class="badge small">Dairy-Free</span>
-                </div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="small" style="font-weight:600">Servings:</span>
-                  <div class="flex items-center gap-2">
-                    <button class="btn small" data-action="dec" data-target="s2">−</button>
-                    <span id="s2" class="small" data-serving data-default="3">3</span>
-                    <button class="btn small" data-action="inc" data-target="s2">＋</button>
-                  </div>
-                </div>
-                <div class="flex gap-2">
-                  <button class="btn w-100 primary">View Recipe</button>
-                  <button class="btn">👨‍🍳</button>
-                </div>
-              </div>
-            </article>
-
-            <!-- Card 3 -->
-            <article class="card">
-              <div class="card-media">
-                <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
-                  <button class="icon-btn">❤️</button>
-                  <button class="icon-btn">🔖</button>
-                </div>
-<img src="https://images.pexels.com/photos/33457994/pexels-photo-33457994.jpeg" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
-              </div>
-              <div class="card-body">
-                <div class="flex items-center justify-between">
-                  <h3 class="mb-1">Classic Margherita Pizza</h3>
-                  <div class="small">⭐ 4.7</div>
-                </div>
-                <p class="muted small clamp-2">Traditional Italian pizza with fresh mozzarella, basil, and tomato sauce</p>
-                <div class="muted small mt-2 mb-2">⏱️ 45 min · 👥 2 · 🔥 520 cal</div>
-                <div class="mb-2">
-                  <span class="badge small">Vegetarian</span>
-                  <span class="badge small">Italian</span>
-                </div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="small" style="font-weight:600">Servings:</span>
-                  <div class="flex items-center gap-2">
-                    <button class="btn small" data-action="dec" data-target="s3">−</button>
-                    <span id="s3" class="small" data-serving data-default="2">2</span>
-                    <button class="btn small" data-action="inc" data-target="s3">＋</button>
-                  </div>
-                </div>
-                <div class="flex gap-2">
-                  <button class="btn w-100 primary">View Recipe</button>
-                  <button class="btn">👨‍🍳</button>
-                </div>
-              </div>
-            </article>
-
-            <!-- Card 4 -->
-            <article class="card">
-              <div class="card-media">
-                <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
-                  <button class="icon-btn">❤️</button>
-                  <button class="icon-btn">🔖</button>
-                </div>
-  <img src="https://images.pexels.com/photos/725991/pexels-photo-725991.jpeg" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
-              </div>
-              <div class="card-body">
-                <div class="flex items-center justify-between">
-                  <h3 class="mb-1">Grilled Salmon with Herbs</h3>
-                  <div class="small">⭐ 4.8</div>
-                </div>
-                <p class="muted small clamp-2">Perfectly grilled salmon with fresh herbs and lemon butter sauce</p>
-                <div class="muted small mt-2 mb-2">⏱️ 20 min · 👥 2 · 🔥 450 cal</div>
-                <div class="mb-2">
-                  <span class="badge small">High Protein</span>
-                  <span class="badge small">Keto</span>
-                </div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="small" style="font-weight:600">Servings:</span>
-                  <div class="flex items-center gap-2">
-                    <button class="btn small" data-action="dec" data-target="s4">−</button>
-                    <span id="s4" class="small" data-serving data-default="2">2</span>
-                    <button class="btn small" data-action="inc" data-target="s4">＋</button>
-                  </div>
-                </div>
-                <div class="flex gap-2">
-                  <button class="btn w-100 primary">View Recipe</button>
-                  <button class="btn">👨‍🍳</button>
-                </div>
-              </div>
-            </article>
-
-            <!-- Card 5 -->
-            <article class="card">
-              <div class="card-media">
-                <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
-                  <button class="icon-btn">❤️</button>
-                  <button class="icon-btn">🔖</button>
-                </div>
-  <img src="https://images.pexels.com/photos/30459912/pexels-photo-30459912.jpeg" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
-              </div>
-              <div class="card-body">
-                <div class="flex items-center justify-between">
-                  <h3 class="mb-1">Moroccan Tagine</h3>
-                  <div class="small">⭐ 4.9</div>
-                </div>
-                <p class="muted small clamp-2">Slow-cooked stew with exotic spices, tender meat, and dried fruits</p>
-                <div class="muted small mt-2 mb-2">⏱️ 2 hours · 👥 6 · 🔥 380 cal</div>
-                <div class="mb-2">
-                  <span class="badge small">Traditional</span>
-                  <span class="badge small">Halal</span>
-                </div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="small" style="font-weight:600">Servings:</span>
-                  <div class="flex items-center gap-2">
-                    <button class="btn small" data-action="dec" data-target="s5">−</button>
-                    <span id="s5" class="small" data-serving data-default="6">6</span>
-                    <button class="btn small" data-action="inc" data-target="s5">＋</button>
-                  </div>
-                </div>
-                <div class="flex gap-2">
-                  <button class="btn w-100 primary">View Recipe</button>
-                  <button class="btn">👨‍🍳</button>
-                </div>
-              </div>
-            </article>
-
-            <!-- Card 6 -->
-            <article class="card">
-              <div class="card-media">
-                <div style="position:absolute; right:12px; top:12px; display:flex; gap:8px">
-                  <button class="icon-btn">❤️</button>
-                  <button class="icon-btn">🔖</button>
-                </div>
-  <img src="https://images.pexels.com/photos/13887558/pexels-photo-13887558.jpeg" alt="Recipe Image" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
-              </div>
-              <div class="card-body">
-                <div class="flex items-center justify-between">
-                  <h3 class="mb-1">Vegan Buddha Bowl</h3>
-                  <div class="small">⭐ 4.6</div>
-                </div>
-                <p class="muted small clamp-2">Nutritious bowl with roasted vegetables, quinoa, and avocado</p>
-                <div class="muted small mt-2 mb-2">⏱️ 35 min · 👥 2 · 🔥 350 cal</div>
-                <div class="mb-2">
-                  <span class="badge small">Vegan</span>
-                  <span class="badge small">Healthy</span>
-                </div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="small" style="font-weight:600">Servings:</span>
-                  <div class="flex items-center gap-2">
-                    <button class="btn small" data-action="dec" data-target="s6">−</button>
-                    <span id="s6" class="small" data-serving data-default="2">2</span>
-                    <button class="btn small" data-action="inc" data-target="s6">＋</button>
-                  </div>
-                </div>
-                <div class="flex gap-2">
-                  <button class="btn w-100 primary">View Recipe</button>
-                  <button class="btn">👨‍🍳</button>
-                </div>
-              </div>
-            </article>
-          </div>
 
           <div class="text-center mt-4">
             <button class="btn">Load More Recipes</button>
           </div>
-        </div>
-      </section>
-
+          <br>
+    </div>
       <!-- AI suggestions -->
       <section class="section hero">
         <div class="container">
@@ -667,11 +435,10 @@
     alt="Dish image"
     style="width:100%; height:100%; object-fit:cover;"
   />
-</div>            </div>
+  </div>
           </article>
         </div>
       </section>
-    </main>
   </div>
 
   <script>
@@ -703,5 +470,119 @@
       el.textContent = String(next);
     });
   </script>
+
+  <!-- ===== Improved Recipe Modal ===== -->
+<div id="recipeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); justify-content:center; align-items:center; z-index:9999; overflow-y:auto; padding:40px;">
+  <div style="
+    background:white; 
+    border-radius:20px; 
+    max-width:900px; 
+    max-height:calc(100vh - 30px);
+    width:100%; 
+    box-shadow:0 16px 48px rgba(0,0,0,.32);
+    font-size:18px;
+    overflow:hidden;
+    animation: fadeInScale .35s ease;
+  ">
+    
+    <!-- Header Image -->
+    <div style="position:relative; height:300px; overflow:hidden;">
+      <img id="modalImage" src="" alt="" style="width:100%; height:100%; object-fit:cover;" />
+      <button id="closeModal" style="
+        position:absolute; 
+        top:16px; right:16px; 
+        background:rgba(0,0,0,0.65); 
+        color:white; 
+        border:none; 
+        padding:8px 14px; 
+        font-size:16px; 
+        border-radius:12px; 
+        cursor:pointer;
+      ">✕</button>
+    </div>
+
+    <!-- Content -->
+    <div style="padding:28px 32px 36px 32px;">
+      
+      <!-- Title -->
+      <h2 id="modalTitle" style="margin:0 0 12px 0; font-size:32px; font-weight:800; line-height:1.2;"></h2>
+      
+      <!-- Tags -->
+      <div id="modalTags" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
+
+      <!-- Info Filters -->
+      <div id="modalFilters" style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:32px; font-size:16px; color:#444;">
+        <!-- Dynamically filled: ⏱ 25 min | 🍽 4 servings | 🔥 420 cal | ⭐ 4.8 -->
+      </div>
+
+<!-- Ingredients + Instructions -->
+<div id="modalBody" style="
+  max-height:400px; 
+  overflow-y:auto; 
+  padding-right:8px;
+">
+  <!-- Ingredients -->
+  <div>
+    <h3 style="margin:0 0 12px 0; font-size:22px;">Ingredients</h3>
+    <ul id="modalIngredients" style="
+      margin:0; 
+      padding:0; 
+      list-style:none; 
+      color:#555; 
+      font-size:16px; 
+      line-height:1.6;
+    "></ul>
+  </div>
+
+  <!-- Instructions -->
+  <div style="margin-top:28px;">
+    <h3 style="margin:0 0 12px 0; font-size:22px;">Instructions</h3>
+    <div id="modalInstructions" style="
+  margin:0; 
+  color:#555; 
+  font-size:16px; 
+  line-height:1.7;
+    "></div>
+  </div>
+   </div>
+      </div>
+
+    </div>
+    </div>
+
+<!-- Add Some Styles -->
+<style>
+  @keyframes fadeInScale {
+    from { opacity:0; transform:scale(0.96); }
+    to { opacity:1; transform:scale(1); }
+  }
+
+  .tag {
+    padding:6px 14px;
+    border-radius:30px;
+    font-size:14px;
+    font-weight:600;
+    color:white;
+    cursor:pointer;
+    transition:all 0.25s ease;
+  }
+
+  .tag:hover {
+    opacity:0.85;
+    transform:translateY(-2px);
+  }
+
+  /* Nice category colors */
+  .tag:nth-child(1n) { background:#FF6B6B; } /* red */
+  .tag:nth-child(2n) { background:#4ECDC4; } /* teal */
+  .tag:nth-child(3n) { background:#FFD93D; color:#222; } /* yellow with dark text */
+  .tag:nth-child(4n) { background:#1A73E8; } /* blue */
+  .tag:nth-child(5n) { background:#9B59B6; } /* purple */
+</style>
+
+  <!-- ===== end modal ===== -->
+
+   <script src="../recipes.js"></script>
+  <script src="../scripts.js"></script>
 </body>
 </html>
