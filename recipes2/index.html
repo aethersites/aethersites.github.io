@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,6 +9,197 @@
 
   <!-- design font (optional, from prototype) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<header class="gp-topnav" role="banner" aria-label="Main navigation">
+  <div class="gp-container">
+
+    <!-- Left: brand (icon + name) -->
+    <a class="gp-brand" href="/" aria-label="GoodPlates home">
+      <!-- plate + fork SVG icon -->
+      <div class="gp-logo-sq" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="white" stroke-width="0.6" fill="none" opacity="0.12"/>
+          <path d="M8 6c0 1.333-1 4-1 6s1 4 1 6" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+          <path d="M10 6v12" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="9" fill="none" stroke="rgba(255,255,255,0.06)"/>
+        </svg>
+      </div>
+
+      <div class="gp-brand-text" style="text-decoration:none;color:inherit">
+        <div class="gp-name">GoodPlates</div>
+        <div class="gp-sub small muted">Recipes & meal ideas</div>
+      </div>
+    </a>
+
+    <!-- Center: links (desktop) -->
+    <nav class="gp-links" role="navigation" aria-label="Primary">
+      <ul>
+        <li><a href="/recipes/">Recipes</a></li>
+        <li><a href="/grocery-list/">Grocery List</a></li>
+        <li><a href="/order-online/">Order Online</a></li>
+        <li><a href="/statistics/">Statistics</a></li>
+        <li><a href="/courses/">Courses</a></li>
+        <li><a href="/contact/">Contact</a></li>
+      </ul>
+    </nav>
+
+    <!-- Right: CTA + hamburger -->
+    <div class="gp-actions">
+      <!-- Login CTA (replaces Onboarding) -->
+      <a href="/login-form/" class="gp-cta cta" title="Login">Login</a>
+
+      <!-- mobile hamburger -->
+      <button id="gpHamburger" class="gp-hamburger" aria-controls="gpMobileMenu" aria-expanded="false" aria-label="Open menu">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mobile: slide-over menu (keeps all links + CTA) -->
+  <aside id="gpMobileMenu" class="gp-mobile" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="gp-mobile-panel" role="document">
+      <div class="gp-mobile-head">
+        <div class="gp-mobile-brand" style="display:flex;align-items:center;gap:10px">
+          <div class="gp-logo-sq" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;background:linear-gradient(90deg,#16a34a,#15803d)">G</div>
+          <div class="gp-name">GoodPlates</div>
+        </div>
+        <button id="gpMobileClose" class="icon-btn" aria-label="Close menu">✕</button>
+      </div>
+
+      <nav class="gp-mobile-links" aria-label="Mobile primary">
+        <ul>
+          <li><a href="/recipes/">Recipes</a></li>
+          <li><a href="/grocery-list/">Grocery List</a></li>
+          <li><a href="/order-online/">Order Online</a></li>
+          <li><a href="/statistics/">Statistics</a></li>
+          <li><a href="/courses/">Courses</a></li>
+          <li><a href="/contact/">Contact</a></li>
+        </ul>
+      </nav>
+
+      <div class="gp-mobile-foot" style="margin-top:18px">
+        <a href="/login-form/" class="gp-cta cta" style="width:100%; display:inline-block; text-align:center">Login</a>
+      </div>
+    </div>
+
+    <!-- overlay click closes -->
+    <div class="gp-mobile-overlay" tabindex="-1" data-close></div>
+  </aside>
+
+  <style>
+    /* ===== tokens (consistency with page) ===== */
+    :root{
+      --primary: #16a34a;
+      --primary-700: #15803d;
+      --primary-100: #dcfce7;
+      --fg: #0f172a;
+      --muted: #6b7280;
+      --border: #e6e9ee;
+      --radius: 12px;
+      --shadow-soft: 0 8px 24px rgba(2,6,23,0.06);
+      --glass: rgba(255,255,255,0.72);
+      --container: 1200px;
+    }
+        /* container + topbar */
+        .gp-topnav {
+          position: sticky;
+          top: 0;
+          z-index: 80;
+          backdrop-filter: blur(6px);
+          background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.82));
+          border-bottom: 1px solid rgba(15,23,42,0.03);
+        }
+        
+        .gp-container {
+          max-width: var(--container);
+          margin: 0 auto;
+          padding: 12px 0px;
+          display: flex;
+          align-items: center;
+          gap: 70px;
+          justify-content: flex-start; /* align everything left-to-right */
+        }
+        
+
+ 
+        
+        /* CTA pill */
+        .gp-cta {
+          padding: 8px 22px;
+          min-width: 110px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, var(--primary), var(--primary-700));
+          color: white;
+          font-weight: 700;
+          text-decoration: none;
+          box-shadow: 0 8px 20px rgba(22,163,74,0.12);
+        }
+        .gp-cta:hover {
+          transform: translateY(-2px);
+          filter: brightness(.96);
+        }
+
+    /* hamburger (mobile) */
+    .gp-hamburger{ display:none; width:44px; height:44px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
+    .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
+
+    /* mobile menu */
+    .gp-mobile{ display:none; position:fixed; inset:0; z-index:100; }
+    .gp-mobile-panel{ width:320px; max-width:90%; height:100%; background:white; box-shadow:0 30px 80px rgba(2,6,23,0.2); padding:18px; transform:translateX(-6px); border-right:1px solid var(--border); }
+    .gp-mobile-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px }
+    .gp-mobile-links ul{ list-style:none; padding:6px 0; margin:0; display:flex; flex-direction:column; gap:6px }
+    .gp-mobile-links a{ display:block; padding:12px 10px; border-radius:8px; font-weight:700; color:var(--fg) }
+    .gp-mobile-links a:hover{ background:var(--surface-2) }
+
+    .gp-mobile-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.28); right:0; }
+
+    /* responsive: remove desktop links at small sizes, show hamburger */
+    @media (max-width:1100px){
+      .gp-links{ display:none }
+      .gp-hamburger{ display:inline-flex }
+      /* keep CTA in mobile menu so hide on header */
+      .gp-cta{ display:none }
+    }
+
+    .small{ font-size:12px; color:var(--muted) }
+    .muted{ color:var(--muted) }
+  </style>
+
+  <script>
+    (function(){
+      const hamb = document.getElementById('gpHamburger');
+      const mobile = document.getElementById('gpMobileMenu');
+      const closeBtn = document.getElementById('gpMobileClose');
+      const overlay = mobile?.querySelector('[data-close]');
+
+      function openMobile(){
+        mobile.style.display = 'block';
+        mobile.setAttribute('aria-hidden','false');
+        hamb.setAttribute('aria-expanded','true');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeMobile(){
+        mobile.style.display = 'none';
+        mobile.setAttribute('aria-hidden','true');
+        hamb.setAttribute('aria-expanded','false');
+        document.body.style.overflow = '';
+      }
+
+      hamb?.addEventListener('click', openMobile);
+      closeBtn?.addEventListener('click', closeMobile);
+      overlay?.addEventListener('click', closeMobile);
+      document.addEventListener('keydown', (e)=> { if(e.key === 'Escape') closeMobile(); });
+
+      window.addEventListener('resize', ()=> {
+        if(window.matchMedia('(min-width:1101px)').matches){
+          closeMobile();
+        }
+      });
+    })();
+    
+  </script>
+</header>
+
 
   <style>
     /* ===== Design tokens (adapted for compatibility) ===== */
@@ -56,7 +249,6 @@
       border-bottom:1px solid rgba(15,23,42,0.03);
       position:sticky; top:0; z-index:60; backdrop-filter: blur(6px);
     }
-    .gp-container{ max-width:var(--container); margin:0 auto; padding:8px 20px; display:flex; align-items:center; gap:12px; justify-content:space-between; }
     .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
     .gp-logo-sq{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; background:linear-gradient(90deg,var(--primary),var(--primary-700)); box-shadow:0 8px 20px rgba(22,163,74,0.12) }
     .gp-name{ font-weight:800; color:var(--fg); }
