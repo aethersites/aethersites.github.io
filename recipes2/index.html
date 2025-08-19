@@ -1,73 +1,8 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GoodPlates</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Avenir', sans-serif;
-      background-color: white;
-    }
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      background-color: white;
-    }
-    .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: black;
-    }
-    ul {
-      list-style: none;
-      display: flex;
-      gap: 2rem;
-      margin: 0;
-      padding: 0;
-      align-items: center;
-    }
-    li a {
-      text-decoration: none;
-      color: black;
-      font-size: 1rem;
-      transition: color 0.2s ease;
-    }
-    li a:hover {
-      color: gray;
-    }
-    .cta {
-      background-color: #16a34a;
-      color: white !important;
-      padding: 0.5rem 1.5rem;
-      border-radius: 999px; /* pill shape */
-      font-weight: medium;
-      transition: background-color 0.2s ease;
-    }
-    .cta:hover {
-      background-color: #12893d;
-    }
-  </style>
-</head>
-<body>
-
-<nav>
-  <div class="logo">GoodPlates</div>
-  <ul>
-    <li><a href="/recipes/">Recipes</a></li>
-    <li><a href="/grocery-list/">Grocery List</a></li>
-    <li><a href="/order-online/">Order Online</a></li>
-    <li><a href="/statistics/">Statistics</a></li>
-    <li><a href="/courses/">Courses</a></li>
-    <li><a href="/contact/">Contact</a></li>
-    <li><a href="/onboarding/" class="cta">Onboarding</a></li>
-  </ul>
-</nav>
-
-
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recipes UI — Pure HTML/CSS</title>
   <style>
@@ -144,12 +79,6 @@
     .card .card-body{padding:16px 16px 20px}
     .card:hover{box-shadow:var(--shadow); transform:translateY(-2px); transition:transform .2s ease, box-shadow .2s ease}
 
-    /* ===== Header / Breadcrumbs ===== */
-    .topbar{border-bottom:1px solid var(--border); background:var(--surface)}
-    .breadcrumbs{font-size:14px; color:var(--muted)}
-    .breadcrumbs a{color:inherit}
-    .breadcrumbs .sep{opacity:.6; padding:0 .5ch}
-
     /* ===== Sidebar ===== */
     .layout{display:grid; grid-template-columns: 320px 1fr}
     .sidebar{background:var(--surface); border-right:1px solid var(--border); max-height:calc(100vh - 57px); overflow:auto}
@@ -159,18 +88,6 @@
     .range{width:100%}
     .chip{display:flex; align-items:center; gap:8px; font-size:14px}
     .stars{letter-spacing:1px; color:#f59e0b}
-
-    /* ===== Main header ===== */
-    .main-header{border-bottom:1px solid var(--border); padding:20px 0; background:var(--surface)}
-
-    /* ===== Hero ===== */
-    .hero{background:linear-gradient(180deg,#f0fdf4,#f7fff8)}
-    .hero h1{font-size:40px; line-height:1.2; margin:12px 0}
-    .hero .searchbar{position:relative}
-    .hero .searchbar input{width:100%; padding:14px 44px 14px 44px; border:1px solid var(--border); border-radius:999px}
-    .hero .searchbar .left, .hero .searchbar .right{position:absolute; top:50%; transform:translateY(-50%)}
-    .hero .searchbar .left{left:14px}
-    .hero .searchbar .right{right:8px}
 
     /* ===== Grids ===== */
     .grid{display:grid; gap:24px}
@@ -185,9 +102,6 @@
       .sidebar{display:none}
       .sidebar.open{display:block}
     }
-
-    /* ===== Recipe of the Day ===== */
-    .hero-card{border:2px solid rgba(22,163,74,.25); box-shadow: 0 8px 32px rgba(16,185,129,.15)}
 
     /* ===== Helpers ===== */
     .mb-0{margin-bottom:0} .mb-1{margin-bottom:6px} .mb-2{margin-bottom:12px} .mb-3{margin-bottom:18px} .mb-4{margin-bottom:24px}
@@ -206,34 +120,6 @@
   </style>
 
   <!-- Main layout with sidebar -->
-
-      <!-- Hero -->
-      <section class="hero section">
-        <div class="container">
-          <div class="grid cols-2" style="align-items:center">
-            <div>
-              <span class="badge primary">🍳 50,000+ Recipes</span>
-              <h1 class="title-2xl mt-2">Discover Your Next <span style="color:var(--primary)">Favorite Recipe</span></h1>
-              <p class="muted mb-3">From quick weeknight dinners to elaborate weekend feasts, find the perfect recipe for every occasion with our AI-powered search and filtering.</p>
-              <div class="searchbar mb-3">
-                <span class="left">🔎</span>
-                <input placeholder="Search recipes, ingredients, or cuisines..." />
-                <span class="right"><button class="btn primary small">Search</button></span>
-              </div>
-              <div class="flex items-center gap-4 muted small">
-                <span>👨‍🍳 AI-powered suggestions</span>
-                <span>🪄 Advanced filtering</span>
-              </div>
-            </div>
-            <div>
-              <div class="card card-media rounded" style="height:320px">
-                    <img src="https://burst.shopifycdn.com/photos/flatlay-iron-skillet-with-meat-and-other-food.jpg?width=1000&format=pjpg&exif=0&iptc=0" alt="Delicious food" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
-                <div style="font-size:64px; opacity:.25"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
 <!-- Layout wrapper -->
 <div class="layout">
@@ -347,50 +233,6 @@
           </div>
           <br>
     </div>
-      <!-- AI suggestions -->
-      <section class="section hero">
-        <div class="container">
-          <div class="text-center mb-4">
-            <h2 class="title-2xl mb-1">AI-Powered Recipe Suggestions</h2>
-            <p class="muted">Personalized recommendations based on your preferences and cooking history</p>
-          </div>
-          <div class="grid cols-3">
-            <div class="card">
-              <div class="card-body">
-                <h3 class="mb-1">Perfect for Tonight</h3>
-                <p class="muted small mb-2">Quick dinner ideas based on your pantry</p>
-                <div class="grid" style="gap:8px">
-                  <div class="flex items-center justify-between border rounded" style="padding:8px 10px; background:var(--surface-2)"><span class="small">Garlic Pasta</span><button class="btn small ghost">View</button></div>
-                  <div class="flex items-center justify-between border rounded" style="padding:8px 10px; background:var(--surface-2)"><span class="small">Stir-fry Vegetables</span><button class="btn small ghost">View</button></div>
-                  <div class="flex items-center justify-between border rounded" style="padding:8px 10px; background:var(--surface-2)"><span class="small">Quick Curry</span><button class="btn small ghost">View</button></div>
-                </div>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-body">
-                <h3 class="mb-1">Try Something New</h3>
-                <p class="muted small mb-2">Expand your culinary horizons</p>
-                <div class="grid" style="gap:8px">
-                  <div class="flex items-center justify-between border rounded" style="padding:8px 10px; background:var(--surface-2)"><span class="small">Korean BBQ</span><button class="btn small ghost">View</button></div>
-                  <div class="flex items-center justify-between border rounded" style="padding:8px 10px; background:var(--surface-2)"><span class="small">Moroccan Tagine</span><button class="btn small ghost">View</button></div>
-                  <div class="flex items-center justify-between border rounded" style="padding:8px 10px; background:var(--surface-2)"><span class="small">Thai Soup</span><button class="btn small ghost">View</button></div>
-                </div>
-              </div>
-            </div>
-            <div class="card">
-              <div class="card-body">
-                <h3 class="mb-1">Healthy Options</h3>
-                <p class="muted small mb-2">Nutritious meals for your goals</p>
-                <div class="grid" style="gap:8px">
-                  <div class="flex items-center justify-between border rounded" style="padding:8px 10px; background:var(--surface-2)"><span class="small">Buddha Bowl</span><button class="btn small ghost">View</button></div>
-                  <div class="flex items-center justify-between border rounded" style="padding:8px 10px; background:var(--surface-2)"><span class="small">Grilled Salmon</span><button class="btn small ghost">View</button></div>
-                  <div class="flex items-center justify-between border rounded" style="padding:8px 10px; background:var(--surface-2)"><span class="small">Quinoa Salad</span><button class="btn small ghost">View</button></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       <!-- Explore Categories -->
       <section class="section hero">
@@ -407,39 +249,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Recipe of the Day -->
-      <section class="section">
-        <div class="container">
-          <article class="card hero-card">
-            <div class="grid cols-2" style="align-items:center">
-              <div class="card-body">
-                <div class="mb-2"><span class="badge primary">⭐ Recipe of the Day</span></div>
-                <h2 class="title-2xl mb-1">Authentic Italian Carbonara</h2>
-                <p class="muted mb-3">Master this classic Roman pasta dish with our step-by-step guide. Creamy, indulgent, and surprisingly simple to make.</p>
-                <div class="flex items-center gap-6 small muted mb-3"><span>⏱️ 20 minutes</span><span>👥 4 servings</span><span>⭐ 4.9 rating</span></div>
-                <div class="mb-3"><span class="badge small">Italian</span> <span class="badge small">Traditional</span> <span class="badge small">Comfort Food</span></div>
-                <div class="flex gap-3">
-                  <button class="btn primary">Cook This Recipe</button>
-                  <button class="btn">Save for Later</button>
-                </div>
-              </div>
-<div class="card-media" style="
-  height: 300px;          /* 👈 Set a fixed height (not min-height) */
-  border-radius: 12px;    /* 👈 Rounded corners */
-  overflow: hidden;       /* 👈 Ensures image stays inside rounded corners */
-  position: relative;     /* 👈 Required if you're positioning things absolutely */
-">
-  <img
-    src="https://images.pexels.com/photos/4518838/pexels-photo-4518838.jpeg"
-    alt="Dish image"
-    style="width:100%; height:100%; object-fit:cover;"
-  />
-  </div>
-          </article>
-        </div>
-      </section>
-  </div>
 
   <script>
     // Mobile: show open-filters button if sidebar is hidden via CSS
@@ -586,4 +395,3 @@
   <script src="../scripts.js"></script>
 </body>
 </html>
-
