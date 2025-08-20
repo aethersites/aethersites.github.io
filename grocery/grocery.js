@@ -43,14 +43,24 @@ let unsubGrocery = null;
 let unsubPantry = null;
 
 /* ---------- AUTH STATE ---------- */
+// --- Option A: SAFE REDIRECT (replace existing onAuthStateChanged) ---
+const LOGIN_PATH = '/login-form/'; // change to your actual login path if different
+
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    // you can change this to your own login path
     userDisplay.textContent = "Not signed in";
-    // If you prefer redirecting to a sign-in page, uncomment below:
-    // window.location.href = "/login-form/";
+
+    // if we're already on the login page, don't redirect (prevents loops)
+    const currentPath = window.location.pathname || '/';
+    if (!currentPath.startsWith(LOGIN_PATH)) {
+      // send the user to login and include a 'next' param so your login can redirect back after auth
+      const next = encodeURIComponent(window.location.pathname + window.location.search + window.location.hash);
+      window.location.href = `${LOGIN_PATH}?next=${next}`;
+    }
     return;
   }
+
+  // user is signed in
   uid = user.uid;
   userDisplay.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px">
