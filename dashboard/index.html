@@ -516,5 +516,42 @@
       document.getElementById('detailBtn')?.addEventListener('click', ()=> alert('Open details (mock)'));
     });
   </script>
+  <!-- Add at the bottom of your <body> just before the closing </body> -->
+<script type="module">
+  // Import Firebase SDK modules (use your correct version)
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+
+  // Your Firebase config (same as in your grocery.js)
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.appspot.com",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+
+  // Initialize Firebase app (or get existing)
+  let app;
+  if (getApps().length === 0) {
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = getApp();
+  }
+
+  // Get Firebase Auth instance
+  const auth = getAuth(app);
+
+  // Listen for auth state changes
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      // Not signed in! Redirect to login page (edit path as needed)
+      window.location.href = "/login.html";
+    }
+    // else: user is signed in, do nothing (let dashboard render)
+  });
+</script>
 </body>
 </html>
