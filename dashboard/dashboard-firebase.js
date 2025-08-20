@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
@@ -15,6 +15,7 @@ const firebaseConfig = {
 let app;
 if (getApps().length === 0) app = initializeApp(firebaseConfig);
 else app = getApp();
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -24,6 +25,8 @@ const saveStatus = document.getElementById('saveStatus');
 
 // Helper: get all form data
 function getProfileFromForm() {
+  const dietChips = Array.from(document.querySelectorAll('#dietChips .chip.selected')).map(n => n.textContent);
+  const avatarDataUrl = document.querySelector('#avatarPreview img')?.src;
   return {
     fullName: form.fullName.value.trim(),
     email: form.email.value.trim(),
@@ -34,7 +37,8 @@ function getProfileFromForm() {
     preferredDelivery: form.preferredDelivery.value,
     bio: form.bio.value.trim(),
     units: form.units.value,
-    // You may want to add avatar, dietTags, etc, as shown before
+    dietTags: dietChips,
+    avatarDataUrl: avatarDataUrl && avatarDataUrl.startsWith('data:') ? avatarDataUrl : '',
     updatedAt: new Date().toISOString()
   };
 }
@@ -51,6 +55,13 @@ function fillForm(profile) {
   form.preferredDelivery.value = profile.preferredDelivery || '';
   form.bio.value = profile.bio || '';
   form.units.value = profile.units || 'metric';
+  // diet tags
+  if (window.renderDietChips && profile.dietTags) window.renderDietChips(profile.dietTags);
+  // avatar
+  if (profile.avatarDataUrl) {
+    const img = document.querySelector('#avatarPreview img');
+    if (img) img.src = profile.avatarDataUrl;
+  }
 }
 
 // Save to Firestore
@@ -58,8 +69,8 @@ async function saveToFirestore(user, data) {
   if (!user) return;
   saveStatus.textContent = 'Saving...';
   await setDoc(doc(db, "users", user.uid, "profile", "main"), data, { merge: true });
-  saveStatus.textContent = 'Saved';
-  setTimeout(()=>saveStatus.textContent='Saved', 1000);
+  saveStatus.textContent = 'Saved!';
+  setTimeout(() => (saveStatus.textContent = 'Saved'), 1500);
 }
 
 // Load from Firestore
@@ -71,28 +82,25 @@ async function loadProfile(user) {
   }
 }
 
-// Listen for realtime updates
-function listenProfileRealtime(user) {
-  if (!user) return;
-  return onSnapshot(doc(db, "users", user.uid, "profile", "main"), (snap) => {
-    if (snap.exists()) fillForm(snap.data());
-  });
-}
-
 // Main logic
 onAuthStateChanged(auth, user => {
-  if (!user) return;
+  if (!user) {
+    // Optionally redirect to login
+    // window.location.href = "/login.html";
+    return;
+  }
   loadProfile(user);
-  listenProfileRealtime(user);
 
-  // Autosave on change
-  form.addEventListener('input', () => {
+  // Save on submit
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
     saveToFirestore(user, getProfileFromForm());
   });
 
-  // Manual save (overrides autosave debounce)
-  saveBtn.addEventListener('click', e => {
-    e.preventDefault();
-    saveToFirestore(user, getProfileFromForm());
+  // Optionally, autosave on input (debounced)
+  let autosaveTimer;
+  form.addEventListener('input', () => {
+    clearTimeout(autosaveTimer);
+    autosaveTimer = setTimeout(() => saveToFirestore(user, getProfileFromForm()), 1200);
   });
 });
