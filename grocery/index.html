@@ -9,11 +9,12 @@
 </head>
 <body>
   <header class="topbar">
-    <h1 class="brand">My Grocery & Pantry</h1>
+    <h1 class="brand">🥦 My Grocery & Pantry</h1>
     <div id="userDisplay" class="user-info"></div>
   </header>
 
   <main class="container">
+    <!-- Grocery Panel -->
     <section class="panel">
       <div class="panel-header">
         <h2>Grocery</h2>
@@ -23,22 +24,18 @@
           <button id="addGrocery" class="btn">Add</button>
         </div>
       </div>
-
       <ul id="groceryList" class="list" aria-live="polite"></ul>
     </section>
 
+    <!-- Pantry Panel -->
     <section class="panel">
       <div class="panel-header">
         <h2>Pantry</h2>
         <div class="note">Items in your pantry — ready to cook with.</div>
       </div>
-
       <ul id="pantryList" class="list" aria-live="polite"></ul>
     </section>
   </main>
 
-  <footer class="footer">
-    <small>Built with Firebase — items are private to your account.</small>
-  </footer>
 </body>
 </html>
