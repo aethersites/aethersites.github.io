@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Grocery & Pantry</title>
   <link rel="stylesheet" href="grocery.css" />
@@ -9,33 +9,36 @@
 </head>
 <body>
   <header class="topbar">
-    <h1 class="brand">🥦 My Grocery & Pantry</h1>
-    <div id="userDisplay" class="user-info"></div>
+    <div class="brand">🥦 My Grocery & Pantry</div>
+    <div id="userDisplay" class="user-info">Checking auth…</div>
   </header>
 
-  <main class="container">
-    <!-- Grocery Panel -->
-    <section class="panel">
+  <main class="container" id="panels">
+    <!-- Grocery -->
+    <section class="panel left-panel" aria-labelledby="groceryTitle">
       <div class="panel-header">
-        <h2>Grocery</h2>
-        <div class="add-row">
-          <input id="groceryInput" placeholder="Add grocery item (press Enter)..." autocomplete="off" />
+        <h2 id="groceryTitle">Grocery</h2>
+        <div class="add-row" role="search" aria-label="Add grocery item">
+          <input id="groceryInput" placeholder="e.g. Bananas" autocomplete="off" />
           <input id="groceryQty" type="number" min="1" value="1" aria-label="quantity" />
           <button id="addGrocery" class="btn">Add</button>
         </div>
       </div>
-      <ul id="groceryList" class="list" aria-live="polite"></ul>
+      <ul id="groceryList" class="list" aria-live="polite" role="list"></ul>
     </section>
 
-    <!-- Pantry Panel -->
-    <section class="panel">
+    <!-- Pantry -->
+    <section class="panel right-panel" aria-labelledby="pantryTitle">
       <div class="panel-header">
-        <h2>Pantry</h2>
+        <h2 id="pantryTitle">Pantry</h2>
         <div class="note">Items in your pantry — ready to cook with.</div>
       </div>
-      <ul id="pantryList" class="list" aria-live="polite"></ul>
+      <ul id="pantryList" class="list" aria-live="polite" role="list"></ul>
     </section>
   </main>
 
+  <footer class="footer">
+    <small>Built with Firebase · items are private to your account.</small>
+  </footer>
 </body>
 </html>
