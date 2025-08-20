@@ -1,13 +1,12 @@
   
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 💡 Grab only breakfast recipes from the global list (recipes.js must be loaded first)
-  // This makes the rest of the code only use breakfast recipes for all filters, searches, etc.
-  const breakfastRecipes = (recipes || []).filter(r =>
-    (r.mealtype ?? r.mealType ?? '').toString().trim().toLowerCase() === 'breakfast'
-  );
-  // Overwrite the global recipes variable so the rest of the code works as before
-  window.recipes = breakfastRecipes;
+  // Only keep breakfast recipes from the global list loaded from varrecipes.js
+const breakfastRecipes = (window.recipes || []).filter(r =>
+  (r.mealtype ?? r.mealType ?? '').toString().trim().toLowerCase() === 'breakfast'
+);
+// Overwrite the global recipes variable so the rest of the code works as before
+window.recipes = breakfastRecipes;
 
   const recipeGrid = document.getElementById("recipeGrid");
   const modal = document.getElementById("recipeModal");
