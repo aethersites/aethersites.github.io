@@ -1,0 +1,996 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>GoodPlates — Profile (Enhanced)</title>
+<style>
+  :root{
+    --bg:#f6fbf6; --panel:#fff; --muted:#6b7280; --text:#052012;
+    --primary-dark:#0f3f22; --primary:#16a34a; --accent:linear-gradient(135deg,#11723a,#16a34a,#9bf7b7);
+    --border:rgba(8,23,12,0.06); --shadow:0 8px 30px rgba(3,24,12,.08);
+    --radius:12px; --sidebar-w:260px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text)}
+  .app{display:grid;grid-template-columns:var(--sidebar-w) 1fr;min-height:100vh}
+  /* Sidebar */
+  .sidebar{padding:26px 18px;background:linear-gradient(180deg,#fff,#f4fff7);border-right:1px solid var(--border);display:flex;flex-direction:column;gap:12px}
+  .logo-mark{width:44px;height:44px;border-radius:10px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+  .nav-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;color:var(--muted);text-decoration:none;font-weight:700}
+  .nav-item.active{background:linear-gradient(90deg, rgba(22,163,74,0.12), rgba(22,163,74,0.04));color:var(--primary-dark);box-shadow: inset 4px 0 0 0 var(--primary)}
+  .upgrade{margin-top:auto;background:linear-gradient(135deg,#1b8a4b,#16a34a);color:white;padding:14px;border-radius:12px}
+  /* Main */
+  .main{padding:24px;overflow:auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .search{flex:1;max-width:640px;display:flex;gap:8px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--border)}
+  .search input{border:0;outline:none;background:transparent;width:100%}
+  /* Profile layout */
+  .page-title{font-size:28px;font-weight:800;margin:0}
+  .page-sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+  .grid{display:grid;grid-template-columns:360px 1fr;gap:18px}
+  .card{background:var(--panel);border-radius:12px;padding:18px;box-shadow:var(--shadow);border:1px solid var(--border)}
+  .avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:12px}
+  .avatar{width:120px;height:120px;border-radius:14px;overflow:hidden;border:4px solid #fff;box-shadow:0 6px 18px rgba(3,24,12,0.08)}
+  .avatar img{width:100%;height:100%;object-fit:cover}
+  .upload{display:flex;gap:8px;align-items:center}
+  form{display:flex;flex-direction:column;gap:12px}
+  label{font-size:13px;color:var(--muted);margin-bottom:6px;display:block}
+  input[type="text"], input[type="email"], input[type="tel"], textarea, select {
+    width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);font-size:14px;background:transparent;
+  }
+  textarea{min-height:100px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .actions{display:flex;gap:12px;margin-top:8px;align-items:center}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:0;padding:10px 14px;border-radius:999px;cursor:pointer;font-weight:700;color:white;background:var(--accent);box-shadow:0 8px 22px rgba(16,163,74,.12)}
+  .btn.ghost{background:transparent;color:var(--primary-dark);border:1px solid rgba(16,163,74,.08);box-shadow:none}
+  .danger{background:linear-gradient(135deg,#d9534f,#c12b2b)}
+  .meta{font-size:13px;color:var(--muted)}
+  .muted{color:var(--muted)}
+  .small{font-size:13px}
+  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#f3fff3;border:1px solid rgba(16,163,74,.06);color:var(--primary-dark);font-weight:700}
+  .field-error{color:#b91c1c;font-size:13px;margin-top:6px}
+  .status {
+    display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700;font-size:13px;margin-left:8px;
+  }
+  .status.saving{background:#fff7e6;color:#a66a00}
+  .status.saved{background:#e6f9ee;color:var(--primary-dark)}
+  .status.unsaved{background:#ffefef;color:#a00d12}
+  /* diet tags & chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:6px 10px;border-radius:999px;border:1px solid var(--border);cursor:pointer;background:transparent}
+  .chip.selected{background:linear-gradient(90deg, rgba(22,163,74,0.12), rgba(22,163,74,0.04));border-color:rgba(22,163,74,0.22)}
+  /* password strength */
+  .strength{height:8px;border-radius:6px;background:#f3f3f3;overflow:hidden}
+  .strength > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#ff4d4d,#ffb84d,#6ee7b7);transition:width .28s}
+  /* toast */
+  .toast{position:fixed;right:20px;bottom:20px;background:#052012;color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.12);opacity:0;transform:translateY(12px);transition:all .28s}
+  .toast.show{opacity:1;transform:none}
+  /* history list */
+  .history-list{max-height:180px;overflow:auto;border-radius:8px;border:1px dashed var(--border);padding:10px;background:linear-gradient(180deg,#fff,#fbfff8)}
+  .history-item{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px}
+  .sessions-list{max-height:160px;overflow:auto}
+  @media(max-width:980px){
+    .app{grid-template-columns:72px 1fr}
+    .grid{grid-template-columns:1fr;gap:12px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="logo-mark">GP</div>
+      <div>
+        <div style="font-weight:800">GoodPlates</div>
+        <div style="font-size:12px;color:var(--muted)">Cook • Order • Track</div>
+      </div>
+    </div>
+
+    <a class="nav-item" href="#">🏠 Home</a>
+    <a class="nav-item" href="#">🍳 Recipes</a>
+    <a class="nav-item" href="#">📝 Grocery List</a>
+    <a class="nav-item active" href="#">👤 Profile</a>
+
+    <div class="upgrade">
+      <div style="font-weight:800">Upgrade to PRO</div>
+      <div style="font-size:13px;margin-top:6px">Premium meal plans & analytics</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="search" aria-hidden>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="#6b7280" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <input placeholder="Search recipes, orders, ingredients..." />
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center">
+        <div id="loggedAs" class="meta muted"></div>
+        <button id="loginBtn" class="btn ghost">Login</button>
+        <button id="logoutBtn" class="btn ghost" style="display:none">Logout</button>
+      </div>
+    </div>
+
+    <h2 class="page-title">Profile</h2>
+    <div class="page-sub">Enhanced profile settings — autosave, history, sessions and quick sync to server.</div>
+
+    <div class="grid">
+      <!-- left: avatar & prefs -->
+      <aside class="card">
+        <div class="avatar-wrap">
+          <div class="avatar" id="avatarPreview">
+            <img src="https://i.pravatar.cc/300?img=5" alt="avatar">
+          </div>
+          <div style="text-align:center">
+            <div id="previewName" style="font-weight:800;font-size:18px">Guest</div>
+            <div id="previewEmail" class="muted small">not logged in</div>
+          </div>
+
+          <div style="width:100%;margin-top:8px">
+            <label class="small muted">Upload avatar (png/jpg)</label>
+            <div class="upload">
+              <input id="avatarInput" type="file" accept="image/*" />
+              <button id="removeAvatar" class="btn ghost" style="padding:8px 10px">Remove</button>
+            </div>
+            <div class="meta small" style="margin-top:6px">Images are resized & compressed client-side (400×400)</div>
+          </div>
+
+          <div style="width:100%;margin-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="meta">Profile status</div>
+              <div id="saveStatus" class="status unsaved">Not saved</div>
+            </div>
+          </div>
+
+          <div style="width:100%;margin-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:700">Version History</div>
+              <div class="meta small">Saved snapshots</div>
+            </div>
+            <div class="history-list" id="historyList" style="margin-top:8px"></div>
+          </div>
+
+          <div style="width:100%;margin-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:700">Active Sessions</div>
+              <div class="meta small">Manage sessions</div>
+            </div>
+            <div class="sessions-list" id="sessionsList" style="margin-top:8px"></div>
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button id="signOutOthers" class="btn ghost">Sign out other sessions</button>
+              <button id="invalidateAll" class="btn ghost">Invalidate all</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- right: editable form -->
+      <section class="card">
+        <form id="profileForm">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:800">Account Details</div>
+            <div class="meta small">Autosaves changes — you can also Save & Sync</div>
+          </div>
+
+          <div style="margin-top:12px">
+            <label for="fullName">Full name <span style="color:#a00d12">*</span></label>
+            <input id="fullName" type="text" placeholder="Jane Doe" required />
+            <div id="errName" class="field-error" style="display:none"></div>
+          </div>
+
+          <div>
+            <label for="email">Email (used as account id) <span style="color:#a00d12">*</span></label>
+            <input id="email" type="email" placeholder="you@domain.com" required />
+            <div id="errEmail" class="field-error" style="display:none"></div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="phone">Phone</label>
+              <input id="phone" type="tel" placeholder="+1 555 555 5555" />
+              <div id="errPhone" class="field-error" style="display:none"></div>
+            </div>
+            <div>
+              <label for="location">Location</label>
+              <input id="location" type="text" placeholder="City, State" />
+            </div>
+          </div>
+
+          <div>
+            <label for="address">Default Delivery Address</label>
+            <input id="address" type="text" placeholder="123 Green St, Apt 5" />
+          </div>
+
+          <div>
+            <label for="dietTags">Dietary Preferences</label>
+            <div class="chips" id="dietChips">
+              <!-- chips inserted via JS -->
+            </div>
+            <div class="meta small" style="margin-top:6px">Click to toggle multiple preferences</div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label for="nutritionGoals">Nutrition goals</label>
+              <input id="nutritionGoals" type="text" placeholder="Maintain 1800-2000 kcal/day" />
+            </div>
+            <div>
+              <label for="units">Units</label>
+              <select id="units"><option value="metric">Metric</option><option value="imperial">Imperial</option></select>
+            </div>
+          </div>
+
+          <div>
+            <label for="preferredDelivery">Preferred Delivery Time</label>
+            <select id="preferredDelivery">
+              <option value="">No preference</option>
+              <option value="morning">Morning (8am–11am)</option>
+              <option value="afternoon">Afternoon (12pm–4pm)</option>
+              <option value="evening">Evening (5pm–9pm)</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="bio">Bio</label>
+            <textarea id="bio" placeholder="A short bio..."></textarea>
+          </div>
+
+          <hr style="border:none;border-top:1px dashed var(--border)"/>
+
+          <!-- password change -->
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:700">Security</div>
+              <div class="meta small">Change password (local demo)</div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:8px">
+              <input id="newPassword" type="password" placeholder="New password" />
+              <button id="setPasswordBtn" class="btn ghost" type="button">Set</button>
+            </div>
+            <div style="margin-top:8px">
+              <div class="strength" aria-hidden><i id="pwStrengthBar"></i></div>
+              <div id="pwStrengthText" class="meta small" style="margin-top:6px">Password strength: —</div>
+            </div>
+          </div>
+
+          <hr style="border:none;border-top:1px dashed var(--border)"/>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:6px">
+            <button id="saveBtn" class="btn" type="submit">Save Profile</button>
+            <button id="syncBtn" class="btn ghost" type="button">Save & Sync</button>
+            <button id="resetBtn" class="btn ghost" type="button">Reset</button>
+            <button id="deleteBtn" class="btn danger" type="button">Delete Profile</button>
+            <div style="margin-left:auto" class="meta small">Last synced: <span id="lastSynced">never</span></div>
+          </div>
+
+          <div style="margin-top:12px; display:flex; gap:8px; align-items:center">
+            <button id="exportBtn" class="btn ghost" type="button">Export JSON</button>
+            <button id="importBtn" class="btn ghost" type="button">Import JSON</button>
+            <input id="jsonImportInput" type="file" accept=".json" style="display:none" />
+            <div id="toast" class="toast">Saved</div>
+          </div>
+
+        </form>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+/* -------------------------
+  Enhanced profile logic
+   - autosave (debounced)
+   - version history
+   - sessions (simulated)
+   - avatar resize & compress
+   - password hashing (SHA-256)
+   - mock server sync
+-------------------------*/
+
+const STORAGE_PREFIX = 'goodplates_profile_';
+const CURRENT_USER_KEY = 'goodplates_current_user';
+const SESSIONS_PREFIX = 'goodplates_sessions_';
+
+const defaultDietTags = ['Vegetarian','Vegan','Gluten-Free','Keto','Paleo','Halal','Dairy-Free','Nut-Free'];
+
+const refs = {
+  avatarInput: document.getElementById('avatarInput'),
+  avatarPreviewImg: document.querySelector('#avatarPreview img'),
+  removeAvatarBtn: document.getElementById('removeAvatar'),
+  fullName: document.getElementById('fullName'),
+  email: document.getElementById('email'),
+  phone: document.getElementById('phone'),
+  location: document.getElementById('location'),
+  address: document.getElementById('address'),
+  nutritionGoals: document.getElementById('nutritionGoals'),
+  preferredDelivery: document.getElementById('preferredDelivery'),
+  bio: document.getElementById('bio'),
+  units: document.getElementById('units'),
+  dietChips: document.getElementById('dietChips'),
+  saveStatus: document.getElementById('saveStatus'),
+  historyList: document.getElementById('historyList'),
+  sessionsList: document.getElementById('sessionsList'),
+  signOutOthers: document.getElementById('signOutOthers'),
+  invalidateAll: document.getElementById('invalidateAll'),
+  saveBtn: document.getElementById('saveBtn'),
+  syncBtn: document.getElementById('syncBtn'),
+  resetBtn: document.getElementById('resetBtn'),
+  deleteBtn: document.getElementById('deleteBtn'),
+  exportBtn: document.getElementById('exportBtn'),
+  importBtn: document.getElementById('importBtn'),
+  jsonImportInput: document.getElementById('jsonImportInput'),
+  toast: document.getElementById('toast'),
+  loggedAs: document.getElementById('loggedAs'),
+  loginBtn: document.getElementById('loginBtn'),
+  logoutBtn: document.getElementById('logoutBtn'),
+  previewName: document.getElementById('previewName'),
+  previewEmail: document.getElementById('previewEmail'),
+  newPassword: document.getElementById('newPassword'),
+  setPasswordBtn: document.getElementById('setPasswordBtn'),
+  pwStrengthBar: document.getElementById('pwStrengthBar'),
+  pwStrengthText: document.getElementById('pwStrengthText'),
+  lastSynced: document.getElementById('lastSynced'),
+  profileForm: document.getElementById('profileForm')
+};
+
+let autosaveTimer = null;
+let dirty = false;
+let currentUser = JSON.parse(localStorage.getItem(CURRENT_USER_KEY) || 'null');
+
+// Helper: build storage key
+function storageKeyFor(email){
+  if(!email) return null;
+  return STORAGE_PREFIX + email.trim().toLowerCase();
+}
+function sessionsKeyFor(email){ return SESSIONS_PREFIX + email.trim().toLowerCase(); }
+
+// Toast helper
+function showToast(text, ms=2200){
+  refs.toast.textContent = text;
+  refs.toast.classList.add('show');
+  setTimeout(()=> refs.toast.classList.remove('show'), ms);
+}
+
+// Mock server sync (replace with fetch)
+function mockServerSync(profile){
+  // simulate network latency and random failure
+  return new Promise((resolve, reject)=>{
+    setTimeout(()=>{
+      if(Math.random() < 0.96) { // 96% success
+        resolve({ ok:true, serverTime: new Date().toISOString() });
+      } else {
+        reject(new Error('Sync failed (simulated network error)'));
+      }
+    }, 800 + Math.random()*700);
+  });
+}
+
+// Simple SHA-256 helper (returns hex)
+async function sha256Hex(text){
+  const enc = new TextEncoder();
+  const data = enc.encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const arr = Array.from(new Uint8Array(hash));
+  return arr.map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// Avatar resize & compress (returns dataURL)
+// - resizes to square 400x400 and center-crops to preserve aspect ratio
+function resizeImageFileToDataUrl(file, size=400, quality=0.85){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e=>{
+      img.onload = ()=>{
+        const canvas = document.createElement('canvas');
+        canvas.width = size; canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        // compute scale and draw center-cropped
+        const sw = img.naturalWidth, sh = img.naturalHeight;
+        const sRatio = Math.max(size/sw, size/sh);
+        const dw = sw * sRatio, dh = sh * sRatio;
+        const dx = (size - dw)/2, dy = (size - dh)/2;
+        // fill white background to avoid transparency artifacts
+        ctx.fillStyle = '#fff'; ctx.fillRect(0,0,size,size);
+        ctx.drawImage(img, dx, dy, dw, dh);
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Generate a small fake sessions list (stored per-user)
+function ensureSessions(email){
+  const key = sessionsKeyFor(email);
+  let s = JSON.parse(localStorage.getItem(key) || 'null');
+  if(!s){
+    // create 3 sessions (current + 2 others)
+    s = [
+      { id: 'sess-'+Date.now(), device:'This browser', ip:'127.0.0.1', lastSeen: new Date().toISOString(), current:true },
+      { id: 'sess-'+(Date.now()+1), device:'Phone • iOS', ip:'203.0.113.5', lastSeen: new Date(Date.now()-3600*1000*24).toISOString(), current:false },
+      { id: 'sess-'+(Date.now()+2), device:'Tablet • Android', ip:'198.51.100.12', lastSeen: new Date(Date.now()-3600*1000*48).toISOString(), current:false }
+    ];
+    localStorage.setItem(key, JSON.stringify(s));
+  }
+  return JSON.parse(localStorage.getItem(key));
+}
+
+// UI: render sessions
+function renderSessions(email){
+  refs.sessionsList.innerHTML = '';
+  if(!email) return;
+  ensureSessions(email);
+  const arr = JSON.parse(localStorage.getItem(sessionsKeyFor(email)));
+  if(!arr || !arr.length){ refs.sessionsList.textContent = 'No active sessions'; return; }
+  arr.forEach(sess=>{
+    const el = document.createElement('div'); el.className='history-item';
+    el.innerHTML = `<div style="display:flex;flex-direction:column">
+      <div style="font-weight:700">${sess.device}${sess.current ? ' — (current)': ''}</div>
+      <div class="meta small">${new Date(sess.lastSeen).toLocaleString()}</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      ${sess.current ? '' : `<button class="btn ghost" data-signout="${sess.id}" style="padding:6px 10px">Sign out</button>`}
+    </div>`;
+    refs.sessionsList.appendChild(el);
+  });
+  // add listeners for signout buttons
+  refs.sessionsList.querySelectorAll('[data-signout]').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      const id = btn.getAttribute('data-signout');
+      if(confirm('Sign out this session?')){
+        let arr = JSON.parse(localStorage.getItem(sessionsKeyFor(email)));
+        arr = arr.filter(s=>s.id !== id);
+        localStorage.setItem(sessionsKeyFor(email), JSON.stringify(arr));
+        renderSessions(email);
+        showToast('Signed out session');
+      }
+    });
+  });
+}
+
+// sessions actions
+refs.signOutOthers.addEventListener('click', ()=>{
+  const email = (refs.email.value||'').trim().toLowerCase();
+  if(!email){ alert('Please sign in (enter email) to manage sessions'); return; }
+  if(!confirm('Sign out all other sessions for '+email+'?')) return;
+  let arr = ensureSessions(email);
+  arr = arr.map(s => ({...s, current: s.current})).filter(s=>s.current); // keep only current one
+  localStorage.setItem(sessionsKeyFor(email), JSON.stringify(arr));
+  renderSessions(email);
+  showToast('Signed out other sessions');
+});
+refs.invalidateAll.addEventListener('click', ()=>{
+  const email = (refs.email.value||'').trim().toLowerCase();
+  if(!email){ alert('Please sign in (enter email) to invalidate sessions'); return; }
+  if(!confirm('Invalidate all sessions for '+email+'?')) return;
+  localStorage.removeItem(sessionsKeyFor(email));
+  renderSessions(email);
+  showToast('All sessions invalidated');
+});
+
+// DIET chips render & toggle
+function renderDietChips(selected=[]){
+  refs.dietChips.innerHTML = '';
+  defaultDietTags.forEach(tag=>{
+    const btn = document.createElement('button');
+    btn.type='button';
+    btn.className = 'chip' + (selected.includes(tag) ? ' selected' : '');
+    btn.textContent = tag;
+    btn.addEventListener('click', ()=> {
+      btn.classList.toggle('selected');
+      markDirty();
+      scheduleAutosave();
+    });
+    refs.dietChips.appendChild(btn);
+  });
+}
+renderDietChips([]);
+
+// inline validation helpers
+function validateEmail(email){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+function validatePhone(p){ return !p || /^[\d\+\-\.\s\(\)]{6,20}$/.test(p); }
+
+// dirty tracking + beforeunload
+function markDirty(){
+  dirty = true;
+  refs.saveStatus.textContent = 'Unsaved';
+  refs.saveStatus.className = 'status unsaved';
+}
+function markSaved(){
+  dirty = false;
+  refs.saveStatus.textContent = 'Saved';
+  refs.saveStatus.className = 'status saved';
+}
+window.addEventListener('beforeunload', (e)=>{
+  if(dirty){
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+// get profile object from form
+function getProfileFromForm(){
+  const chips = Array.from(refs.dietChips.querySelectorAll('.chip.selected')).map(n=>n.textContent);
+  return {
+    fullName: refs.fullName.value.trim(),
+    email: (refs.email.value||'').trim().toLowerCase(),
+    phone: refs.phone.value.trim(),
+    location: refs.location.value.trim(),
+    address: refs.address.value.trim(),
+    nutritionGoals: refs.nutritionGoals.value.trim(),
+    preferredDelivery: refs.preferredDelivery.value,
+    bio: refs.bio.value.trim(),
+    units: refs.units.value,
+    dietTags: chips,
+    avatarDataUrl: refs.avatarPreviewImg.src && refs.avatarPreviewImg.src.startsWith('data:') ? refs.avatarPreviewImg.src : null,
+    updatedAt: new Date().toISOString()
+  };
+}
+
+// simple validation
+function validateForm(){
+  let ok = true;
+  // name required
+  if(!refs.fullName.value.trim()){
+    document.getElementById('errName').style.display='block';
+    document.getElementById('errName').textContent = 'Name is required';
+    ok=false;
+  } else { document.getElementById('errName').style.display='none'; }
+  // email
+  const emailVal = (refs.email.value||'').trim();
+  if(!validateEmail(emailVal)){
+    document.getElementById('errEmail').style.display='block';
+    document.getElementById('errEmail').textContent = 'Enter a valid email';
+    ok=false;
+  } else { document.getElementById('errEmail').style.display='none'; }
+  // phone
+  if(!validatePhone(refs.phone.value.trim())){
+    document.getElementById('errPhone').style.display='block';
+    document.getElementById('errPhone').textContent = 'Invalid phone format';
+    ok=false;
+  } else { document.getElementById('errPhone').style.display='none'; }
+  return ok;
+}
+
+// history: read & render
+function getHistory(email){
+  if(!email) return [];
+  const key = storageKeyFor(email)+'_history';
+  return JSON.parse(localStorage.getItem(key) || '[]');
+}
+function pushHistory(email, profile){
+  const key = storageKeyFor(email)+'_history';
+  const arr = JSON.parse(localStorage.getItem(key) || '[]');
+  arr.unshift({ snapshot: profile, at: new Date().toISOString() });
+  // cap history to 20 entries
+  arr.splice(20);
+  localStorage.setItem(key, JSON.stringify(arr));
+  renderHistory(email);
+}
+function renderHistory(email){
+  refs.historyList.innerHTML = '';
+  if(!email) return;
+  const arr = getHistory(email);
+  if(!arr.length) { refs.historyList.textContent = 'No snapshots yet'; return; }
+  arr.forEach((h, idx)=>{
+    const el = document.createElement('div');
+    el.className = 'history-item';
+    el.innerHTML = `<div style="display:flex;flex-direction:column">
+      <div style="font-weight:700">Saved ${new Date(h.at).toLocaleString()}</div>
+      <div class="meta small">${h.snapshot.email || ''} • ${h.snapshot.fullName || ''}</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn ghost" data-restore="${idx}" style="padding:6px 10px">Restore</button>
+      <button class="btn ghost" data-download="${idx}" style="padding:6px 10px">Download</button>
+    </div>`;
+    refs.historyList.appendChild(el);
+  });
+  // listeners
+  refs.historyList.querySelectorAll('[data-restore]').forEach(b=>{
+    b.addEventListener('click', (ev)=>{
+      const idx = +b.getAttribute('data-restore');
+      const arr = getHistory(refs.email.value || '');
+      if(!arr[idx]) return;
+      if(!confirm('Restore snapshot from '+new Date(arr[idx].at).toLocaleString()+'?')) return;
+      loadProfileIntoForm(arr[idx].snapshot.email, arr[idx].snapshot);
+      showToast('Snapshot restored');
+    });
+  });
+  refs.historyList.querySelectorAll('[data-download]').forEach(b=>{
+    b.addEventListener('click', (ev)=>{
+      const idx = +b.getAttribute('data-download');
+      const arr = getHistory(refs.email.value || '');
+      if(!arr[idx]) return;
+      const blob = new Blob([JSON.stringify(arr[idx].snapshot, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=`profile-snapshot-${idx}.json`; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+  });
+}
+
+// Save profile locally
+function saveProfileLocally(profile){
+  const key = storageKeyFor(profile.email);
+  localStorage.setItem(key, JSON.stringify(profile));
+  pushHistory(profile.email, profile);
+  // mark last saved at
+  localStorage.setItem(key + '_lastSaved', new Date().toISOString());
+  refs.lastSynced.textContent = 'local: ' + new Date().toLocaleString();
+}
+
+// load profile
+function loadProfileIntoForm(email, fromSnapshot=null){
+  if(!email) return;
+  const key = storageKeyFor(email);
+  let raw = fromSnapshot ? JSON.stringify(fromSnapshot) : localStorage.getItem(key);
+  if(!raw){
+    // prefill email + preview
+    refs.email.value = email;
+    refs.previewEmail.textContent = email;
+    refs.previewName.textContent = (refs.fullName.value || '—');
+    renderHistory(email);
+    renderSessions(email);
+    return;
+  }
+  try{
+    const obj = JSON.parse(raw);
+    refs.fullName.value = obj.fullName || '';
+    refs.email.value = obj.email || email;
+    refs.phone.value = obj.phone || '';
+    refs.location.value = obj.location || '';
+    refs.address.value = obj.address || '';
+    refs.nutritionGoals.value = obj.nutritionGoals || '';
+    refs.preferredDelivery.value = obj.preferredDelivery || '';
+    refs.bio.value = obj.bio || '';
+    refs.units.value = obj.units || 'metric';
+    // diet tags
+    renderDietChips(obj.dietTags || []);
+    // avatar
+    if(obj.avatarDataUrl) refs.avatarPreviewImg.src = obj.avatarDataUrl;
+    else refs.avatarPreviewImg.src = 'https://i.pravatar.cc/300?img=5';
+    refs.previewName.textContent = obj.fullName || email;
+    refs.previewEmail.textContent = obj.email || email;
+    renderHistory(email);
+    renderSessions(email);
+    markSaved();
+  }catch(e){
+    console.error('failed load', e);
+  }
+}
+
+// Autosave debounce
+function scheduleAutosave(){
+  if(autosaveTimer) clearTimeout(autosaveTimer);
+  refs.saveStatus.textContent = 'Saving...';
+  refs.saveStatus.className = 'status saving';
+  autosaveTimer = setTimeout(()=> {
+    autosaveTimer = null;
+    if(validateForm()){
+      const p = getProfileFromForm();
+      saveProfileLocally(p);
+      markSaved();
+      showToast('Autosaved');
+      // update preview
+      refs.previewName.textContent = p.fullName || p.email || 'Guest';
+      refs.previewEmail.textContent = p.email || 'not logged in';
+      // ensure sessions exist
+      if(p.email) ensureSessions(p.email);
+    } else {
+      refs.saveStatus.textContent = 'Has errors';
+      refs.saveStatus.className = 'status unsaved';
+    }
+  }, 1500);
+}
+
+// Manual save (immediate)
+async function manualSave(sync=false){
+  if(!validateForm()) { showToast('Fix form errors'); return; }
+  const profile = getProfileFromForm();
+  saveProfileLocally(profile);
+  markSaved();
+  showToast('Saved locally');
+  // update current user stored
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify({email: profile.email}));
+  currentUser = {email: profile.email};
+  renderSessions(profile.email);
+  // server sync if requested
+  if(sync){
+    refs.saveStatus.textContent = 'Syncing…';
+    refs.saveStatus.className = 'status saving';
+    try{
+      const res = await mockServerSync(profile);
+      refs.saveStatus.textContent = 'Saved';
+      refs.saveStatus.className = 'status saved';
+      showToast('Synced to server');
+      refs.lastSynced.textContent = new Date(res.serverTime).toLocaleString();
+    }catch(err){
+      refs.saveStatus.textContent = 'Sync failed';
+      refs.saveStatus.className = 'status unsaved';
+      showToast('Server sync failed');
+    }
+  } else {
+    refs.lastSynced.textContent = 'local: ' + new Date().toLocaleString();
+  }
+}
+
+// delete profile
+function deleteProfile(){
+  const email = (refs.email.value||'').trim().toLowerCase();
+  if(!email){ alert('Enter an email to delete'); return; }
+  if(!confirm('Delete profile for '+email+'? This cannot be undone locally.')) return;
+  localStorage.removeItem(storageKeyFor(email));
+  localStorage.removeItem(storageKeyFor(email)+'_history');
+  localStorage.removeItem(sessionsKeyFor(email));
+  // if current user, clear
+  const cur = JSON.parse(localStorage.getItem(CURRENT_USER_KEY) || 'null');
+  if(cur && cur.email === email) {
+    localStorage.removeItem(CURRENT_USER_KEY);
+    currentUser = null;
+    refs.loggedAs.textContent = '';
+    refs.loginBtn.style.display = 'inline-flex';
+    refs.logoutBtn.style.display = 'none';
+  }
+  clearForm();
+  renderHistory(email);
+  renderSessions(email);
+  showToast('Profile deleted');
+}
+
+// clear form (not delete)
+function clearForm(){
+  refs.fullName.value = '';
+  refs.email.value = '';
+  refs.phone.value = '';
+  refs.location.value = '';
+  refs.address.value = '';
+  refs.nutritionGoals.value = '';
+  refs.preferredDelivery.value = '';
+  refs.bio.value = '';
+  refs.units.value = 'metric';
+  renderDietChips([]);
+  refs.avatarPreviewImg.src = 'https://i.pravatar.cc/300?img=5';
+  refs.previewName.textContent = 'Guest';
+  refs.previewEmail.textContent = 'not logged in';
+  markDirty();
+}
+
+// export JSON
+refs.exportBtn.addEventListener('click', ()=>{
+  const email = (refs.email.value||'').trim().toLowerCase();
+  if(!email){ alert('Enter an email to export'); return; }
+  const raw = localStorage.getItem(storageKeyFor(email));
+  if(!raw){ alert('No profile to export'); return; }
+  const blob = new Blob([raw], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=`profile-${email}.json`; document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  showToast('Profile exported');
+});
+
+// import JSON
+refs.importBtn.addEventListener('click', ()=> refs.jsonImportInput.click());
+refs.jsonImportInput.addEventListener('change', (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    try{
+      const obj = JSON.parse(r.result);
+      if(!obj.email){ alert('JSON must contain an email'); return; }
+      localStorage.setItem(storageKeyFor(obj.email), JSON.stringify(obj));
+      pushHistory(obj.email, obj);
+      loadProfileIntoForm(obj.email);
+      showToast('Imported profile for ' + obj.email);
+      refs.jsonImportInput.value = '';
+    }catch(err){
+      alert('Invalid JSON');
+      refs.jsonImportInput.value = '';
+    }
+  };
+  r.readAsText(f);
+});
+
+// avatar upload handler (resize & compress)
+refs.avatarInput.addEventListener('change', async (e)=>{
+  const f = e.target.files && e.target.files[0];
+  if(!f) return;
+  if(!f.type.startsWith('image/')){ alert('Please upload an image'); return; }
+  refs.saveStatus.textContent = 'Processing image...';
+  refs.saveStatus.className = 'status saving';
+  try{
+    const url = await resizeImageFileToDataUrl(f, 400, 0.85);
+    refs.avatarPreviewImg.src = url;
+    markDirty();
+    scheduleAutosave();
+  }catch(err){ console.error(err); alert('Image processing failed'); }
+});
+refs.removeAvatarBtn.addEventListener('click', (e)=>{ e.preventDefault(); refs.avatarPreviewImg.src = 'https://i.pravatar.cc/300?img=5'; markDirty(); scheduleAutosave(); });
+
+// field change handlers -> mark dirty & schedule autosave
+['input','change','keyup'].forEach(evt=>{
+  ['fullName','email','phone','location','address','nutritionGoals','preferredDelivery','bio','units'].forEach(id=>{
+    document.getElementById(id).addEventListener(evt, ()=>{ markDirty(); scheduleAutosave(); });
+  });
+});
+
+// listen to chips toggle attributes (already markDirty inside chip click)
+
+// Save & sync handlers
+refs.profileForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  manualSave(false);
+});
+refs.syncBtn.addEventListener('click', ()=> manualSave(true));
+
+// Reset & delete
+refs.resetBtn.addEventListener('click', (e)=>{
+  e.preventDefault();
+  const email = (refs.email.value||'').trim().toLowerCase();
+  if(email) loadProfileIntoForm(email);
+  else clearForm();
+  showToast('Form reset');
+});
+refs.deleteBtn.addEventListener('click', (e)=>{ e.preventDefault(); deleteProfile(); });
+
+// login/logout mock
+refs.loginBtn.addEventListener('click', ()=>{
+  const mail = prompt('Enter your email to sign in (demo):');
+  if(mail && mail.includes('@')){
+    currentUser = {email: mail.trim().toLowerCase()};
+    localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser));
+    refs.loggedAs.textContent = 'Signed in as ' + currentUser.email;
+    refs.loginBtn.style.display = 'none';
+    refs.logoutBtn.style.display = 'inline-flex';
+    // ensure sessions
+    ensureSessions(currentUser.email);
+    loadProfileIntoForm(currentUser.email);
+    showToast('Signed in');
+  } else if(mail !== null) { alert('Please enter a valid email'); }
+});
+refs.logoutBtn.addEventListener('click', ()=>{
+  if(confirm('Sign out?')) {
+    localStorage.removeItem(CURRENT_USER_KEY);
+    currentUser = null;
+    refs.loggedAs.textContent = '';
+    refs.loginBtn.style.display = 'inline-flex';
+    refs.logoutBtn.style.display = 'none';
+    clearForm();
+    showToast('Signed out');
+  }
+});
+
+// password strength & set password (local hashed)
+refs.newPassword.addEventListener('input', ()=> {
+  const p = refs.newPassword.value || '';
+  const score = passwordStrengthScore(p);
+  refs.pwStrengthBar.style.width = (score*25)+'%';
+  let txt='Very weak';
+  if(score>=1 && score<2) txt='Weak';
+  if(score>=2 && score<3) txt='Fair';
+  if(score>=3 && score<4) txt='Good';
+  if(score>=4) txt='Strong';
+  refs.pwStrengthText.textContent = 'Password strength: ' + txt;
+});
+refs.setPasswordBtn.addEventListener('click', async ()=>{
+  const p = refs.newPassword.value || '';
+  if(p.length < 8){ alert('Password must be at least 8 characters'); return; }
+  const hashed = await sha256Hex(p);
+  // store locally with current email
+  const email = (refs.email.value||'').trim().toLowerCase();
+  if(!email){ alert('Enter email first'); return; }
+  const key = storageKeyFor(email);
+  let profile = JSON.parse(localStorage.getItem(key) || '{}');
+  profile.passwordHash = hashed;
+  localStorage.setItem(key, JSON.stringify(profile));
+  pushHistory(email, profile);
+  showToast('Password set (hashed locally)');
+  refs.newPassword.value = '';
+  refs.pwStrengthBar.style.width = '0%';
+  refs.pwStrengthText.textContent = 'Password strength: —';
+});
+
+// small password strength heuristic (0..4)
+function passwordStrengthScore(p){
+  let score = 0;
+  if(p.length >= 8) score++;
+  if(/[A-Z]/.test(p)) score++;
+  if(/[0-9]/.test(p)) score++;
+  if(/[^A-Za-z0-9]/.test(p)) score++;
+  return score;
+}
+
+// Session initial render / history render on load
+function initUI(){
+  // if logged in, set UI
+  currentUser = JSON.parse(localStorage.getItem(CURRENT_USER_KEY) || 'null');
+  if(currentUser && currentUser.email){
+    refs.loggedAs.textContent = 'Signed in as ' + currentUser.email;
+    refs.loginBtn.style.display = 'none';
+    refs.logoutBtn.style.display = 'inline-flex';
+    loadProfileIntoForm(currentUser.email);
+  } else {
+    refs.loggedAs.textContent = '';
+    refs.loginBtn.style.display = 'inline-flex';
+    refs.logoutBtn.style.display = 'none';
+    clearForm();
+  }
+  // populate diet chips initially
+  renderDietChips([]);
+  // render sessions/histories for current user if any
+  if(currentUser && currentUser.email){
+    renderSessions(currentUser.email);
+    renderHistory(currentUser.email);
+  }
+  // wire save status initial
+  markSaved();
+}
+initUI();
+
+// Manual save button quick binding
+refs.saveBtn.addEventListener('click', (e)=> { e.preventDefault(); manualSave(false); });
+
+// small helper: load profile into form by object (used by restore)
+function loadProfileIntoForm(email, fromSnapshot=null){
+  if(!email) return;
+  if(fromSnapshot){
+    // snapshot object was passed
+    refs.fullName.value = fromSnapshot.fullName || '';
+    refs.email.value = fromSnapshot.email || email;
+    refs.phone.value = fromSnapshot.phone || '';
+    refs.location.value = fromSnapshot.location || '';
+    refs.address.value = fromSnapshot.address || '';
+    refs.nutritionGoals.value = fromSnapshot.nutritionGoals || '';
+    refs.preferredDelivery.value = fromSnapshot.preferredDelivery || '';
+    refs.bio.value = fromSnapshot.bio || '';
+    refs.units.value = fromSnapshot.units || 'metric';
+    renderDietChips(fromSnapshot.dietTags || []);
+    if(fromSnapshot.avatarDataUrl) refs.avatarPreviewImg.src = fromSnapshot.avatarDataUrl;
+    refs.previewName.textContent = fromSnapshot.fullName || email;
+    refs.previewEmail.textContent = fromSnapshot.email || email;
+    markDirty();
+    scheduleAutosave();
+    return;
+  }
+  const key = storageKeyFor(email);
+  const raw = localStorage.getItem(key);
+  if(!raw){
+    refs.email.value = email;
+    refs.previewEmail.textContent = email;
+    return;
+  }
+  try{
+    const obj = JSON.parse(raw);
+    refs.fullName.value = obj.fullName || '';
+    refs.email.value = obj.email || email;
+    refs.phone.value = obj.phone || '';
+    refs.location.value = obj.location || '';
+    refs.address.value = obj.address || '';
+    refs.nutritionGoals.value = obj.nutritionGoals || '';
+    refs.preferredDelivery.value = obj.preferredDelivery || '';
+    refs.bio.value = obj.bio || '';
+    refs.units.value = obj.units || 'metric';
+    renderDietChips(obj.dietTags || []);
+    if(obj.avatarDataUrl) refs.avatarPreviewImg.src = obj.avatarDataUrl;
+    refs.previewName.textContent = obj.fullName || email;
+    refs.previewEmail.textContent = obj.email || email;
+    markSaved();
+    renderHistory(email);
+    renderSessions(email);
+  }catch(e){ console.error(e); }
+}
+ <script src="dashboard-login.js" type="module"></script>
+</script>
+</body>
+</html>
+
+
