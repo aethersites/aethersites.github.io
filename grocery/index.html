@@ -10,35 +10,35 @@
 <body>
   <header class="topbar">
     <div class="brand">🥦 My Grocery & Pantry</div>
-    <div id="userDisplay" class="user-info">Checking auth…</div>
+    <div id="userDisplay" class="user-info">Not signed in</div>
   </header>
 
-  <main class="container" id="panels">
-    <!-- Grocery -->
+  <!-- panels container -->
+  <main class="container" id="panelContainer">
+    <!-- Grocery panel -->
     <section class="panel left-panel" aria-labelledby="groceryTitle">
       <div class="panel-header">
         <h2 id="groceryTitle">Grocery</h2>
         <div class="add-row" role="search" aria-label="Add grocery item">
           <input id="groceryInput" placeholder="e.g. Bananas" autocomplete="off" />
           <input id="groceryQty" type="number" min="1" value="1" aria-label="quantity" />
-          <button id="addGrocery" class="btn">Add</button>
+          <button id="addGrocery" class="btn" aria-disabled="true">Add</button>
         </div>
       </div>
+
       <ul id="groceryList" class="list" aria-live="polite" role="list"></ul>
     </section>
 
-    <!-- Pantry -->
+    <!-- Pantry panel -->
     <section class="panel right-panel" aria-labelledby="pantryTitle">
       <div class="panel-header">
         <h2 id="pantryTitle">Pantry</h2>
         <div class="note">Items in your pantry — ready to cook with.</div>
       </div>
+
       <ul id="pantryList" class="list" aria-live="polite" role="list"></ul>
     </section>
   </main>
 
-  <footer class="footer">
-    <small>Built with Firebase · items are private to your account.</small>
-  </footer>
 </body>
 </html>
