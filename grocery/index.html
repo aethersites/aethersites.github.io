@@ -1,24 +1,44 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Grocery List</title>
-    <script type="module" src="grocery.js"></script>
-  </head>
-  <body>
-    <h1>My Grocery & Pantry</h1>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Grocery & Pantry</title>
+  <link rel="stylesheet" href="grocery.css" />
+  <script type="module" src="grocery.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="brand">My Grocery & Pantry</h1>
+    <div id="userDisplay" class="user-info"></div>
+  </header>
 
-    <section>
-      <h2>Grocery List</h2>
-      <input id="groceryInput" placeholder="Add grocery item..." />
-      <input id="groceryQty" type="number" min="1" value="1" />
-      <button id="addGrocery">Add</button>
-      <ul id="groceryList"></ul>
+  <main class="container">
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Grocery</h2>
+        <div class="add-row">
+          <input id="groceryInput" placeholder="Add grocery item (press Enter)..." autocomplete="off" />
+          <input id="groceryQty" type="number" min="1" value="1" aria-label="quantity" />
+          <button id="addGrocery" class="btn">Add</button>
+        </div>
+      </div>
+
+      <ul id="groceryList" class="list" aria-live="polite"></ul>
     </section>
 
-    <section>
-      <h2>Pantry</h2>
-      <ul id="pantryList"></ul>
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Pantry</h2>
+        <div class="note">Items in your pantry — ready to cook with.</div>
+      </div>
+
+      <ul id="pantryList" class="list" aria-live="polite"></ul>
     </section>
-  </body>
+  </main>
+
+  <footer class="footer">
+    <small>Built with Firebase — items are private to your account.</small>
+  </footer>
+</body>
 </html>
