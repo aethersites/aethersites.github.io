@@ -1,691 +1,447 @@
+  var recipes = [
+  {
+    id: 1,
+    title: "Mediterranean Quinoa Bowl",
+    rating: 4.8,
+    time: 25,
+    servings: 4,
+    calories: 420,
+    ingredients: [
+      "1 cup quinoa",
+      "2 cups vegetable broth",
+      "1 cucumber, diced",
+      "1 cup cherry tomatoes, halved",
+      "1/4 cup tahini"
+    ],
+    instructions: `
+      1. Cook quinoa in vegetable broth.<br>
+      2. Mix with chopped vegetables.<br>
+      3. Drizzle with tahini dressing and serve.
+    `,
+    tags: ["Vegetarian", "Gluten-Free"],
+    image: "https://media.istockphoto.com/id/1194750269/photo/fresh-quinoa-tabbouleh-salad.jpg?s=612x612&w=0&k=20&c=Jo7y2fl9RKIMBXteG83NZUpl57HpvEd4GiCfj-gh8yM=",
+    cuisine: "Mediterranean",
+    mealtype: "Lunch"
+  },
+  {
+    id: 2,
+    title: "Spicy Thai Green Curry",
+    rating: 4.9,
+    time: 30,
+    servings: 3,
+    calories: 380,
+    ingredients: [
+      "1 can coconut milk",
+      "2 tbsp green curry paste",
+      "1 zucchini, sliced",
+      "1 red bell pepper, sliced",
+      "Fresh basil leaves"
+    ],
+    instructions: `
+      1. Heat coconut milk and curry paste.<br>
+      2. Add vegetables and simmer until tender.<br>
+      3. Garnish with fresh basil and serve.
+    `,
+    tags: ["Spicy", "Dairy-Free"],
+    image: "https://images.pexels.com/photos/33435594/pexels-photo-33435594.jpeg",
+    cuisine: "Asian",
+    mealtype: "Dinner"
+  },
+  {
+    id: 3,
+    title: "Classic Margherita Pizza",
+    rating: 4.7,
+    time: 45,
+    servings: 2,
+    calories: 520,
+    ingredients: [
+      "Pizza dough",
+      "1/2 cup tomato sauce",
+      "Fresh mozzarella",
+      "Fresh basil leaves",
+      "Olive oil"
+    ],
+    instructions: `
+      1. Preheat oven to 475°F (245°C).<br>
+      2. Roll out dough and spread with tomato sauce.<br>
+      3. Top with mozzarella and basil leaves.<br>
+      4. Drizzle with olive oil and bake for 10–12 minutes.
+    `,
+    tags: ["Vegetarian", "Italian"],
+    image: "https://images.pexels.com/photos/33457994/pexels-photo-33457994.jpeg",
+    cuisine: "European",
+    mealtype: "Dinner"
+  },
+  {
+    id: 4,
+    title: "Grilled Salmon with Herbs",
+    rating: 4.8,
+    time: 20,
+    servings: 2,
+    calories: 450,
+    ingredients: [
+      "2 salmon fillets",
+      "2 tbsp olive oil",
+      "Fresh dill",
+      "Fresh parsley",
+      "1 lemon (for juice)"
+    ],
+    instructions: `
+      1. Preheat grill to medium-high.<br>
+      2. Brush salmon with olive oil and season with herbs.<br>
+      3. Grill for 4–5 minutes per side.<br>
+      4. Drizzle with lemon juice and serve.
+    `,
+    tags: ["High Protein", "Keto"],
+    image: "https://images.pexels.com/photos/725991/pexels-photo-725991.jpeg",
+    cuisine: "American",
+    mealtype: "Dinner"
+  },
+  {
+    id: 5,
+    title: "Moroccan Tagine",
+    rating: 4.9,
+    time: 120,
+    servings: 6,
+    calories: 380,
+    ingredients: [
+      "2 lbs lamb or chicken",
+      "2 onions, sliced",
+      "2 carrots, chopped",
+      "1/2 cup dried apricots",
+      "2 tbsp Moroccan spice mix"
+    ],
+    instructions: `
+      1. Sauté onions and spices in olive oil.<br>
+      2. Add meat and brown on all sides.<br>
+      3. Add vegetables, dried fruits, and water.<br>
+      4. Cover and simmer for 2 hours until tender.
+    `,
+    tags: ["Traditional", "Halal"],
+    image: "https://images.pexels.com/photos/30459912/pexels-photo-30459912.jpeg",
+    cuisine: "African",
+    mealtype: "Dinner"
+  },
+  {
+    id: 6,
+    title: "Vegan Buddha Bowl",
+    rating: 4.6,
+    time: 35,
+    servings: 2,
+    calories: 350,
+    ingredients: [
+      "1 cup quinoa",
+      "1 cup roasted sweet potatoes",
+      "1 cup broccoli florets",
+      "1 avocado, sliced",
+      "Tahini sauce"
+    ],
+    instructions: `
+      1. Cook quinoa according to package instructions.<br>
+      2. Roast sweet potatoes and steam broccoli.<br>
+      3. Arrange quinoa, veggies, and avocado in a bowl.<br>
+      4. Drizzle with tahini sauce and serve.
+    `,
+    tags: ["Vegan", "Healthy"],
+    image: "https://images.pexels.com/photos/13887558/pexels-photo-13887558.jpeg",
+    cuisine: "Fusion / Global Contemporary",
+    mealtype: "Lunch"
+  },
+  {
+  id: 7,
+  title: "Fluffy Blueberry Pancakes",
+  rating: 4.8,
+  time: 25,
+  servings: 4,
+  calories: 380,
+  ingredients: [
+    "1 1/2 cups all-purpose flour",
+    "3 1/2 tsp baking powder",
+    "1/2 tsp salt",
+    "1 tbsp sugar",
+    "1 1/4 cups milk",
+    "1 egg",
+    "3 tbsp melted butter",
+    "1 cup fresh or frozen blueberries",
+    "Butter or oil for cooking"
+  ],
+  instructions: `
+    1. In a large bowl, whisk together the flour, baking powder, salt, and sugar until evenly combined.<br>
+    2. In a separate bowl, whisk the milk, egg, and melted butter until smooth.<br>
+    3. Gradually pour the wet ingredients into the dry mixture, stirring gently with a spatula until just combined (batter should be slightly lumpy — do not overmix).<br>
+    4. Gently fold in the blueberries.<br>
+    5. Heat a lightly greased skillet or griddle over medium heat. Pour about 1/4 cup batter for each pancake.<br>
+    6. Cook until bubbles appear on the surface (about 2–3 minutes), then flip and cook the other side until golden brown.<br>
+    7. Serve warm with maple syrup, butter, or extra blueberries on top.
+  `,
+  tags: ["Breakfast", "Family Favorite"],
+  image: "https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg",
+  cuisine: "American",
+  mealtype: "Breakfast"
+},
+{
+  id: 8,
+  title: "Avocado Toast with Poached Egg",
+  rating: 4.7,
+  time: 15,
+  servings: 2,
+  calories: 320,
+  ingredients: [
+    "2 slices sourdough bread",
+    "1 ripe avocado",
+    "2 large eggs",
+    "1 tbsp white vinegar (for poaching)",
+    "Salt and pepper to taste",
+    "Chili flakes (optional)",
+    "Olive oil (optional drizzle)"
+  ],
+  instructions: `
+    1. Toast the sourdough bread slices until golden brown and crisp.<br>
+    2. While the bread is toasting, bring a medium pot of water to a gentle simmer. Add the vinegar.<br>
+    3. Crack each egg into a small ramekin. Stir the water to create a gentle whirlpool, then carefully lower one egg into the center. Poach for about 3 minutes for a runny yolk, or longer if you prefer a firmer yolk. Repeat with the second egg.<br>
+    4. Halve the avocado, remove the pit, and mash the flesh in a bowl with a fork. Season with salt and pepper.<br>
+    5. Spread the mashed avocado generously on the toasted bread.<br>
+    6. Top each slice with a poached egg. Sprinkle with chili flakes and drizzle with olive oil if desired.<br>
+    7. Serve immediately while warm.
+  `,
+  tags: ["Healthy", "Protein-Packed"],
+  image: "https://www.shutterstock.com/image-photo/benedict-eggs-on-avocado-toast-600nw-2439635221.jpg",
+  cuisine: "Modern European",
+  mealtype: "Breakfast"
+},
+{
+  id: 9,
+  title: "Greek Yogurt Parfait",
+  rating: 4.5,
+  time: 10,
+  servings: 2,
+  calories: 280,
+  ingredients: [
+    "2 cups Greek yogurt (plain or vanilla)",
+    "1 cup granola",
+    "1 cup mixed berries (strawberries, blueberries, raspberries)",
+    "2 tbsp honey or maple syrup",
+    "Chia seeds or flax seeds (optional topping)"
+  ],
+  instructions: `
+    1. Wash and pat dry the berries. Slice strawberries if using.<br>
+    2. In two serving glasses or bowls, add a spoonful of yogurt as the first layer.<br>
+    3. Sprinkle a layer of granola evenly over the yogurt.<br>
+    4. Add a layer of fresh berries, distributing them evenly.<br>
+    5. Repeat the layers until all ingredients are used, finishing with berries on top.<br>
+    6. Drizzle with honey or maple syrup for added sweetness.<br>
+    7. Optionally sprinkle chia seeds or flax seeds for extra nutrition. Serve immediately for crunch or let chill for 10 minutes for softer granola.
+  `,
+  tags: ["Quick", "Healthy", "No-Cook"],
+  image: "https://images.pexels.com/photos/1435894/pexels-photo-1435894.jpeg",
+  cuisine: "Mediterranean",
+  mealtype: "Breakfast"
+},
+{
+  id: 10,
+  title: "Savory Breakfast Burrito",
+  rating: 4.9,
+  time: 30,
+  servings: 2,
+  calories: 450,
+  ingredients: [
+    "2 large flour tortillas",
+    "4 large eggs",
+    "1/4 cup milk",
+    "1/2 cup cheddar cheese, shredded",
+    "1/2 cup black beans, drained and rinsed",
+    "1/2 cup diced bell peppers",
+    "1/4 cup diced onions",
+    "1/4 cup salsa",
+    "1 tbsp olive oil",
+    "Salt and pepper to taste"
+  ],
+  instructions: `
+    1. In a medium bowl, whisk together the eggs, milk, salt, and pepper until smooth and well combined.<br>
+    2. Heat olive oil in a skillet over medium heat. Add onions and bell peppers and sauté until softened (about 4–5 minutes).<br>
+    3. Add the black beans and stir until warmed through.<br>
+    4. Pour the egg mixture into the skillet and cook, stirring frequently, until scrambled and fully set.<br>
+    5. Warm the tortillas in a dry pan or microwave for 20–30 seconds until pliable.<br>
+    6. Divide the scrambled egg mixture between the tortillas. Sprinkle with shredded cheese and spoon over some salsa.<br>
+    7. Roll the tortillas tightly into burritos by folding in the sides first, then rolling from the bottom up.<br>
+    8. Serve warm, optionally with extra salsa or sour cream on the side.
+  `,
+  tags: ["Savory", "High-Protein", "On-the-Go"],
+  image: "https://images.pexels.com/photos/5908002/pexels-photo-5908002.jpeg",
+  cuisine: "Mexican-American",
+  mealtype: "Breakfast"
+   }
+  // 👉 Add more recipes here...
+];
 
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Recipes UI — Pure HTML/CSS</title>
+document.addEventListener("DOMContentLoaded", () => {
+  // 💡 Grab only dinner recipes from the global list (recipes.js must be loaded first)
+  // This makes the rest of the code only use dinner recipes for all filters, searches, etc.
+  const dinnerRecipes = (recipes || []).filter(r =>
+    (r.mealtype ?? r.mealType ?? '').toString().trim().toLowerCase() === 'dinner'
+  );
+  // Overwrite the global recipes variable so the rest of the code works as before
+  window.recipes = dinnerRecipes;
 
-  <!-- design font (optional, from prototype) -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<header class="gp-topnav" role="banner" aria-label="Main navigation">
-  <div class="gp-container">
+  const recipeGrid = document.getElementById("recipeGrid");
+  const modal = document.getElementById("recipeModal");
+  const closeModal = document.getElementById("closeModal");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalImage = document.getElementById("modalImage");
+  const modalIngredients = document.getElementById("modalIngredients");
+  const modalInstructions = document.getElementById("modalInstructions");
+  const modalTags = document.getElementById("modalTags");
+  const modalFilters = document.getElementById("modalFilters");
 
-    <!-- Left: brand (icon + name) -->
-    <a class="gp-brand" href="/" aria-label="GoodPlates home">
-      <!-- plate + fork SVG icon -->
-      <div class="gp-logo-sq" aria-hidden="true">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
-          <circle cx="12" cy="12" r="9" stroke="white" stroke-width="0.6" fill="none" opacity="0.12"/>
-          <path d="M8 6c0 1.333-1 4-1 6s1 4 1 6" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
-          <path d="M10 6v12" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
-          <circle cx="12" cy="12" r="9" fill="none" stroke="rgba(255,255,255,0.06)"/>
-        </svg>
-      </div>
-
-      <div class="gp-brand-text" style="text-decoration:none;color:inherit">
-        <div class="gp-name">GoodPlates</div>
-        <div class="gp-sub small muted">Recipes & meal ideas</div>
-      </div>
-    </a>
-
-    <!-- Center: links (desktop) -->
-    <nav class="gp-links" role="navigation" aria-label="Primary">
-      <ul>
-        <li><a href="/recipes/">Recipes</a></li>
-        <li><a href="/grocery-list/">Grocery List</a></li>
-        <li><a href="/order-online/">Order Online</a></li>
-        <li><a href="/statistics/">Statistics</a></li>
-        <li><a href="/courses/">Courses</a></li>
-        <li><a href="/contact/">Contact</a></li>
-      </ul>
-    </nav>
-
-    <!-- Right: CTA + hamburger -->
-    <div class="gp-actions">
-      <!-- Login CTA (replaces Onboarding) -->
-      <a href="/login-form/" class="gp-cta cta" title="Login">Login</a>
-
-      <!-- mobile hamburger -->
-      <button id="gpHamburger" class="gp-hamburger" aria-controls="gpMobileMenu" aria-expanded="false" aria-label="Open menu">
-        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
-      </button>
-    </div>
-
-  </div>
-
-  <!-- Mobile: slide-over menu (keeps all links + CTA) -->
-  <aside id="gpMobileMenu" class="gp-mobile" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="gp-mobile-panel" role="document">
-      <div class="gp-mobile-head">
-        <div class="gp-mobile-brand" style="display:flex;align-items:center;gap:10px">
-          <div class="gp-logo-sq" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;background:linear-gradient(90deg,#16a34a,#15803d)">G</div>
-          <div class="gp-name">GoodPlates</div>
+  // Render all recipe cards
+  function renderRecipes(list) {
+    recipeGrid.innerHTML = "";
+    list.forEach(r => {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="card-media">
+          <img src="${r.image}" alt="${r.title}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
         </div>
-        <button id="gpMobileClose" class="icon-btn" aria-label="Close menu">✕</button>
-      </div>
-
-      <nav class="gp-mobile-links" aria-label="Mobile primary">
-        <ul>
-          <li><a href="/recipes/">Recipes</a></li>
-          <li><a href="/grocery-list/">Grocery List</a></li>
-          <li><a href="/order-online/">Order Online</a></li>
-          <li><a href="/statistics/">Statistics</a></li>
-          <li><a href="/courses/">Courses</a></li>
-          <li><a href="/contact/">Contact</a></li>
-        </ul>
-      </nav>
-
-      <div class="gp-mobile-foot" style="margin-top:18px">
-        <a href="/login-form/" class="gp-cta cta" style="width:100%; display:inline-block; text-align:center">Login</a>
-      </div>
-    </div>
-
-    <!-- overlay click closes -->
-    <div class="gp-mobile-overlay" tabindex="-1" data-close></div>
-  </aside>
-
-  <style>
-    /* ===== tokens (consistency with page) ===== */
-    :root{
-      --primary: #16a34a;
-      --primary-700: #15803d;
-      --primary-100: #dcfce7;
-      --fg: #0f172a;
-      --muted: #6b7280;
-      --border: #e6e9ee;
-      --radius: 12px;
-      --shadow-soft: 0 8px 24px rgba(2,6,23,0.06);
-      --glass: rgba(255,255,255,0.72);
-      --container: 1200px;
-    }
-        /* container + topbar */
-        .gp-topnav {
-          position: sticky;
-          top: 0;
-          z-index: 80;
-          backdrop-filter: blur(6px);
-          background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.82));
-          border-bottom: 1px solid rgba(15,23,42,0.03);
-        }
-        
-        .gp-container {
-          max-width: var(--container);
-          margin: 0 auto;
-          padding: 12px 0px;
-          display: flex;
-          align-items: center;
-          gap: 70px;
-          justify-content: flex-start; /* align everything left-to-right */
-        }
-        
-
- 
-        
-        /* CTA pill */
-        .gp-cta {
-          padding: 8px 22px;
-          min-width: 110px;
-          border-radius: 999px;
-          background: linear-gradient(90deg, var(--primary), var(--primary-700));
-          color: white;
-          font-weight: 700;
-          text-decoration: none;
-          box-shadow: 0 8px 20px rgba(22,163,74,0.12);
-        }
-        .gp-cta:hover {
-          transform: translateY(-2px);
-          filter: brightness(.96);
-        }
-
-    /* hamburger (mobile) */
-    .gp-hamburger{ display:none; width:44px; height:44px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
-    .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
-
-    /* mobile menu */
-    .gp-mobile{ display:none; position:fixed; inset:0; z-index:100; }
-    .gp-mobile-panel{ width:320px; max-width:90%; height:100%; background:white; box-shadow:0 30px 80px rgba(2,6,23,0.2); padding:18px; transform:translateX(-6px); border-right:1px solid var(--border); }
-    .gp-mobile-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px }
-    .gp-mobile-links ul{ list-style:none; padding:6px 0; margin:0; display:flex; flex-direction:column; gap:6px }
-    .gp-mobile-links a{ display:block; padding:12px 10px; border-radius:8px; font-weight:700; color:var(--fg) }
-    .gp-mobile-links a:hover{ background:var(--surface-2) }
-
-    .gp-mobile-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.28); right:0; }
-
-    /* responsive: remove desktop links at small sizes, show hamburger */
-    @media (max-width:1100px){
-      .gp-links{ display:none }
-      .gp-hamburger{ display:inline-flex }
-      /* keep CTA in mobile menu so hide on header */
-      .gp-cta{ display:none }
-    }
-
-    .small{ font-size:12px; color:var(--muted) }
-    .muted{ color:var(--muted) }
-  </style>
-
-  <script>
-    (function(){
-      const hamb = document.getElementById('gpHamburger');
-      const mobile = document.getElementById('gpMobileMenu');
-      const closeBtn = document.getElementById('gpMobileClose');
-      const overlay = mobile?.querySelector('[data-close]');
-
-      function openMobile(){
-        mobile.style.display = 'block';
-        mobile.setAttribute('aria-hidden','false');
-        hamb.setAttribute('aria-expanded','true');
-        document.body.style.overflow = 'hidden';
-      }
-      function closeMobile(){
-        mobile.style.display = 'none';
-        mobile.setAttribute('aria-hidden','true');
-        hamb.setAttribute('aria-expanded','false');
-        document.body.style.overflow = '';
-      }
-
-      hamb?.addEventListener('click', openMobile);
-      closeBtn?.addEventListener('click', closeMobile);
-      overlay?.addEventListener('click', closeMobile);
-      document.addEventListener('keydown', (e)=> { if(e.key === 'Escape') closeMobile(); });
-
-      window.addEventListener('resize', ()=> {
-        if(window.matchMedia('(min-width:1101px)').matches){
-          closeMobile();
-        }
-      });
-    })();
-    
-  </script>
-</header>
-
-
-  <style>
-    /* ===== Design tokens (adapted for compatibility) ===== */
-    :root{
-      --bg: #ffffff;
-      --fg: #0f172a;
-      --muted: #6b7280;
-      --muted-2: #9ca3af;
-      --border: #e6e9ee;
-      --surface: #ffffff;
-      --surface-2: #f7f8fa;
-      --primary: #16a34a;
-      --primary-700: #15803d;
-      --primary-100: #dcfce7;
-      --ring: rgba(16,185,129,0.18);
-      --shadow-soft: 0 8px 24px rgba(2,6,23,0.06);
-      --shadow-2: 0 16px 48px rgba(2,6,23,0.08);
-      --radius-lg: 14px;
-      --radius-md: 10px;
-      --radius: var(--radius-lg); /* keep compatibility with old --radius usage */
-      --container: 1200px;
-      --glass: rgba(255,255,255,0.72);
-    }
-
-    /* ===== Base / resets ===== */
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0}
-    body{
-      margin:0;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      color:var(--fg);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      -webkit-tap-highlight-color: transparent;
-    }
-    a{color:inherit; text-decoration:none}
-    img{max-width:100%; display:block}
-    .container{max-width:var(--container); margin:0 auto; padding:0 20px}
-
-    /* ===== Topnav styling (keeps your header clean) ===== */
-    .gp-topnav,
-    .topnav {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:12px 20px; gap:12px;
-      background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.82));
-      border-bottom:1px solid rgba(15,23,42,0.03);
-      position:sticky; top:0; z-index:60; backdrop-filter: blur(6px);
-    }
-    .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
-    .gp-logo-sq{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:800; background:linear-gradient(90deg,var(--primary),var(--primary-700)); box-shadow:0 8px 20px rgba(22,163,74,0.12) }
-    .gp-name{ font-weight:800; color:var(--fg); }
-    .gp-sub{ font-size:12px; color:var(--muted) }
-
-    .gp-links ul{ list-style:none; padding:0; margin:0; display:flex; gap:20px; align-items:center; }
-    .gp-links a{ display:inline-flex; align-items:center; padding:8px 10px; border-radius:10px; color:var(--fg); font-weight:600; transition:all .12s ease; border:1px solid transparent; font-size:15px }
-    .gp-links a:hover{ background:var(--primary-100); color:var(--primary); transform:translateY(-2px); box-shadow:var(--shadow-soft) }
-
-    .gp-actions{ display:flex; gap:8px; align-items:center; margin-left:auto }
-    .icon-btn{ width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--border); background:var(--surface); cursor:pointer; }
-    .icon-btn:hover{ box-shadow:var(--shadow-soft); transform:translateY(-2px) }
-
-    .gp-cta{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:8px 18px; min-width:120px; border-radius:999px;
-      background:linear-gradient(90deg,var(--primary),var(--primary-700)); color:white; font-weight:700; text-decoration:none;
-      box-shadow:0 8px 20px rgba(22,163,74,0.12);
-    }
-    .gp-cta:hover{ transform:translateY(-2px); filter:brightness(.96) }
-
-    .gp-hamburger{ display:none; width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
-    .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
-
-    @media (max-width:1100px){
-      .gp-links{ display:none }
-      .gp-hamburger{ display:inline-flex }
-      .gp-cta{ display:none }
-    }
-
-    /* ===== Layout (content + sidebar) ===== */
-    .layout{ display:grid; grid-template-columns:320px 1fr; gap:28px; padding:28px 0; align-items:start; height: 2000px !important;
-      max-height: 2000px !important;
-      min-height: 2000px !important;
-      /* If you want scrolling for overflow: */
-      overflow-y: auto;}
-    @media (max-width:1100px)
-    {
-      .layout{ grid-template-columns:1fr }
-      .sidebar{ display:none }
-      .open-sidebar{ display:block; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.35) }
-      .sidebar.panel{ position:fixed; left:0; top:0; bottom:0; height:100%; transform:translateX(0); box-shadow: var(--shadow-2); }
-    }
-
-
-    /* ===== Sidebar / Filters ===== */
-    .sidebar{
-      background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
-      padding:18px; height:calc(100vh - 92px); overflow:auto; box-shadow: var(--shadow-soft);  margin-left:24px;
-    }
-    .title-lg{font-size:18px; font-weight:700; color:var(--fg); margin:0}
-    .filter-block{ padding:14px; border-radius:10px; background:linear-gradient(180deg, rgba(250,250,250,0.6), rgba(255,255,255,0.6)); border:1px solid rgba(15,23,42,0.03); margin-bottom:12px }
-    .filter-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
-    .input{ width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:14px; background:var(--surface) }
-    .chip{ display:flex; align-items:center; gap:10px; font-size:14px; padding:8px 10px; border-radius:999px; background:var(--surface-2); cursor:pointer; border:1px solid transparent }
-    .chip input{ width:16px; height:16px }
-    .chip:hover{ transform:translateY(-2px) }
-
-    .range{ width:100% }
-    .btn{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--fg); padding:8px 14px; border-radius:10px; cursor:pointer; transition:all .14s ease; font-weight:600 }
-    .btn:hover{ transform:translateY(-2px); box-shadow:var(--shadow-soft) }
-    .btn.primary{ background:linear-gradient(90deg,var(--primary),var(--primary-700)); color:white; border:0 }
-    .btn.ghost{ background:transparent; border:1px dashed rgba(15,23,42,0.04) }
-
-    /* compatibility: preserve original .block selectors used in functional file */
-    .sidebar .block{ padding:18px; border-bottom:1px solid var(--border); margin-bottom:0; background:transparent; border:0 }
-    .sidebar .block > .flex {
-      display: flex;
-      justify-content: space-between;
-      align-items: center; /* this aligns the button with the text vertically */
-       } 
-    .block .input{ border-radius:10px; }
-
-    .small{font-size:13px}
-    .muted{ color:var(--muted); font-size:13px }
-    .muted-2{ color:var(--muted-2) }
-
-    /* ===== Grid & cards (kept and improved) ===== */
-    .grid{ display:grid; gap:24px; padding-left:10px; padding-right:10px; }
-    .grid.cols-2{ grid-template-columns:repeat(2,1fr) }
-    .grid.cols-3{ grid-template-columns:repeat(3,1fr) }
-    .grid.cols-4{ grid-template-columns:repeat(4,1fr) }
-
-    .card{
-      background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;
-      transition:transform .18s ease, box-shadow .18s ease;
-    }
-    .card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-2) }
-    .card .card-media{ height:192px; background: linear-gradient(135deg,#ecfdf5,#f0fdf4); display:flex; align-items:center; justify-content:center; position:relative; }
-    .card .card-body{ padding:16px 16px 20px }
-
-    .badge{ padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; background:var(--primary-100); color:var(--primary) }
-    .pill{ border-radius:999px; padding:6px 12px; font-weight:700; font-size:13px; background:var(--surface-2) }
-
-    /* ===== Modal (styled) ===== */
-    .modal-backdrop, #recipeModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:24px }
-    .modal{ width:100%; max-width:920px; background:var(--surface); border-radius:16px; overflow:hidden; box-shadow:var(--shadow-2) }
-    .modal .modal-media{ height:320px; background:#ddd; object-fit:cover }
-    .modal .content{ padding:28px }
-    .modal .close-btn, #closeModal{ position:absolute; right:18px; top:18px; background:rgba(0,0,0,0.6); color:#fff; border:0; padding:8px 12px; border-radius:10px; cursor:pointer }
-
-    /* small helpers */
-    .text-center{text-align:center}
-    .title-2xl{ font-size:32px; font-weight:800 }
-    .mb-0{ margin-bottom:0 } .mb-1{ margin-bottom:6px } .mb-2{ margin-bottom:12px } .mb-3{ margin-bottom:18px }
-
-    /* accessibility */
-    :focus{ outline:none }
-    :focus-visible{ box-shadow:0 0 0 4px var(--ring); border-radius:8px }
-
-    /* tag pill styles (moved from bottom style block) */
-    .tag {
-      padding:6px 14px;
-      border-radius:30px;
-      font-size:14px;
-      font-weight:600;
-      color:white;
-      cursor:pointer;
-      transition:all 0.25s ease;
-      display:inline-block;
-    }
-    .tag:hover { opacity:0.85; transform:translateY(-2px); }
-    .tag:nth-child(1n) { background:#FF6B6B; } /* red */
-    .tag:nth-child(2n) { background:#4ECDC4; } /* teal */
-    .tag:nth-child(3n) { background:#FFD93D; color:#222; } /* yellow */
-    .tag:nth-child(4n) { background:#1A73E8; } /* blue */
-    .tag:nth-child(5n) { background:#9B59B6; } /* purple */
-    
-    .header-image{
-  width:100%; height:220px; border-radius:14px; overflow:hidden;
-  background-image: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.06)), url('https://images.pexels.com/photos/28976231/pexels-photo-28976231.jpeg');
-  background-size:cover; background-position:center;
-  box-shadow: 0 8px 24px rgba(2,6,23,0.06); border:1px solid #e6e9ee;
-}
-.hero-text{ margin-top:12px; margin-bottom:18px; text-align:center }
-.hero-text h1{ font-size:28px; margin:6px 0; font-weight:800; letter-spacing:-0.6px }
-.muted{ color:#6b7280; font-size:13px }
-  </style>
-</head>
-<body>
-
-<!-- HERO SECTION - paste below your nav bar -->
-<div class="container" style="padding-top:18px">
-<!-- HERO SECTION - paste below your nav bar -->
-<div class="container" style="padding-top:18px">
-  <div class="header-image"></div>
-  <div class="hero-text">
-    <br>
-    <h1>Dinner Recipes</h1>
-    <div class="muted">Hearty dinners to savor and share.</div>
-  </div>
-</div>
-  <!-- Main layout with sidebar -->
-
-  <!-- Layout wrapper -->
-  <div class="layout">
-      <!-- Sidebar (filters) -->
-  <aside id="sidebar" class="sidebar">
-    <div class="block">
-      <div class="flex items-center justify-between">
-        <h2 class="title-lg">Filters</h2>
-        <button class="btn ghost small" data-toggle="sidebar">✖️</button>
-      </div>
-       <br>
-      <div class="mt-2">
-        <div class="searchbar" style="position:relative">
-          <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
-          <!-- ✅ must have id="filter-search" -->
-          <input class="input" type="text" id="filter-search" placeholder="Search recipes..." style="padding-left:36px" />
-        </div>
-      </div>
-    </div>
-
-    <div class="block">
-      <h3>Rating</h3>
-      <div class="grid" style="gap:10px">
-        <!-- ✅ must use data-filter="rating" -->
-        <label class="chip"><input type="checkbox" data-filter="rating" value="5"/> <span class="stars">★★★★★</span> &nbsp;&amp; up</label>
-        <label class="chip"><input type="checkbox" data-filter="rating" value="4"/> <span class="stars">★★★★☆</span> &nbsp;&amp; up</label>
-        <label class="chip"><input type="checkbox" data-filter="rating" value="3"/> <span class="stars">★★★☆☆</span> &nbsp;&amp; up</label>
-        <label class="chip"><input type="checkbox" data-filter="rating" value="2"/> <span class="stars">★★☆☆☆</span> &nbsp;&amp; up</label>
-        <label class="chip"><input type="checkbox" data-filter="rating" value="1"/> <span class="stars">★☆☆☆☆</span> &nbsp;&amp; up</label>
-      </div>
-    </div>
-
-    <div class="block">
-      <h3>Prep Time (minutes)</h3>
-      <!-- ✅ must have id="filter-prepTime" -->
-      <input class="range" type="range" id="filter-prepTime" min="5" max="180" step="5" value="60" />
-      <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
-    </div>
-
-    <div class="block">
-      <h3>Calories</h3>
-      <div class="grid" style="gap:10px">
-        <!-- ✅ must use data-filter="calories" -->
-        <label class="chip"><input type="checkbox" data-filter="calories" value="under-200"/> Under 200 calories</label>
-        <label class="chip"><input type="checkbox" data-filter="calories" value="200-400"/> 200-400 calories</label>
-        <label class="chip"><input type="checkbox" data-filter="calories" value="400-600"/> 400-600 calories</label>
-        <label class="chip"><input type="checkbox" data-filter="calories" value="600-800"/> 600-800 calories</label>
-        <label class="chip"><input type="checkbox" data-filter="calories" value="800-plus"/> 800+ calories</label>
-      </div>
-    </div>
-
-    <div class="block">
-      <h3>Diet Type</h3>
-      <div class="grid" style="gap:10px">
-        <!-- ✅ must use data-filter="tags" -->
-        <label class="chip"><input type="checkbox" data-filter="tags" value="Vegetarian"/> Vegetarian</label>
-        <label class="chip"><input type="checkbox" data-filter="tags" value="Vegan"/> Vegan</label>
-        <label class="chip"><input type="checkbox" data-filter="tags" value="Gluten-Free"/> Gluten-Free</label>
-        <label class="chip"><input type="checkbox" data-filter="tags" value="Keto"/> Keto</label>
-        <label class="chip"><input type="checkbox" data-filter="tags" value="Paleo"/> Paleo</label>
-        <label class="chip"><input type="checkbox" data-filter="tags" value="Halal"/> Halal</label>
-      </div>
-    </div>
-
-    <div class="block">
-      <h3>Ingredients</h3>
-      <!-- ✅ must have id="filter-ingredients" -->
-      <input class="range" type="range" id="filter-ingredients" min="3" max="20" step="1" value="10" />
-      <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
-    </div>
-
-    <div class="block">
-      <!-- ✅ must have id="clearFilters" -->
-      <button id="clearFilters" class="btn w-100">Clear All Filters</button>
-    </div>
-  </aside>
-
-    <!-- Main content -->
-    <main>
-      <div class="main-header">
-        <div class="container flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <button class="btn" data-open="sidebar" aria-label="Open filters" style="display:none">⚙️ Filters</button>
-            <div>
-              <h1 class="title-lg">All Recipes</h1>
-              <div class="muted small">Showing <span id="totalRecipes"></span> recipes</div>
-            </div>
+        <div class="card-body">
+          <div class="flex items-center justify-between">
+            <h3 class="mb-1">${r.title}</h3>
+            <div class="small">⭐ ${r.rating}</div>
+          </div>
+          <p class="muted small clamp-2">${r.ingredients.slice(0,3).join(", ")}...</p>
+          <div class="muted small mt-2 mb-2">⏱️ ${r.time} min · 👥 ${r.servings} · 🔥 ${r.calories} cal</div>
+          <div class="mb-2">
+            ${r.tags.map(t => `<span class="badge small">${t}</span>`).join(" ")}
+          </div>
+          <div class="flex gap-2">
+            <button class="btn w-100 primary" data-id="${r.id}">View Recipe</button>
           </div>
         </div>
-      </div>
-
-      <!-- Featured Recipes -->
-      <section class="section">
-        <div class="container">
-          <div class="flex items-center justify-between mb-3">
-            <div></div>
-            <div class="flex gap-2">
-            </div>
-          </div>
-
-          <!-- your recipe grid continues... -->
-
-              <div class="flex gap-2">
-              </div>
-            </div>
-
-           <div id="recipeGrid" class="grid cols-3"></div>
-
-           <br>
-            <div class="text-center mt-4">
-              <button class="btn">Load More Recipes</button>
-            </div>
-            <br>
-
-        <!-- Explore Categories -->
-        <section class="section hero">
-          <div class="container">
-            <div class="text-center mb-4">
-              <h2 class="title-2xl mb-1">Explore Recipe Categories</h2>
-              <p class="muted">From quick breakfast ideas to elaborate dinner parties, discover recipes organized by meal type and occasion.</p>
-            </div>
-            <div class="grid cols-4">
-        <a href="/breakfast/" class="card" style="text-decoration:none; color:inherit;">
-          <div class="card-body text-center">
-            <div style="font-size:36px">🌅</div>
-            <div class="mb-1" style="font-weight:600">Breakfast</div>
-            <p class="muted small mb-2">Start your day right with healthy breakfast recipes</p>
-            <span class="badge" style="background:#fff7ed; border-color:#fed7aa; color:#9a3412">850 recipes</span>
-          </div>
-        </a>
-        
-        <a href="/lunch/" class="card" style="text-decoration:none; color:inherit;">
-          <div class="card-body text-center">
-            <div style="font-size:36px">🥗</div>
-            <div class="mb-1" style="font-weight:600">Lunch</div>
-            <p class="muted small mb-2">Quick and satisfying midday meals</p>
-            <span class="badge" style="background:#ecfdf5; border-color:#bbf7d0; color:#166534">1200 recipes</span>
-          </div>
-        </a>
-        
-        <a href="/dinner/" class="card" style="text-decoration:none; color:inherit;">
-          <div class="card-body text-center">
-            <div style="font-size:36px">🍽️</div>
-            <div class="mb-1" style="font-weight:600">Dinner</div>
-            <p class="muted small mb-2">Hearty dinner recipes for the whole family</p>
-            <span class="badge" style="background:#eff6ff; border-color:#bfdbfe; color:#1e3a8a">1800 recipes</span>
-          </div>
-        </a>
-        
-        <a href="/dessert/" class="card" style="text-decoration:none; color:inherit;">
-          <div class="card-body text-center">
-            <div style="font-size:36px">🍰</div>
-            <div class="mb-1" style="font-weight:600">Desserts</div>
-            <p class="muted small mb-2">Sweet treats and indulgent desserts</p>
-            <span class="badge" style="background:#fdf2f8; border-color:#fbcfe8; color:#9d174d">650 recipes</span>
-          </div>
-        </a>
-            </div>
-          </div>
-        </section>
-
-      </section>
-    </main>
-  </div>
-
-  <script>
-    // Mobile: show open-filters button if sidebar is hidden via CSS
-    (function(){
-      const sidebar = document.getElementById('sidebar');
-      const openBtn = document.querySelector('[data-open="sidebar"]');
-      const closeBtn = document.querySelector('[data-toggle="sidebar"]');
-      const mq = window.matchMedia('(max-width: 900px)');
-      function update(){
-        if(mq.matches){ openBtn.style.display='inline-flex'; } else { openBtn.style.display='none'; sidebar.classList.remove('open'); }
-      }
-      update(); mq.addEventListener('change', update);
-      openBtn && openBtn.addEventListener('click', ()=> sidebar.classList.add('open'));
-      closeBtn && closeBtn.addEventListener('click', ()=> sidebar.classList.remove('open'));
-    })();
-
-    // Servings +/- controls
-    document.addEventListener('click', function(e){
-      const btn = e.target.closest('[data-action]');
-      if(!btn) return;
-      const id = btn.getAttribute('data-target');
-      const el = document.getElementById(id);
-      if(!el) return;
-      const inc = btn.getAttribute('data-action') === 'inc';
-      const min = 1;
-      const current = parseInt(el.textContent.trim(), 10) || parseInt(el.getAttribute('data-default')||'1',10);
-      const next = Math.max(min, current + (inc?1:-1));
-      el.textContent = String(next);
+      `;
+      recipeGrid.appendChild(card);
     });
-  </script>
+  }
 
-  <!-- ===== Improved Recipe Modal ===== -->
-  <div id="recipeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); justify-content:center; align-items:center; z-index:9999;">
-     <div style="
-      background:white;
-      border-radius:20px;
-      max-width:900px;
-      max-height:calc(100vh - 30px);
-      width:100%;
-      box-shadow:0 16px 48px rgba(0,0,0,.32);
-      font-size:18px;
-      overflow: auto;
-      animation: fadeInScale .35s ease;
-    ">
+  applyFilters();
 
-      <!-- Header Image -->
-      <div style="position:relative; height:300px; overflow:hidden;">
-        <img id="modalImage" src="" alt="" style="width:100%; height:100%; object-fit:cover;" />
-        <button id="closeModal" style="
-          position:absolute;
-          top:16px; right:16px;
-          background:rgba(0,0,0,0.65);
-          color:white;
-          border:none;
-          padding:8px 14px;
-          font-size:16px;
-          border-radius:12px;
-          cursor:pointer;
-        ">✕</button>
-      </div>
+  // Open modal with recipe details
+  recipeGrid.addEventListener("click", e => {
+    if (e.target.matches("button[data-id]")) {
+      const id = parseInt(e.target.dataset.id, 10);
+      const r = recipes.find(x => x.id === id);
+      if (!r) return;
+      modalTitle.textContent = r.title;
+      modalImage.src = r.image;
+      // Ingredients with checkboxes
+      modalIngredients.innerHTML = r.ingredients
+        .map(i => `
+          <li>
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" style="transform:scale(1.2);" />
+              <span>${i}</span>
+            </label>
+          </li>
+        `).join("");
 
-      <!-- Content -->
-      <div style="padding:28px 32px 36px 32px;">
+      // Instructions as plain paragraphs (no numbers)
+      const steps = r.instructions.split("<br>").filter(s => s.trim());
+      modalInstructions.innerHTML = steps.map(s => `<p>${s.trim()}</p>`).join("");
 
-        <!-- Title -->
-        <h2 id="modalTitle" style="margin:0 0 12px 0; font-size:32px; font-weight:800; line-height:1.2;"></h2>
+      modalTags.innerHTML = r.tags.map((t, i) =>
+        `<span class="tag tag-${i+1}">${t}</span>`
+      ).join("");
 
-        <!-- Tags -->
-        <div id="modalTags" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
-
-        <!-- Info Filters -->
-        <div id="modalFilters" style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:32px; font-size:16px; color:#444;">
-          <!-- Dynamically filled: ⏱ 25 min | 🍽 4 servings | 🔥 420 cal | ⭐ 4.8 -->
-        </div>
-
-  <!-- Ingredients + Instructions -->
- <div id="modalBody" style="
-  max-height:calc(100vh - 400px); /* adjust based on your modal header height! */
-  overflow-y:auto;
-  padding-right:8px;
-">
-    <!-- Ingredients -->
-    <div>
-      <h3 style="margin:0 0 12px 0; font-size:22px;">Ingredients</h3>
-      <ul id="modalIngredients" style="
-        margin:0;
-        padding:0;
-        list-style:none;
-        color:#555;
-        font-size:16px;
-        line-height:1.6;
-      "></ul>
-    </div>
-
-    <!-- Instructions -->
-    <div style="margin-top:28px;">
-      <h3 style="margin:0 0 12px 0; font-size:22px;">Instructions</h3>
-      <div id="modalInstructions" style="
-    margin:0;
-    color:#555;
-    font-size:16px;
-    line-height:1.7;
-      "></div>
-    </div>
-     </div>
-        </div>
-
-      </div>
-    </div>
-
-  <style>
-    @keyframes fadeInScale {
-      from { opacity:0; transform:scale(0.96); }
-      to { opacity:1; transform:scale(1); }
+      modalFilters.innerHTML = `
+        ⏱ ${r.time} min 
+        | 🍽 ${r.servings} servings 
+        | 🔥 ${r.calories} cal 
+        | ⭐ ${r.rating}
+      `;
+      modal.style.display = "flex";
     }
-    
-  </style>
-  <!-- ===== end modal ===== -->
+  });
 
+  // Close modal
+  closeModal.addEventListener("click", () => modal.style.display = "none");
+  modal.addEventListener("click", e => {
+    if (e.target === modal) modal.style.display = "none";
+  });
 
-<script src="../dinner.js"></script>
+  // 🔥 NEW: Filtering logic
+  function applyFilters() {
+    let filtered = [...recipes];
 
-</body>
-</html>
+    // Search
+    const searchVal = document.getElementById("filter-search").value.toLowerCase();
+    if (searchVal) {
+      filtered = filtered.filter(r =>
+        r.title.toLowerCase().includes(searchVal) ||
+        r.ingredients.join(" ").toLowerCase().includes(searchVal)
+      );
+    }
+
+    // Rating
+    const ratingChecks = [...document.querySelectorAll('input[data-filter="rating"]:checked')];
+    if (ratingChecks.length > 0) {
+      const minRating = Math.max(...ratingChecks.map(i => Number(i.value)));
+      filtered = filtered.filter(r => r.rating >= minRating);
+    }
+
+    // Calories
+    const calorieChecks = [...document.querySelectorAll('input[data-filter="calories"]:checked')].map(i => i.value);
+    if (calorieChecks.length > 0) {
+      filtered = filtered.filter(r => {
+        return calorieChecks.some(c => {
+          if (c === "under-200") return r.calories < 200;
+          if (c === "200-400") return r.calories >= 200 && r.calories <= 400;
+          if (c === "400-600") return r.calories >= 400 && r.calories <= 600;
+          if (c === "600-800") return r.calories >= 600 && r.calories <= 800;
+          if (c === "800-plus") return r.calories > 800;
+        });
+      });
+    }
+
+    // Tags (Diet Type)
+    const tagChecks = [...document.querySelectorAll('input[data-filter="tags"]:checked')].map(i => i.value);
+    if (tagChecks.length > 0) {
+      filtered = filtered.filter(r => tagChecks.some(tag => r.tags.includes(tag)));
+    }
+
+    // Prep time
+    const prepLimit = Number(document.getElementById("filter-prepTime").value);
+    filtered = filtered.filter(r => r.time <= prepLimit);
+
+    // Ingredients
+    const ingLimit = Number(document.getElementById("filter-ingredients").value);
+    filtered = filtered.filter(r => r.ingredients.length <= ingLimit);
+
+    // Render results
+    renderRecipes(filtered);
+    document.getElementById('totalRecipes').textContent = filtered.length;
+  }
+
+  // 🔥 NEW: Attach listeners
+  const allFilterInputs = document.querySelectorAll("#sidebar input");
+  allFilterInputs.forEach(input => input.addEventListener("change", applyFilters));
+  document.getElementById("filter-prepTime").addEventListener("input", applyFilters);
+  document.getElementById("filter-ingredients").addEventListener("input", applyFilters);
+  document.getElementById("filter-search").addEventListener("input", applyFilters);
+
+  // 🔥 NEW: Clear filters button
+  document.getElementById("clearFilters").addEventListener("click", () => {
+    // clear checkboxes
+    document.querySelectorAll("#sidebar input[type=checkbox]").forEach(cb => cb.checked = false);
+
+    // reset ranges to defaults
+    document.getElementById("filter-prepTime").value = 60;
+    document.getElementById("filter-ingredients").value = 10;
+
+    // clear search
+    document.getElementById("filter-search").value = "";
+
+    // reapply filters
+    applyFilters();
+  });
+
+});
