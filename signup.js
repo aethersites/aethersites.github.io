@@ -61,7 +61,7 @@ signupForm.addEventListener('submit', async (e) => {
           },
           aboutMe: "",
           preferredUnits: "metric",
-          defaultServingSize: 100,      // number
+          defaultServingSize: 1,      // number
           defaultServingUnit: "g",      // optional but recommended
           householdSize: 1,
 
