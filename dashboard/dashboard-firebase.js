@@ -139,19 +139,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   onAuthStateChanged(auth, user => {
-    const notSignedIn = document.getElementById('notSignedInModal');
-    const mainEl = document.querySelector('.main');
-    const profileFormEl = document.getElementById('profileForm');
-    const lightboxLoginBtn = document.getElementById('lightboxLoginBtn');
-
+    
     if (!user) {
-      if (notSignedIn) notSignedIn.style.display = "flex";
-      if (mainEl) mainEl.style.filter = "blur(3px)";
-      if (profileFormEl) profileFormEl.style.pointerEvents = "none";
-      if (lightboxLoginBtn) {
-        lightboxLoginBtn.onclick = () => { window.location.href = "/login-form/"; };
-      }
-      return;
+  window.location.href = "/login-form/";
+  return;
     }
 
     // Signed in → clean up overlay and restore form
