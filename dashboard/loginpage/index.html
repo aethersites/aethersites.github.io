@@ -978,16 +978,18 @@ function loadProfileIntoForm(email, fromSnapshot=null){
     renderSessions(email);
   }catch(e){ console.error(e); }
 }
- <script src="dashboard-login.js" type="module"></script>
-  <script type="module" src="dashboard-firebase.js"></script>
 
 </script>
-  <div id="notSignedInModal" style="display:none;position:fixed;z-index:9999;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,.38);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;">
+<!-- Modal for not signed in -->
+<div id="notSignedInModal" style="display:none;position:fixed;z-index:9999;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,.38);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;">
   <div style="background:#fff;padding:32px 28px 24px 28px;border-radius:16px;box-shadow:0 6px 32px rgba(0,0,0,.17);text-align:center;max-width:350px;">
     <div style="font-size:1.3em;font-weight:700;margin-bottom:10px;">Not Signed In</div>
     <div style="margin-bottom:20px;color:#666;">You must be signed in to view your profile. Please log in to continue.</div>
     <button id="lightboxLoginBtn" class="btn" style="width:100%;">Go to Login</button>
   </div>
 </div>
+
+<!-- Only ONE dashboard script, and make sure it's a module and correctly sourced -->
+<script type="module" src="/dashboard/dashboard.js"></script>
 </body>
 </html>
