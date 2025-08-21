@@ -158,6 +158,15 @@ document.addEventListener('DOMContentLoaded', () => {
       };
       return;
     }
+     // Hide the "not signed in" modal (in case an earlier script showed it)
+  const notSignedIn = document.getElementById('notSignedInModal');
+  if (notSignedIn) notSignedIn.style.display = 'none';
+
+  // Remove blur and re-enable form interactions
+  const mainEl = document.querySelector('.main');
+  if (mainEl) mainEl.style.filter = '';
+  const profileFormEl = document.getElementById('profileForm');
+  if (profileFormEl) profileFormEl.style.pointerEvents = '';
 
     // logged in UI adjustments
     loggedAs.textContent = "Signed in as " + (user.displayName || user.email);
