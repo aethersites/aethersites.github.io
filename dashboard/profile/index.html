@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Profile Dashboard — GoodPlates</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="profile.css" />
+</head>
+<body>
+  <header style="background:#faf7f2;padding:20px 0;text-align:center;border-bottom:1px solid #eee;">
+    <h1 style="margin:0;font-size:2em;color:#59391d;">🍽️ GoodPlates</h1>
+    <nav>
+      <a href="/dashboard/" style="margin:0 15px;color:#59391d;text-decoration:underline;">Dashboard</a>
+      <a href="/dashboard/profile/" style="margin:0 15px;color:#59391d;">Profile</a>
+      <a href="/dashboard/orders/" style="margin:0 15px;color:#59391d;">Orders</a>
+      <a href="#" id="logoutNavBtn" style="margin:0 15px;color:#c0392b;">Logout</a>
+    </nav>
+  </header>
+  <main id="mainContent" style="max-width:480px;margin:40px auto;padding:30px 24px;background:#fff;border-radius:16px;box-shadow:0 6px 32px rgba(0,0,0,.09);">
+    <h2 style="text-align:center;color:#59391d;">Your Profile</h2>
+    <div id="profilePreview" style="margin-bottom:28px;text-align:center;">
+      <img id="avatarPreview" src="https://i.pravatar.cc/120?img=5" alt="Avatar" style="width:96px;height:96px;border-radius:50%;box-shadow:0 2px 16px rgba(0,0,0,0.08);margin-bottom:12px;">
+      <div style="font-size:1.25em;font-weight:600;" id="previewName">—</div>
+      <div style="color:#777;" id="previewEmail">—</div>
+    </div>
+    <form id="profileForm" autocomplete="off">
+      <label>
+        Full Name
+        <input type="text" id="fullName" name="fullName" required />
+      </label>
+      <label>
+        Email
+        <input type="email" id="email" name="email" required disabled />
+      </label>
+      <label>
+        Phone
+        <input type="tel" id="phone" name="phone" placeholder="e.g. +1 555-555-5555" />
+      </label>
+      <label>
+        Location
+        <input type="text" id="location" name="location" placeholder="City, State or Country" />
+      </label>
+      <label>
+        Delivery Preference
+        <select id="preferredDelivery" name="preferredDelivery">
+          <option value="">— Select —</option>
+          <option value="pickup">Pickup</option>
+          <option value="delivery">Delivery</option>
+          <option value="curbside">Curbside</option>
+        </select>
+      </label>
+      <label>
+        Nutrition Goals
+        <input type="text" id="nutritionGoals" name="nutritionGoals" placeholder="e.g. vegan, low-carb" />
+      </label>
+      <label>
+        Units
+        <select id="units" name="units">
+          <option value="metric">Metric</option>
+          <option value="imperial">Imperial</option>
+        </select>
+      </label>
+      <label>
+        Bio
+        <textarea id="bio" name="bio" placeholder="Short intro about you"></textarea>
+      </label>
+      <label>
+        Avatar
+        <input type="file" id="avatarInput" accept="image/*" />
+        <button type="button" id="removeAvatar" style="margin-left:8px;">Remove Avatar</button>
+      </label>
+      <div style="margin:18px 0;">
+        <button type="submit" id="saveBtn" style="width:45%;background:#59391d;color:#fff;">Save</button>
+        <button type="button" id="logoutBtn" style="width:45%;background:#c0392b;color:#fff;float:right;">Logout</button>
+        <div style="clear:both;"></div>
+      </div>
+      <div id="saveStatus" style="margin-top:10px;color:green"></div>
+    </form>
+  </main>
+
+  <!-- Modal for not signed in -->
+  <div id="notSignedInModal" style="display:none;position:fixed;z-index:9999;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,.38);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;">
+    <div style="background:#fff;padding:32px 28px 24px 28px;border-radius:16px;box-shadow:0 6px 32px rgba(0,0,0,.17);text-align:center;max-width:350px;">
+      <div style="font-size:1.3em;font-weight:700;margin-bottom:10px;">Not Signed In</div>
+      <div style="margin-bottom:20px;color:#666;">You must be signed in to view your profile. Please log in to continue.</div>
+      <button id="lightboxLoginBtn" style="width:100%;">Go to Login</button>
+    </div>
+  </div>
+
+  <footer style="margin-top:48px;text-align:center;font-size:0.95em;color:#aaa;">
+    &copy; 2025 GoodPlates — Powered by Firebase
+  </footer>
+
+  <script type="module" src="profile.js"></script>
+</body>
+</html>
