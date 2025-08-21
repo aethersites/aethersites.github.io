@@ -122,7 +122,7 @@
       <aside class="card">
         <div class="avatar-wrap">
           <div class="avatar" id="avatarPreview">
-            <img src="https://i.pravatar.cc/300?img=5" alt="avatar">
+            <img src="https://cdn-icons-png.flaticon.com/256/3985/3985429.png" alt="avatar">
           </div>
           <div style="text-align:center">
             <div id="previewName" style="font-weight:800;font-size:18px">Guest</div>
@@ -645,7 +645,7 @@ function loadProfileIntoForm(email, fromSnapshot=null){
     renderDietChips(obj.dietTags || []);
     // avatar
     if(obj.avatarDataUrl) refs.avatarPreviewImg.src = obj.avatarDataUrl;
-    else refs.avatarPreviewImg.src = 'https://i.pravatar.cc/300?img=5';
+    else refs.avatarPreviewImg.src = 'https://cdn-icons-png.flaticon.com/256/3985/3985429.png';
     refs.previewName.textContent = obj.fullName || email;
     refs.previewEmail.textContent = obj.email || email;
     renderHistory(email);
@@ -746,7 +746,7 @@ function clearForm(){
   refs.bio.value = '';
   refs.units.value = 'metric';
   renderDietChips([]);
-  refs.avatarPreviewImg.src = 'https://i.pravatar.cc/300?img=5';
+  refs.avatarPreviewImg.src = 'https://cdn-icons-png.flaticon.com/256/3985/3985429.png';
   refs.previewName.textContent = 'Guest';
   refs.previewEmail.textContent = 'not logged in';
   markDirty();
@@ -802,7 +802,7 @@ refs.avatarInput.addEventListener('change', async (e)=>{
     scheduleAutosave();
   }catch(err){ console.error(err); alert('Image processing failed'); }
 });
-refs.removeAvatarBtn.addEventListener('click', (e)=>{ e.preventDefault(); refs.avatarPreviewImg.src = 'https://i.pravatar.cc/300?img=5'; markDirty(); scheduleAutosave(); });
+refs.removeAvatarBtn.addEventListener('click', (e)=>{ e.preventDefault(); refs.avatarPreviewImg.src = 'https://cdn-icons-png.flaticon.com/256/3985/3985429.png'; markDirty(); scheduleAutosave(); });
 
 // field change handlers -> mark dirty & schedule autosave
 ['input','change','keyup'].forEach(evt=>{
