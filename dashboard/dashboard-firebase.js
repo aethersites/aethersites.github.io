@@ -1,7 +1,30 @@
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+<script type="module">
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.appspot.com",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+
+  let app;
+  if (getApps().length === 0) app = initializeApp(firebaseConfig);
+  else app = getApp();
+
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+
+// DOM ready wrapper
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('profileForm');
+  const saveBtn = document.getElementById('saveBtn');
 const firebaseConfig = {
   apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
   authDomain: "goodplates-7ae36.firebaseapp.com",
@@ -120,6 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('input', () => {
       clearTimeout(autosaveTimer);
       autosaveTimer = setTimeout(() => saveToFirestore(user, getProfileFromForm()), 1200);
+      });
     });
   });
-});
+  
+</script>
