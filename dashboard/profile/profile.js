@@ -1,24 +1,28 @@
 // /dashboard/profile/profile.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-// ==== FIREBASE CONFIG (same as signup.js) ====
-const firebaseConfig = {
-  apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-  authDomain: "goodplates-7ae36.firebaseapp.com",
-  projectId: "goodplates-7ae36",
-  storageBucket: "goodplates-7ae36.firebasestorage.app",
-  messagingSenderId: "541149626283",
-  appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-  measurementId: "G-HKMSHM726J"
-};
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const storage = getStorage(app);
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
 
 // ==== DOM REFS ====
 const profileInput = document.getElementById('profile-picture');
