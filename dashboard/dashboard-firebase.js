@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // --- Firebase config (your real project config) ---
 const firebaseConfig = {
@@ -32,64 +32,90 @@ document.addEventListener('DOMContentLoaded', () => {
   const removeAvatarBtn = document.getElementById('removeAvatar');
 
   function getProfileFromForm() {
-    const dietChips = Array.from(document.querySelectorAll('#dietChips .chip.selected')).map(n => n.textContent);
-    const avatarDataUrl = document.querySelector('#avatarPreview img')?.src;
-    return {
-      fullName: form.elements['fullName']?.value.trim() || "",
-      email: form.elements['email']?.value.trim() || "",
-      phone: form.elements['phone']?.value.trim() || "",
-      location: form.elements['location']?.value.trim() || "",
-      address: form.elements['address']?.value.trim() || "",
-      nutritionGoals: form.elements['nutritionGoals']?.value.trim() || "",
-      preferredDelivery: form.elements['preferredDelivery']?.value || "",
-      bio: form.elements['bio']?.value.trim() || "",
-      units: form.elements['units']?.value || "metric",
-      dietTags: dietChips,
-      avatarDataUrl: avatarDataUrl && avatarDataUrl.startsWith('data:') ? avatarDataUrl : '',
-      updatedAt: new Date().toISOString()
+    // Build user doc patch and profiles doc patch
+    const first = (form.elements['firstName']?.value || "").trim();
+    const last = (form.elements['lastName']?.value || "").trim();
+    const phone = (form.elements['phone']?.value || "").trim();
+    const profilePicture = (form.elements['profilePictureUrl']?.value || "").trim();
+    const subscriptionTier = (form.elements['subscriptionTier']?.value || "free");
+    const aboutMe = (form.elements['aboutMe']?.value || "").trim();
+
+    const usersPayload = {
+      name: { first, last },
+      phone,
+      profilePicture,
+      subscriptionTier,
+      updatedAt: serverTimestamp()
     };
+
+    const profilesPayload = {
+      aboutMe,
+      updatedAt: serverTimestamp()
+    };
+
+    return { usersPayload, profilesPayload };
   }
 
-  function fillForm(profile) {
-    if (!profile) return;
-    form.elements['fullName'].value = profile.fullName || '';
-    form.elements['email'].value = profile.email || '';
-    form.elements['phone'].value = profile.phone || '';
-    form.elements['location'].value = profile.location || '';
-    form.elements['address'].value = profile.address || '';
-    form.elements['nutritionGoals'].value = profile.nutritionGoals || '';
-    ensureOption(form.elements['preferredDelivery'], profile.preferredDelivery);
-    form.elements['preferredDelivery'].value = profile.preferredDelivery || '';
-    form.elements['bio'].value = profile.bio || '';
-    ensureOption(form.elements['units'], profile.units);
-    form.elements['units'].value = profile.units || 'metric';
+  function fillForm(userDoc, profileDoc) {
+    // userDoc from users/{uid}, profileDoc from profiles/{uid}
+    if (userDoc) {
+      form.elements['firstName'].value = userDoc.name?.first || '';
+      form.elements['lastName'].value = userDoc.name?.last || '';
+      form.elements['email'].value = userDoc.email || (auth.currentUser && auth.currentUser.email) || '';
+      form.elements['phone'].value = userDoc.phone || '';
+      form.elements['subscriptionTier'].value = userDoc.subscriptionTier || 'free';
+      form.elements['profilePictureUrl'].value = userDoc.profilePicture || '';
 
-    if (window.renderDietChips && profile.dietTags) window.renderDietChips(profile.dietTags);
-    if (profile.avatarDataUrl) {
-      const img = document.querySelector('#avatarPreview img');
-      if (img) img.src = profile.avatarDataUrl;
+      // preview avatar
+      const avatarImg = document.querySelector('#avatarPreview img');
+      if (userDoc.profilePicture && avatarImg) avatarImg.src = userDoc.profilePicture;
+
+      // createdAt display (do not overwrite createdAt in DB)
+      const createdAtEl = document.getElementById('createdAt');
+      if (userDoc.createdAt && typeof userDoc.createdAt.toDate === "function") {
+        createdAtEl.textContent = userDoc.createdAt.toDate().toLocaleString();
+      } else {
+        createdAtEl.textContent = userDoc.createdAt || '—';
+      }
+
+      // stripe id display
+      document.getElementById('stripeCustomerId').textContent = userDoc.stripeCustomerId || '—';
+    } else {
+      // clear user fields if doc doesn't exist
+      form.elements['firstName'].value = '';
+      form.elements['lastName'].value = '';
+      form.elements['email'].value = auth.currentUser?.email || '';
+      form.elements['phone'].value = '';
+      form.elements['subscriptionTier'].value = 'free';
+      form.elements['profilePictureUrl'].value = '';
+      document.getElementById('createdAt').textContent = '—';
+      document.getElementById('stripeCustomerId').textContent = '—';
     }
-    previewName.textContent = profile.fullName || profile.email || '—';
-    previewEmail.textContent = profile.email || '';
-  }
 
-  function ensureOption(select, value) {
-    if (select && value && ![...select.options].some(opt => opt.value === value)) {
-      const opt = document.createElement('option');
-      opt.value = value;
-      opt.textContent = value;
-      select.appendChild(opt);
+    if (profileDoc) {
+      form.elements['aboutMe'].value = profileDoc.aboutMe || '';
+    } else {
+      form.elements['aboutMe'].value = '';
     }
+
+    previewName.textContent = `${form.elements['firstName'].value || ''} ${form.elements['lastName'].value || ''}`.trim() || (auth.currentUser?.email || '—');
+    previewEmail.textContent = form.elements['email'].value || '';
   }
 
-  async function saveToFirestore(user, data) {
+  async function saveToFirestore(user, usersPayload, profilesPayload) {
     if (!user) return;
     try {
       if (saveStatus) saveStatus.textContent = 'Saving...';
-      await setDoc(doc(db, "users", user.uid), data, { merge: true });
+      // write users doc (merge so we don't clobber createdAt or other fields)
+      await setDoc(doc(db, "users", user.uid), usersPayload, { merge: true });
+      // write profiles doc (merge)
+      await setDoc(doc(db, "profiles", user.uid), profilesPayload, { merge: true });
+
       if (saveStatus) {
         saveStatus.textContent = 'Saved!';
-        setTimeout(() => (saveStatus.textContent = 'Saved'), 1500);
+        setTimeout(() => {
+          if (saveStatus) saveStatus.textContent = 'Saved';
+        }, 1500);
       }
     } catch (err) {
       if (saveStatus) saveStatus.textContent = 'Save failed!';
@@ -100,60 +126,86 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadProfile(user) {
     if (!user) return;
     try {
-      const snap = await getDoc(doc(db, "users", user.uid));
-      if (snap.exists()) {
-        fillForm(snap.data());
-      }
+      const [userSnap, profileSnap] = await Promise.all([
+        getDoc(doc(db, "users", user.uid)),
+        getDoc(doc(db, "profiles", user.uid))
+      ]);
+
+      const userDoc = userSnap.exists() ? userSnap.data() : null;
+      const profileDoc = profileSnap.exists() ? profileSnap.data() : null;
+
+      fillForm(userDoc, profileDoc);
+      if (saveStatus) saveStatus.textContent = 'Loaded';
     } catch (err) {
       console.error("Firestore load error:", err);
+      if (saveStatus) saveStatus.textContent = 'Load failed';
     }
   }
 
   onAuthStateChanged(auth, user => {
     if (!user) {
-      document.getElementById('notSignedInModal').style.display = "flex";
-      document.querySelector('.main').style.filter = "blur(3px)";
-      document.getElementById('profileForm').style.pointerEvents = "none";
-      document.getElementById('lightboxLoginBtn').onclick = function() {
+      // show not-signed-in overlay / block interactions (as your original flow)
+      const notSignedIn = document.getElementById('notSignedInModal');
+      if (notSignedIn) notSignedIn.style.display = "flex";
+      const mainEl = document.querySelector('.main');
+      if (mainEl) mainEl.style.filter = "blur(3px)";
+      const profileFormEl = document.getElementById('profileForm');
+      if (profileFormEl) profileFormEl.style.pointerEvents = "none";
+
+      const lightboxLoginBtn = document.getElementById('lightboxLoginBtn');
+      if (lightboxLoginBtn) lightboxLoginBtn.onclick = function() {
         window.location.href = "/login-form/";
       };
       return;
     }
 
+    // logged in UI adjustments
     loggedAs.textContent = "Signed in as " + (user.displayName || user.email);
     loginBtn.style.display = "none";
     logoutBtn.style.display = "";
     previewName.textContent = user.displayName || user.email || "—";
     previewEmail.textContent = user.email || "";
 
+    // load profile data
     loadProfile(user);
 
+    // Save on form submit
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      saveToFirestore(user, getProfileFromForm());
+      const { usersPayload, profilesPayload } = getProfileFromForm();
+      saveToFirestore(user, usersPayload, profilesPayload);
     });
 
+    // blur autosave + Enter behavior
     Array.from(form.elements).forEach(el => {
+      if (!el) return;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) {
         el.addEventListener('blur', () => {
-          saveToFirestore(user, getProfileFromForm());
+          const { usersPayload, profilesPayload } = getProfileFromForm();
+          saveToFirestore(user, usersPayload, profilesPayload);
         });
         el.addEventListener('keydown', (e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            saveToFirestore(user, getProfileFromForm());
+            const { usersPayload, profilesPayload } = getProfileFromForm();
+            saveToFirestore(user, usersPayload, profilesPayload);
             el.blur();
           }
         });
       }
     });
 
+    // debounced input autosave
     let autosaveTimer;
     form.addEventListener('input', () => {
       clearTimeout(autosaveTimer);
-      autosaveTimer = setTimeout(() => saveToFirestore(user, getProfileFromForm()), 1200);
+      autosaveTimer = setTimeout(() => {
+        const { usersPayload, profilesPayload } = getProfileFromForm();
+        saveToFirestore(user, usersPayload, profilesPayload);
+      }, 1200);
     });
 
+    // avatar file -> set preview and save the data URL into profilePicture (minimal approach)
     avatarInput?.addEventListener('change', async (e) => {
       const f = e.target.files && e.target.files[0];
       if (!f) return;
@@ -162,27 +214,37 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const reader = new FileReader();
-      reader.onload = () => {
+      reader.onload = async () => {
         const img = document.querySelector('#avatarPreview img');
         if (img) img.src = reader.result;
-        saveToFirestore(user, getProfileFromForm());
+        // also populate the profilePictureUrl input if present
+        const urlInput = document.getElementById('profilePictureUrl');
+        if (urlInput) urlInput.value = reader.result;
+        const { usersPayload, profilesPayload } = getProfileFromForm();
+        await saveToFirestore(auth.currentUser, usersPayload, profilesPayload);
       };
       reader.readAsDataURL(f);
     });
 
+    // remove avatar -> reset preview and save empty string
     removeAvatarBtn?.addEventListener('click', (e) => {
       e.preventDefault();
       const img = document.querySelector('#avatarPreview img');
       if (img) img.src = 'https://i.pravatar.cc/300?img=5';
-      saveToFirestore(user, getProfileFromForm());
+      const urlInput = document.getElementById('profilePictureUrl');
+      if (urlInput) urlInput.value = '';
+      const { usersPayload, profilesPayload } = getProfileFromForm();
+      saveToFirestore(user, usersPayload, profilesPayload);
     });
 
+    // logout flow
     logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
       window.location.href = "/login-form/";
     });
   });
 
+  // goto login
   loginBtn.addEventListener('click', () => {
     window.location.href = "/login-form/";
   });
