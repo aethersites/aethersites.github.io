@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebas
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-// --- Firebase config (your real project config) ---
+// --- Firebase config ---
 const firebaseConfig = {
   apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
   authDomain: "goodplates-7ae36.firebaseapp.com",
@@ -21,7 +21,6 @@ const db = getFirestore(app);
 document.addEventListener('DOMContentLoaded', () => {
   // --- DOM refs ---
   const form = document.getElementById('profileForm');
-  const saveBtn = document.getElementById('saveBtn');
   const saveStatus = document.getElementById('saveStatus');
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
@@ -32,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const removeAvatarBtn = document.getElementById('removeAvatar');
 
   function getProfileFromForm() {
-    // Build user doc patch and profiles doc patch
     const first = (form.elements['firstName']?.value || "").trim();
     const last = (form.elements['lastName']?.value || "").trim();
     const phone = (form.elements['phone']?.value || "").trim();
@@ -57,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function fillForm(userDoc, profileDoc) {
-    // userDoc from users/{uid}, profileDoc from profiles/{uid}
     if (userDoc) {
       form.elements['firstName'].value = userDoc.name?.first || '';
       form.elements['lastName'].value = userDoc.name?.last || '';
@@ -66,11 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
       form.elements['subscriptionTier'].value = userDoc.subscriptionTier || 'free';
       form.elements['profilePictureUrl'].value = userDoc.profilePicture || '';
 
-      // preview avatar
       const avatarImg = document.querySelector('#avatarPreview img');
       if (userDoc.profilePicture && avatarImg) avatarImg.src = userDoc.profilePicture;
 
-      // createdAt display (do not overwrite createdAt in DB)
       const createdAtEl = document.getElementById('createdAt');
       if (userDoc.createdAt && typeof userDoc.createdAt.toDate === "function") {
         createdAtEl.textContent = userDoc.createdAt.toDate().toLocaleString();
@@ -78,16 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
         createdAtEl.textContent = userDoc.createdAt || '—';
       }
 
-      // stripe id display
       document.getElementById('stripeCustomerId').textContent = userDoc.stripeCustomerId || '—';
     } else {
-      // clear user fields if doc doesn't exist
-      form.elements['firstName'].value = '';
-      form.elements['lastName'].value = '';
+      form.reset();
       form.elements['email'].value = auth.currentUser?.email || '';
-      form.elements['phone'].value = '';
-      form.elements['subscriptionTier'].value = 'free';
-      form.elements['profilePictureUrl'].value = '';
       document.getElementById('createdAt').textContent = '—';
       document.getElementById('stripeCustomerId').textContent = '—';
     }
@@ -106,9 +95,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!user) return;
     try {
       if (saveStatus) saveStatus.textContent = 'Saving...';
-      // write users doc (merge so we don't clobber createdAt or other fields)
-      await setDoc(doc(db, "users", user.uid), usersPayload, { merge: true });
-      // write profiles doc (merge)
+
+      // --- Users doc (merge, preserve createdAt) ---
+      await setDoc(doc(db, "users", user.uid), {
+        ...usersPayload,
+        createdAt: user.metadata?.creationTime
+          ? new Date(user.metadata.creationTime)
+          : serverTimestamp()
+      }, { merge: true });
+
+      // --- Profiles doc (merge only, no createdAt field needed here) ---
       await setDoc(doc(db, "profiles", user.uid), profilesPayload, { merge: true });
 
       if (saveStatus) {
@@ -143,39 +139,32 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   onAuthStateChanged(auth, user => {
-    if (!user) {
-      // show not-signed-in overlay / block interactions (as your original flow)
-      const notSignedIn = document.getElementById('notSignedInModal');
-      if (notSignedIn) notSignedIn.style.display = "flex";
-      const mainEl = document.querySelector('.main');
-      if (mainEl) mainEl.style.filter = "blur(3px)";
-      const profileFormEl = document.getElementById('profileForm');
-      if (profileFormEl) profileFormEl.style.pointerEvents = "none";
+    const notSignedIn = document.getElementById('notSignedInModal');
+    const mainEl = document.querySelector('.main');
+    const profileFormEl = document.getElementById('profileForm');
+    const lightboxLoginBtn = document.getElementById('lightboxLoginBtn');
 
-      const lightboxLoginBtn = document.getElementById('lightboxLoginBtn');
-      if (lightboxLoginBtn) lightboxLoginBtn.onclick = function() {
-        window.location.href = "/login-form/";
-      };
+    if (!user) {
+      if (notSignedIn) notSignedIn.style.display = "flex";
+      if (mainEl) mainEl.style.filter = "blur(3px)";
+      if (profileFormEl) profileFormEl.style.pointerEvents = "none";
+      if (lightboxLoginBtn) {
+        lightboxLoginBtn.onclick = () => { window.location.href = "/login-form/"; };
+      }
       return;
     }
-     // Hide the "not signed in" modal (in case an earlier script showed it)
-  const notSignedIn = document.getElementById('notSignedInModal');
-  if (notSignedIn) notSignedIn.style.display = 'none';
 
-  // Remove blur and re-enable form interactions
-  const mainEl = document.querySelector('.main');
-  if (mainEl) mainEl.style.filter = '';
-  const profileFormEl = document.getElementById('profileForm');
-  if (profileFormEl) profileFormEl.style.pointerEvents = '';
+    // Signed in → clean up overlay and restore form
+    if (notSignedIn) notSignedIn.style.display = 'none';
+    if (mainEl) mainEl.style.filter = '';
+    if (profileFormEl) profileFormEl.style.pointerEvents = '';
 
-    // logged in UI adjustments
     loggedAs.textContent = "Signed in as " + (user.displayName || user.email);
     loginBtn.style.display = "none";
     logoutBtn.style.display = "";
     previewName.textContent = user.displayName || user.email || "—";
     previewEmail.textContent = user.email || "";
 
-    // load profile data
     loadProfile(user);
 
     // Save on form submit
@@ -185,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
       saveToFirestore(user, usersPayload, profilesPayload);
     });
 
-    // blur autosave + Enter behavior
+    // Autosave on blur + Enter
     Array.from(form.elements).forEach(el => {
       if (!el) return;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) {
@@ -204,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    // debounced input autosave
+    // Debounced autosave
     let autosaveTimer;
     form.addEventListener('input', () => {
       clearTimeout(autosaveTimer);
@@ -214,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 1200);
     });
 
-    // avatar file -> set preview and save the data URL into profilePicture (minimal approach)
+    // Avatar upload
     avatarInput?.addEventListener('change', async (e) => {
       const f = e.target.files && e.target.files[0];
       if (!f) return;
@@ -226,7 +215,6 @@ document.addEventListener('DOMContentLoaded', () => {
       reader.onload = async () => {
         const img = document.querySelector('#avatarPreview img');
         if (img) img.src = reader.result;
-        // also populate the profilePictureUrl input if present
         const urlInput = document.getElementById('profilePictureUrl');
         if (urlInput) urlInput.value = reader.result;
         const { usersPayload, profilesPayload } = getProfileFromForm();
@@ -235,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
       reader.readAsDataURL(f);
     });
 
-    // remove avatar -> reset preview and save empty string
+    // Avatar removal
     removeAvatarBtn?.addEventListener('click', (e) => {
       e.preventDefault();
       const img = document.querySelector('#avatarPreview img');
@@ -246,14 +234,14 @@ document.addEventListener('DOMContentLoaded', () => {
       saveToFirestore(user, usersPayload, profilesPayload);
     });
 
-    // logout flow
+    // Logout
     logoutBtn.addEventListener('click', async () => {
       await signOut(auth);
       window.location.href = "/login-form/";
     });
   });
 
-  // goto login
+  // Go to login page
   loginBtn.addEventListener('click', () => {
     window.location.href = "/login-form/";
   });
