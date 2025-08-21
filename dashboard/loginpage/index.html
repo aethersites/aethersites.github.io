@@ -167,95 +167,93 @@
         </div>
       </aside>
 
-      <!-- right: editable form -->
-      <section class="card">
-        <form id="profileForm">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="font-weight:800">Account Details</div>
-            <div class="meta small">Autosaves changes — you can also Save & Sync</div>
-          </div>
-
-          <div style="margin-top:12px">
-            <label for="fullName">Full name <span style="color:#a00d12">*</span></label>
-            <input id="fullName" type="text" placeholder="Jane Doe" required />
-            <div id="errName" class="field-error" style="display:none"></div>
-          </div>
-
+          <!-- right: editable form (REPLACE existing right-side section with this) -->
+    <section class="card">
+      <form id="profileForm">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:800">Account Details</div>
+          <div class="meta small">Autosaves changes — you can also Save</div>
+        </div>
+    
+        <div style="margin-top:12px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
           <div>
-            <label for="email">Email (used as account id) <span style="color:#a00d12">*</span></label>
-            <input id="email" type="email" placeholder="you@domain.com" required />
-            <div id="errEmail" class="field-error" style="display:none"></div>
+            <label for="firstName">First name</label>
+            <input id="firstName" name="firstName" type="text" placeholder="Jane" />
           </div>
-
-          <div class="row">
-            <div>
-              <label for="phone">Phone</label>
-              <input id="phone" type="tel" placeholder="+1 555 555 5555" />
-              <div id="errPhone" class="field-error" style="display:none"></div>
-            </div>
-            <div>
-              <label for="location">Location</label>
-              <input id="location" type="text" placeholder="City, State" />
-            </div>
-          </div>
-
           <div>
-            <label for="address">Default Delivery Address</label>
-            <input id="address" type="text" placeholder="123 Green St, Apt 5" />
+            <label for="lastName">Last name</label>
+            <input id="lastName" name="lastName" type="text" placeholder="Doe" />
           </div>
-
+        </div>
+    
+        <div style="margin-top:10px">
+          <label for="email">Email (account id)</label>
+          <input id="email" name="email" type="email" readonly />
+          <div class="meta small">Email cannot be changed here. Use account settings or contact support.</div>
+        </div>
+    
+        <div style="margin-top:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
           <div>
-            <label for="dietTags">Dietary Preferences</label>
-            <div class="chips" id="dietChips">
-              <!-- chips inserted via JS -->
-            </div>
-            <div class="meta small" style="margin-top:6px">Click to toggle multiple preferences</div>
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel" placeholder="+1 555 555 5555" />
           </div>
-
-          <div class="row">
-            <div>
-              <label for="nutritionGoals">Nutrition goals</label>
-              <input id="nutritionGoals" type="text" placeholder="Maintain 1800-2000 kcal/day" />
-            </div>
-            <div>
-              <label for="units">Units</label>
-              <select id="units"><option value="metric">Metric</option><option value="imperial">Imperial</option></select>
-            </div>
-          </div>
-
           <div>
-            <label for="preferredDelivery">Preferred Delivery Time</label>
-            <select id="preferredDelivery">
-              <option value="">No preference</option>
-              <option value="morning">Morning (8am–11am)</option>
-              <option value="afternoon">Afternoon (12pm–4pm)</option>
-              <option value="evening">Evening (5pm–9pm)</option>
+            <label for="subscriptionTier">Subscription</label>
+            <select id="subscriptionTier" name="subscriptionTier">
+              <option value="free">Free</option>
+              <option value="premium">Premium</option>
             </select>
           </div>
-
+        </div>
+    
+        <div style="margin-top:12px">
+          <label for="profilePictureUrl">Profile picture URL</label>
+          <input id="profilePictureUrl" name="profilePictureUrl" type="text" placeholder="https://..." />
+          <div class="meta small">This is the image that appears in your avatar. You can also upload via the avatar area.</div>
+        </div>
+    
+        <div style="margin-top:12px">
+          <label for="aboutMe">Bio</label>
+          <textarea id="aboutMe" name="aboutMe" placeholder="A short bio..."></textarea>
+        </div>
+    
+        <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
           <div>
-            <label for="bio">Bio</label>
-            <textarea id="bio" placeholder="A short bio..."></textarea>
+            <div class="meta small">Account created</div>
+            <div id="createdAt" class="muted">—</div>
           </div>
-
-          <hr style="border:none;border-top:1px dashed var(--border)"/>
-
-          <!-- password change -->
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:center">
-              <div style="font-weight:700">Security</div>
-              <div class="meta small">Change password (local demo)</div>
-            </div>
-
-            <div style="display:flex;gap:12px;margin-top:8px">
-              <input id="newPassword" type="password" placeholder="New password" />
-              <button id="setPasswordBtn" class="btn ghost" type="button">Set</button>
-            </div>
-            <div style="margin-top:8px">
-              <div class="strength" aria-hidden><i id="pwStrengthBar"></i></div>
-              <div id="pwStrengthText" class="meta small" style="margin-top:6px">Password strength: —</div>
-            </div>
+          <div style="margin-left:24px">
+            <div class="meta small">Stripe customer</div>
+            <div id="stripeCustomerId" class="muted small">—</div>
           </div>
+        </div>
+    
+        <hr style="border:none;border-top:1px dashed var(--border)"/>
+    
+        <!-- password change (kept for demo) -->
+        <div style="margin-top:8px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-weight:700">Security</div>
+            <div class="meta small">Change password (local demo)</div>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <input id="newPassword" name="newPassword" type="password" placeholder="New password" />
+            <button id="setPasswordBtn" class="btn ghost" type="button">Set</button>
+          </div>
+          <div style="margin-top:8px">
+            <div class="strength" aria-hidden><i id="pwStrengthBar"></i></div>
+            <div id="pwStrengthText" class="meta small" style="margin-top:6px">Password strength: —</div>
+          </div>
+        </div>
+    
+        <hr style="border:none;border-top:1px dashed var(--border)"/>
+    
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:6px">
+          <button id="saveBtn" class="btn" type="submit">Save Profile</button>
+          <button id="deleteBtn" class="btn danger" type="button">Delete Profile</button>
+        </div>
+      </form>
+    </section>
 
           <hr style="border:none;border-top:1px dashed var(--border)"/>
 
