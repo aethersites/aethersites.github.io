@@ -1,27 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Profile Dashboard — GoodPlates</title>
+  <meta charset="UTF-8">
+  <title>User Profile Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-  <h1>Profile</h1>
-  <form id="profileForm" autocomplete="off">
-    <label>Full Name <input type="text" id="fullName" name="fullName" required /></label><br>
-    <label>Email <input type="email" id="email" name="email" required disabled /></label><br>
-    <label>Phone <input type="tel" id="phone" name="phone" /></label><br>
-    <label>Location <input type="text" id="location" name="location" /></label><br>
-    <label>Bio <textarea id="bio" name="bio"></textarea></label><br>
-    <button type="submit" id="saveBtn">Save</button>
-    <button type="button" id="logoutBtn">Logout</button>
-    <div id="saveStatus"></div>
-  </form>
-
   <div id="notSignedInModal" style="display:none;">
     <p>You must be signed in to view your profile.</p>
-    <button id="lightboxLoginBtn">Go to Login</button>
+    <button id="loginBtn">Go to Login</button>
   </div>
 
+  <div class="form-container" style="display:none;" id="profileContainer">
+    <form id="profileForm">
+      <div class="column-left">
+        <label for="name">Name:</label>
+        <input type="text" name="name" id="name" required>
+
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" required disabled>
+
+        <label for="gender">Gender:</label>
+        <select name="gender" id="gender" required>
+          <option value="">Select</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+
+        <label for="age">Age:</label>
+        <input type="number" name="age" id="age" required>
+
+        <button type="submit" id="saveBtn">Save</button>
+        <button type="button" id="logoutBtn">Logout</button>
+        <div id="saveStatus"></div>
+      </div>
+
+      <div class="column-right">
+        <label for="photo">Profile Picture:</label>
+        <input type="file" name="photo" id="photo">
+        <img src="#" alt="Profile Picture" style="display:none;" id="profilePic">
+      </div>
+    </form>
+  </div>
   <script type="module" src="profile.js"></script>
 </body>
 </html>
