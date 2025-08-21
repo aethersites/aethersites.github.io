@@ -1,48 +1,97 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>User Profile Form</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body>
-  <div id="notSignedInModal" style="display:none;">
-    <p>You must be signed in to view your profile.</p>
-    <button id="loginBtn">Go to Login</button>
-  </div>
+// ==== FIREBASE CONFIGURATION ====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-  <div class="form-container" style="display:none;" id="profileContainer">
-    <form id="profileForm">
-      <div class="column-left">
-        <label for="name">Name:</label>
-        <input type="text" name="name" id="name" required>
+// Firebase config (replace XX with your credentials)
+const firebaseConfig = {
+  apiKey: "XX",
+  authDomain: "XX",
+  projectId: "XX",
+  storageBucket: "XX",
+  messagingSenderId: "XX",
+  appId: "XX",
+  measurementId: "XX"
+};
 
-        <label for="email">Email:</label>
-        <input type="email" name="email" id="email" required disabled>
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-        <label for="gender">Gender:</label>
-        <select name="gender" id="gender" required>
-          <option value="">Select</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
+// ==== DOM REFS ====
+const profileInput = document.getElementById('profile-picture');
+const profilePreview = document.getElementById('profile-preview');
+const saveBtn = document.getElementById('save-btn');
+const logoutBtn = document.getElementById('logout-btn');
 
-        <label for="age">Age:</label>
-        <input type="number" name="age" id="age" required>
+// ==== PREVIEW PROFILE PICTURE ====
+profileInput.addEventListener('change', () => {
+  const file = profileInput.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => profilePreview.src = e.target.result;
+    reader.readAsDataURL(file);
+  }
+});
 
-        <button type="submit" id="saveBtn">Save</button>
-        <button type="button" id="logoutBtn">Logout</button>
-        <div id="saveStatus"></div>
-      </div>
+// ==== AUTH STATE & DATA LOAD ====
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("Not logged in. Redirecting...");
+    window.location.href = "/login.html";
+    return;
+  }
 
-      <div class="column-right">
-        <label for="photo">Profile Picture:</label>
-        <input type="file" name="photo" id="photo">
-        <img src="#" alt="Profile Picture" style="display:none;" id="profilePic">
-      </div>
-    </form>
-  </div>
-  <script type="module" src="profile.js"></script>
-</body>
-</html>
+  document.getElementById('email').value = user.email;
+
+  const docRef = doc(db, "users", user.uid);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    document.getElementById('name').value = data.name || "";
+    document.getElementById('phone').value = data.phone || "";
+    document.getElementById('card-number').value = data.cardNumber || "";
+    document.getElementById('expiry').value = data.expiry || "";
+    document.getElementById('cvc').value = data.cvc || "";
+    document.getElementById('calories').value = data.calories || "";
+    document.getElementById('protein').value = data.protein || "";
+    document.getElementById('carbs').value = data.carbs || "";
+    document.getElementById('fats').value = data.fats || "";
+    if (data.profilePictureUrl) {
+      profilePreview.src = data.profilePictureUrl;
+    }
+  }
+});
+
+// ==== SAVE PROFILE ====
+saveBtn.addEventListener('click', async () => {
+  const user = auth.currentUser;
+  if (!user) return alert("You must be logged in to save your profile.");
+
+  const userData = {
+    name: document.getElementById('name').value,
+    phone: document.getElementById('phone').value,
+    cardNumber: document.getElementById('card-number').value,
+    expiry: document.getElementById('expiry').value,
+    cvc: document.getElementById('cvc').value,
+    calories: document.getElementById('calories').value,
+    protein: document.getElementById('protein').value,
+    carbs: document.getElementById('carbs').value,
+    fats: document.getElementById('fats').value
+  };
+
+  try {
+    await setDoc(doc(db, "users", user.uid), userData, { merge: true });
+    alert("Profile saved successfully!");
+  } catch (error) {
+    console.error("Error saving profile:", error);
+    alert("An error occurred while saving your profile.");
+  }
+});
+
+// ==== LOGOUT ====
+logoutBtn.addEventListener('click', async () => {
+  await signOut(auth);
+  window.location.href = "/login.html";
+});
