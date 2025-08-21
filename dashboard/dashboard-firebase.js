@@ -1,30 +1,8 @@
-<script type="module">
-  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-    authDomain: "goodplates-7ae36.firebaseapp.com",
-    projectId: "goodplates-7ae36",
-    storageBucket: "goodplates-7ae36.appspot.com",
-    messagingSenderId: "541149626283",
-    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
-  };
-
-  let app;
-  if (getApps().length === 0) app = initializeApp(firebaseConfig);
-  else app = getApp();
-
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-
-// DOM ready wrapper
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('profileForm');
-  const saveBtn = document.getElementById('saveBtn');
+// --- Firebase config (your real project config) ---
 const firebaseConfig = {
   apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
   authDomain: "goodplates-7ae36.firebaseapp.com",
@@ -42,18 +20,21 @@ else app = getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// DOM ready wrapper
+// --- DOM Ready ---
 document.addEventListener('DOMContentLoaded', () => {
+  // --- DOM refs ---
   const form = document.getElementById('profileForm');
   const saveBtn = document.getElementById('saveBtn');
   const saveStatus = document.getElementById('saveStatus');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loggedAs = document.getElementById('loggedAs');
+  const previewName = document.getElementById('previewName');
+  const previewEmail = document.getElementById('previewEmail');
+  const avatarInput = document.getElementById('avatarInput');
+  const removeAvatarBtn = document.getElementById('removeAvatar');
 
-  if (!form) {
-    console.error("Profile form with id 'profileForm' not found in HTML.");
-    return;
-  }
-
-  // Helper: get all form data
+  // --- Helper: Get profile data from form ---
   function getProfileFromForm() {
     const dietChips = Array.from(document.querySelectorAll('#dietChips .chip.selected')).map(n => n.textContent);
     const avatarDataUrl = document.querySelector('#avatarPreview img')?.src;
@@ -73,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // Helper: fill form from object
+  // --- Helper: Fill form from profile object ---
   function fillForm(profile) {
     if (!profile) return;
     form.elements['fullName'].value = profile.fullName || '';
@@ -85,16 +66,20 @@ document.addEventListener('DOMContentLoaded', () => {
     form.elements['preferredDelivery'].value = profile.preferredDelivery || '';
     form.elements['bio'].value = profile.bio || '';
     form.elements['units'].value = profile.units || 'metric';
-    // diet tags (chips)
+
+    // Render diet chips if function exists
     if (window.renderDietChips && profile.dietTags) window.renderDietChips(profile.dietTags);
-    // avatar
+    // Avatar preview
     if (profile.avatarDataUrl) {
       const img = document.querySelector('#avatarPreview img');
       if (img) img.src = profile.avatarDataUrl;
     }
+    // UI preview
+    previewName.textContent = profile.fullName || profile.email || '—';
+    previewEmail.textContent = profile.email || '';
   }
 
-  // Save to Firestore
+  // --- Save profile to Firestore ---
   async function saveToFirestore(user, data) {
     if (!user) return;
     try {
@@ -110,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Load from Firestore
+  // --- Load profile from Firestore ---
   async function loadProfile(user) {
     if (!user) return;
     try {
@@ -123,28 +108,81 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Main logic
+  // --- Auth State ---
   onAuthStateChanged(auth, user => {
-    if (!user) {
-      // Optionally redirect to login
-      // window.location.href = "/login.html";
-      return;
-    }
+if (!user) {
+  // Show lightbox/modal
+  document.getElementById('notSignedInModal').style.display = "flex";
+  // Optionally: hide sensitive profile sections, e.g.
+  document.querySelector('.main').style.filter = "blur(3px)";
+  // Block profile form interaction
+  document.getElementById('profileForm').style.pointerEvents = "none";
+  // Handle login button in modal
+  document.getElementById('lightboxLoginBtn').onclick = function() {
+    window.location.href = "/login-form/";
+  };
+  return;
+}
+
+    // User is logged in: update UI
+    loggedAs.textContent = "Signed in as " + (user.displayName || user.email);
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "";
+    previewName.textContent = user.displayName || user.email || "—";
+    previewEmail.textContent = user.email || "";
+
+    // Load profile from Firestore
     loadProfile(user);
 
-    // Save on submit
+    // Save on form submit
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       saveToFirestore(user, getProfileFromForm());
     });
 
-    // Optionally, autosave on input (debounced)
+    // Autosave on input (debounced)
     let autosaveTimer;
     form.addEventListener('input', () => {
       clearTimeout(autosaveTimer);
       autosaveTimer = setTimeout(() => saveToFirestore(user, getProfileFromForm()), 1200);
-      });
+    });
+
+    // Avatar upload (resize/compress if needed)
+    avatarInput?.addEventListener('change', async (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      if (!f.type.startsWith('image/')) {
+        alert('Please upload an image');
+        return;
+      }
+      // Optionally process image here (resize/compress)
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = document.querySelector('#avatarPreview img');
+        if (img) img.src = reader.result;
+        // Autosave after selecting avatar
+        saveToFirestore(user, getProfileFromForm());
+      };
+      reader.readAsDataURL(f);
+    });
+
+    removeAvatarBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const img = document.querySelector('#avatarPreview img');
+      if (img) img.src = 'https://i.pravatar.cc/300?img=5';
+      saveToFirestore(user, getProfileFromForm());
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = "/login-form/";
     });
   });
-  
-</script>
+
+  // Login button (for users who are logged out)
+  loginBtn.addEventListener('click', () => {
+    window.location.href = "/login-form/";
+  });
+});
+
