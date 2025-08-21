@@ -1,14 +1,15 @@
-// ==== FIREBASE CONFIGURATION ====
+// /dashboard/profile/profile.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-storage.js";
 
-// Firebase config (replace XX with your credentials)
+// ==== FIREBASE CONFIG (same as signup.js) ====
 const firebaseConfig = {
   apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
   authDomain: "goodplates-7ae36.firebaseapp.com",
   projectId: "goodplates-7ae36",
-  storageBucket: "goodplates-7ae36.appspot.com",
+  storageBucket: "goodplates-7ae36.firebasestorage.app",
   messagingSenderId: "541149626283",
   appId: "1:541149626283:web:928888f0b42cda49b7dcee",
   measurementId: "G-HKMSHM726J"
@@ -17,14 +18,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // ==== DOM REFS ====
 const profileInput = document.getElementById('profile-picture');
 const profilePreview = document.getElementById('profile-preview');
+const uploadStatus = document.getElementById('upload-status');
 const saveBtn = document.getElementById('save-btn');
 const logoutBtn = document.getElementById('logout-btn');
 
-// ==== PREVIEW PROFILE PICTURE ====
+// preview local selection
 profileInput.addEventListener('change', () => {
   const file = profileInput.files[0];
   if (file) {
@@ -34,63 +37,138 @@ profileInput.addEventListener('change', () => {
   }
 });
 
-// ==== AUTH STATE & DATA LOAD ====
+// watch auth state, load profile
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    alert("Not logged in. Redirecting...");
+    // not logged in -> redirect to login
     window.location.href = "/login.html";
     return;
   }
 
+  // show user email
   document.getElementById('email').value = user.email;
 
+  // load Firestore profile doc under users/{uid}
   const docRef = doc(db, "users", user.uid);
-  const docSnap = await getDoc(docRef);
-
-  if (docSnap.exists()) {
-    const data = docSnap.data();
-    document.getElementById('name').value = data.name || "";
-    document.getElementById('phone').value = data.phone || "";
-    document.getElementById('card-number').value = data.cardNumber || "";
-    document.getElementById('expiry').value = data.expiry || "";
-    document.getElementById('cvc').value = data.cvc || "";
-    document.getElementById('calories').value = data.calories || "";
-    document.getElementById('protein').value = data.protein || "";
-    document.getElementById('carbs').value = data.carbs || "";
-    document.getElementById('fats').value = data.fats || "";
-    if (data.profilePictureUrl) {
-      profilePreview.src = data.profilePictureUrl;
+  try {
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      document.getElementById('name').value = data.name ?? "";
+      document.getElementById('phone').value = data.phone ?? "";
+      document.getElementById('card-number').value = data.cardNumber ?? "";
+      document.getElementById('expiry').value = data.expiry ?? "";
+      document.getElementById('cvc').value = data.cvc ?? "";
+      document.getElementById('calories').value = data.calories ?? "";
+      document.getElementById('protein').value = data.protein ?? "";
+      document.getElementById('carbs').value = data.carbs ?? "";
+      document.getElementById('fats').value = data.fats ?? "";
+      if (data.profilePictureUrl) {
+        profilePreview.src = data.profilePictureUrl;
+      }
+    } else {
+      // doc doesn't exist — create a minimal doc to be safe
+      await setDoc(docRef, {
+        email: user.email,
+        createdAt: serverTimestamp()
+      }, { merge: true });
     }
+  } catch (err) {
+    console.error("Error loading profile:", err);
   }
 });
 
-// ==== SAVE PROFILE ====
+// helper: upload image to Firebase Storage and return download URL
+async function uploadProfileImage(uid, file) {
+  if (!file) return null;
+  const path = `profiles/${uid}/profile.${file.name.split('.').pop()}`; // keep original ext
+  const ref = storageRef(storage, path);
+  const uploadTask = uploadBytesResumable(ref, file);
+
+  return new Promise((resolve, reject) => {
+    uploadTask.on('state_changed',
+      (snapshot) => {
+        // progress
+        const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+        uploadStatus.textContent = `Uploading image: ${pct}%`;
+      },
+      (error) => {
+        console.error("Upload failed:", error);
+        uploadStatus.textContent = "Image upload failed.";
+        reject(error);
+      },
+      async () => {
+        // success
+        try {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          uploadStatus.textContent = "Upload complete.";
+          resolve(downloadURL);
+        } catch (err) {
+          reject(err);
+        }
+      }
+    );
+  });
+}
+
+// save profile handler
 saveBtn.addEventListener('click', async () => {
   const user = auth.currentUser;
   if (!user) return alert("You must be logged in to save your profile.");
 
-  const userData = {
-    name: document.getElementById('name').value,
-    phone: document.getElementById('phone').value,
-    cardNumber: document.getElementById('card-number').value,
-    expiry: document.getElementById('expiry').value,
-    cvc: document.getElementById('cvc').value,
-    calories: document.getElementById('calories').value,
-    protein: document.getElementById('protein').value,
-    carbs: document.getElementById('carbs').value,
-    fats: document.getElementById('fats').value
-  };
+  saveBtn.disabled = true;
+  saveBtn.textContent = "Saving...";
 
   try {
-    await setDoc(doc(db, "users", user.uid), userData, { merge: true });
+    const uid = user.uid;
+    const file = profileInput.files[0];
+    let profilePictureUrl = null;
+
+    if (file) {
+      try {
+        profilePictureUrl = await uploadProfileImage(uid, file);
+      } catch (uploadErr) {
+        console.error("Profile image upload error:", uploadErr);
+        // continue — we still allow saving other fields even if image fails
+      }
+    }
+
+    const userData = {
+      name: document.getElementById('name').value || "",
+      phone: document.getElementById('phone').value || "",
+      cardNumber: document.getElementById('card-number').value || "",
+      expiry: document.getElementById('expiry').value || "",
+      cvc: document.getElementById('cvc').value || "",
+      calories: parseNumberOrNull(document.getElementById('calories').value),
+      protein: parseNumberOrNull(document.getElementById('protein').value),
+      carbs: parseNumberOrNull(document.getElementById('carbs').value),
+      fats: parseNumberOrNull(document.getElementById('fats').value),
+      updatedAt: serverTimestamp()
+    };
+
+    if (profilePictureUrl) {
+      userData.profilePictureUrl = profilePictureUrl;
+    }
+
+    await setDoc(doc(db, "users", uid), userData, { merge: true });
     alert("Profile saved successfully!");
-  } catch (error) {
-    console.error("Error saving profile:", error);
+  } catch (err) {
+    console.error("Error saving profile:", err);
     alert("An error occurred while saving your profile.");
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Save Profile";
+    setTimeout(() => uploadStatus.textContent = "", 2000);
   }
 });
 
-// ==== LOGOUT ====
+function parseNumberOrNull(v) {
+  if (v === "" || v === null || v === undefined) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+// logout
 logoutBtn.addEventListener('click', async () => {
   await signOut(auth);
   window.location.href = "/login.html";
