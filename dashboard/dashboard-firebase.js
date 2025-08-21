@@ -63,8 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
     form.elements['location'].value = profile.location || '';
     form.elements['address'].value = profile.address || '';
     form.elements['nutritionGoals'].value = profile.nutritionGoals || '';
+    // Ensure value exists for <select>
+    ensureOption(form.elements['preferredDelivery'], profile.preferredDelivery);
     form.elements['preferredDelivery'].value = profile.preferredDelivery || '';
     form.elements['bio'].value = profile.bio || '';
+    // Ensure value exists for <select>
+    ensureOption(form.elements['units'], profile.units);
     form.elements['units'].value = profile.units || 'metric';
 
     // Render diet chips if function exists
@@ -77,6 +81,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // UI preview
     previewName.textContent = profile.fullName || profile.email || '—';
     previewEmail.textContent = profile.email || '';
+  }
+
+  // --- Dynamically add option for select if needed ---
+  function ensureOption(select, value) {
+    if (select && value && ![...select.options].some(opt => opt.value === value)) {
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = value;
+      select.appendChild(opt);
+    }
   }
 
   // --- Save profile to Firestore ---
@@ -110,19 +124,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Auth State ---
   onAuthStateChanged(auth, user => {
-if (!user) {
-  // Show lightbox/modal
-  document.getElementById('notSignedInModal').style.display = "flex";
-  // Optionally: hide sensitive profile sections, e.g.
-  document.querySelector('.main').style.filter = "blur(3px)";
-  // Block profile form interaction
-  document.getElementById('profileForm').style.pointerEvents = "none";
-  // Handle login button in modal
-  document.getElementById('lightboxLoginBtn').onclick = function() {
-    window.location.href = "/login-form/";
-  };
-  return;
-}
+    if (!user) {
+      // Show lightbox/modal
+      document.getElementById('notSignedInModal').style.display = "flex";
+      document.querySelector('.main').style.filter = "blur(3px)";
+      document.getElementById('profileForm').style.pointerEvents = "none";
+      document.getElementById('lightboxLoginBtn').onclick = function() {
+        window.location.href = "/login-form/";
+      };
+      return;
+    }
 
     // User is logged in: update UI
     loggedAs.textContent = "Signed in as " + (user.displayName || user.email);
@@ -138,6 +149,23 @@ if (!user) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       saveToFirestore(user, getProfileFromForm());
+    });
+
+    // Autosave on blur for each field
+    Array.from(form.elements).forEach(el => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName)) {
+        el.addEventListener('blur', () => {
+          saveToFirestore(user, getProfileFromForm());
+        });
+        // Also save on Enter key
+        el.addEventListener('keydown', (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            saveToFirestore(user, getProfileFromForm());
+            el.blur();
+          }
+        });
+      }
     });
 
     // Autosave on input (debounced)
@@ -185,4 +213,3 @@ if (!user) {
     window.location.href = "/login-form/";
   });
 });
-
