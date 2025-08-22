@@ -1,8 +1,3 @@
-/* grocery.js — production-ready (auth required). No demo mode.
-   Steps:
-   1) Paste your Firebase web app config into `firebaseConfig` below.
-   2) Ensure Firestore is enabled and your rules restrict access to /users/{uid}/...
-*/
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -11,8 +6,7 @@ import {
   onSnapshot, serverTimestamp, query, orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-/* ---------- CONFIG: PASTE YOUR FIREBASE CONFIG HERE ---------- */
-  const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
     authDomain: "goodplates-7ae36.firebaseapp.com",
     projectId: "goodplates-7ae36",
@@ -22,214 +16,336 @@ import {
     measurementId: "G-HKMSHM726J"
   };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
-
-/* ---------------------------------------------------------------- */
-
-let app;
-if (getApps().length === 0) {
-  if (!firebaseConfig || !firebaseConfig.projectId) {
-    console.error('Please paste your Firebase config into grocery/grocery.js before enabling cloud mode.');
-  }
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
-}
-
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ---------- DOM ---------- */
-const groceryInput = document.getElementById("groceryInput");
-const groceryQty = document.getElementById("groceryQty");
-const addBtn = document.getElementById("addGrocery");
-const groceryList = document.getElementById("groceryList");
-const pantryList = document.getElementById("pantryList");
-const userDisplay = document.getElementById("userDisplay");
-const panelContainer = document.getElementById("panelContainer");
+// UI refs
+const signinBtn = document.getElementById('signinBtn');
+const signoutBtn = document.getElementById('signoutBtn');
+const signedState = document.getElementById('signedState');
 
-let uid = null;
-let unsubGrocery = null;
-let unsubPantry = null;
+const groceriesBody = document.getElementById('groceriesBody');
+const pantryBody = document.getElementById('pantryBody');
 
-/* ---------- UI initial: disabled until sign-in ---------- */
-function setUIEnabled(enabled) {
-  // panels fade when disabled
-  if (enabled) panelContainer.classList.remove('disabled'); else panelContainer.classList.add('disabled');
+const addGroceryBtn = document.getElementById('addGroceryBtn');
+const gName = document.getElementById('gName');
+const gQty = document.getElementById('gQty');
+const gPrice = document.getElementById('gPrice');
 
-  // enable/disable inputs & buttons
-  groceryInput.disabled = !enabled;
-  groceryQty.disabled = !enabled;
-  addBtn.disabled = !enabled;
-  addBtn.setAttribute('aria-disabled', (!enabled).toString());
-  // disable any action buttons via attribute (they are added dynamically; we will also guard by checking uid on click)
-  const actionButtons = document.querySelectorAll('.icon-btn');
-  actionButtons.forEach(b => b.disabled = !enabled);
-}
-setUIEnabled(false);
+const addPantryBtn = document.getElementById('addPantryBtn');
+const pName = document.getElementById('pName');
+const pQty = document.getElementById('pQty');
+const pExp = document.getElementById('pExp');
 
-/* ---------- Auth state: no redirect, only enable UI on sign-in ---------- */
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    uid = null;
-    userDisplay.textContent = 'Not signed in — sign in to enable editing';
-    setUIEnabled(false);
-    // unsubscribe snapshots if present
-    if (unsubGrocery) { unsubGrocery(); unsubGrocery = null; }
-    if (unsubPantry) { unsubPantry(); unsubPantry = null; }
-    // still render empty placeholders so page is usable view-only
-    renderGrocery([]);
-    renderPantry([]);
-    return;
+const customAddBtn = document.getElementById('customAddBtn');
+const customName = document.getElementById('customName');
+const customQty = document.getElementById('customQty');
+const customPrice = document.getElementById('customPrice');
+const customCalories = document.getElementById('customCalories');
+
+const modalBackdrop = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const mName = document.getElementById('mName');
+const mQty = document.getElementById('mQty');
+const mPrice = document.getElementById('mPrice');
+const modalSave = document.getElementById('modalSave');
+const modalCancel = document.getElementById('modalCancel');
+
+// state
+let currentUser = null;
+let profileDocRef = null;
+let profileData = null;
+let activeGroceryListIndex = 0;
+let editingContext = null;
+
+signinBtn.addEventListener('click', async () => {
+  const provider = new GoogleAuthProvider();
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (e) {
+    alert('Sign-in failed: ' + e.message);
+    console.error(e);
   }
-
-  // user is signed-in: enable UI and start realtime listeners
-  uid = user.uid;
-  userDisplay.innerHTML = `
-    <div style="display:flex;align-items:center;gap:10px">
-      <img src="${user.photoURL || ''}" style="width:30px;height:30px;border-radius:999px;object-fit:cover" />
-      <strong style="font-size:14px">${(user.displayName || user.email)}</strong>
-      <button id="signoutBtn" style="margin-left:10px;padding:6px 8px;border-radius:8px;border:1px solid #e6e9ef;background:#fff;cursor:pointer">Sign out</button>
-    </div>`;
-  document.getElementById('signoutBtn').onclick = async () => { await signOut(auth); window.location.reload(); };
-
-  setUIEnabled(true);
-  subscribeRealtime();
+});
+signoutBtn.addEventListener('click', async () => {
+  await signOut(auth);
 });
 
-/* ---------- Add item ---------- */
-addBtn.addEventListener('click', handleAdd);
-groceryInput.addEventListener('keydown', e => { if (e.key === 'Enter') handleAdd(); });
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  if (user) {
+    signedState.textContent = user.displayName || user.email || user.uid;
+    signinBtn.style.display = 'none';
+    signoutBtn.style.display = '';
+    profileDocRef = doc(db, 'profiles', user.uid);
+    await loadOrCreateProfile();
+    renderAll();
+  } else {
+    signedState.textContent = 'Not signed in';
+    signinBtn.style.display = '';
+    signoutBtn.style.display = 'none';
+    profileDocRef = null;
+    profileData = null;
+    clearUI();
+  }
+});
 
-async function handleAdd() {
-  if (!uid) { alert('Please sign in to add items.'); return; }
-  const name = (groceryInput.value || '').trim();
-  const qty = Number(groceryQty.value || 1);
-  if (!name) { groceryInput.focus(); return; }
-
-  addBtn.disabled = true;
-  try {
-    await addDoc(collection(db, 'users', uid, 'grocery'), {
-      name, quantity: qty || 1, bought: false, createdAt: serverTimestamp()
-    });
-    groceryInput.value = ''; groceryQty.value = 1;
-  } catch (err) {
-    console.error('Add failed', err);
-    alert('Could not add item — check console.');
-  } finally {
-    addBtn.disabled = false;
+async function loadOrCreateProfile() {
+  const snap = await getDoc(profileDocRef);
+  if (!snap.exists()) {
+    const initial = {
+      groceryLists: [{ name: 'Default', items: [], createdAt: new Date() }],
+      pantryItems: [],
+      customIngredients: [],
+      aiSuggestionsEnabled: true
+    };
+    await setDoc(profileDocRef, initial);
+    profileData = initial;
+  } else {
+    profileData = snap.data();
+    profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items:[], createdAt:new Date() }];
+    profileData.pantryItems = profileData.pantryItems || [];
+    profileData.customIngredients = profileData.customIngredients || [];
   }
 }
 
-/* ---------- Realtime firestore subscriptions ---------- */
-function subscribeRealtime() {
-  if (!uid) return;
-  const gRef = collection(db, 'users', uid, 'grocery');
-  const pRef = collection(db, 'users', uid, 'pantry');
-  const qG = query(gRef, orderBy('createdAt', 'desc'));
-  const qP = query(pRef, orderBy('createdAt', 'desc'));
-
-  if (unsubGrocery) unsubGrocery();
-  if (unsubPantry) unsubPantry();
-
-  unsubGrocery = onSnapshot(qG, snap => {
-    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderGrocery(items);
-  }, err => { console.error('grocery snapshot error', err); });
-
-  unsubPantry = onSnapshot(qP, snap => {
-    const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    renderPantry(items);
-  }, err => { console.error('pantry snapshot error', err); });
+// debounce save
+let pendingSave = null;
+function scheduleSave() {
+  if (pendingSave) clearTimeout(pendingSave);
+  pendingSave = setTimeout(async () => {
+    pendingSave = null;
+    if (!profileDocRef) return;
+    try {
+      await updateDoc(profileDocRef, {
+        groceryLists: profileData.groceryLists,
+        pantryItems: profileData.pantryItems,
+        customIngredients: profileData.customIngredients,
+        aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+      });
+    } catch (e) {
+      console.error('Save failed', e);
+      try { await setDoc(profileDocRef, profileData, { merge: true }); } catch (e2) { console.error(e2); }
+    }
+  }, 350);
 }
 
-/* ---------- Renderers ---------- */
-function renderGrocery(items) {
-  groceryList.innerHTML = '';
-  if (!items || items.length === 0) {
-    const el = document.createElement('li'); el.className = 'empty'; el.textContent = 'No groceries — add something above.'; groceryList.appendChild(el); return;
+function clearUI() {
+  groceriesBody.innerHTML = '<tr><td colspan="4" class="small">Sign in to see your lists</td></tr>';
+  pantryBody.innerHTML = '<tr><td colspan="4" class="small">Sign in to see your pantry</td></tr>';
+}
+
+function renderAll() {
+  const list = (profileData.groceryLists && profileData.groceryLists[activeGroceryListIndex]) || { name:'Default', items:[] };
+  renderGroceries(list.items || []);
+  renderPantry(profileData.pantryItems || []);
+  document.getElementById('signedState').textContent = currentUser ? (currentUser.displayName || currentUser.email) : 'Not signed in';
+}
+
+function renderGroceries(items) {
+  groceriesBody.innerHTML = '';
+  if (!items.length) {
+    groceriesBody.innerHTML = '<tr><td colspan="4" class="small">No grocery items</td></tr>';
+    return;
   }
-
-  for (const it of items) {
-    const li = document.createElement('li'); li.className = 'item'; li.dataset.id = it.id;
-
-    const left = document.createElement('div'); left.className = 'left';
-    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!it.bought; cb.title = 'Mark as bought';
-    cb.addEventListener('change', () => {
-      if (!uid) { cb.checked = !cb.checked; alert('Sign in to change'); return; }
-      updateDoc(doc(db, 'users', uid, 'grocery', it.id), { bought: !it.bought }).catch(err => console.error(err));
-    });
-
-    const name = document.createElement('div'); name.className = 'name'; name.textContent = it.name;
-    const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = `×${it.quantity || 1}`;
-    left.append(cb, name, meta);
-
-    const actions = document.createElement('div'); actions.className = 'actions';
-    const move = document.createElement('button'); move.className = 'icon-btn move-btn'; move.title = 'Move to pantry';
-    move.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>`;
-    move.disabled = !uid;
-    move.addEventListener('click', async () => {
-      if (!uid) return alert('Sign in to move items');
-      li.classList.add('moving');
-      setTimeout(async () => {
-        try {
-          await addDoc(collection(db, 'users', uid, 'pantry'), { name: it.name, quantity: it.quantity || 1, inStock: true, createdAt: serverTimestamp() });
-          await deleteDoc(doc(db, 'users', uid, 'grocery', it.id));
-        } catch (err) {
-          console.error('Move failed', err); li.classList.remove('moving'); alert('Move failed — check console.');
-        }
-      }, 200);
-    });
-
-    const del = document.createElement('button'); del.className = 'icon-btn del'; del.title = 'Delete';
-    del.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>`;
-    del.disabled = !uid;
-    del.addEventListener('click', () => {
-      if (!uid) return alert('Sign in to delete');
-      deleteDoc(doc(db, 'users', uid, 'grocery', it.id)).catch(err => console.error(err));
-    });
-
-    if (it.bought) li.classList.add('bought');
-    actions.append(move, del);
-    li.append(left, actions);
-    groceryList.appendChild(li);
-  }
+  items.forEach((it, idx) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHTML(it.name)}</td>
+      <td>${it.quantity ?? 1}</td>
+      <td>${it.price != null ? formatCurrency(it.price) : '-'}</td>
+      <td class="actions">
+        <button data-idx="${idx}" class="btn btn-edit btn-edit-row">Edit</button>
+        <button data-idx="${idx}" class="btn btn-muted btn-move">Move → Pantry</button>
+        <button data-idx="${idx}" class="btn btn-danger btn-delete">Delete</button>
+      </td>
+    `;
+    groceriesBody.appendChild(tr);
+  });
+  groceriesBody.querySelectorAll('.btn-edit-row').forEach(btn => btn.addEventListener('click', onEditGrocery));
+  groceriesBody.querySelectorAll('.btn-delete').forEach(btn => btn.addEventListener('click', onDeleteGrocery));
+  groceriesBody.querySelectorAll('.btn-move').forEach(btn => btn.addEventListener('click', onMoveToPantry));
 }
 
 function renderPantry(items) {
-  pantryList.innerHTML = '';
-  if (!items || items.length === 0) {
-    const el = document.createElement('li'); el.className = 'empty'; el.textContent = 'Pantry is empty.'; pantryList.appendChild(el); return;
+  pantryBody.innerHTML = '';
+  if (!items.length) {
+    pantryBody.innerHTML = '<tr><td colspan="4" class="small">No pantry items</td></tr>';
+    return;
   }
-
-  for (const it of items) {
-    const li = document.createElement('li'); li.className = 'item'; li.dataset.id = it.id;
-    const left = document.createElement('div'); left.className = 'left';
-    const name = document.createElement('div'); name.className = 'name'; name.textContent = it.name;
-    const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = `×${it.quantity || 1}`;
-    left.append(name, meta);
-
-    const actions = document.createElement('div'); actions.className = 'actions';
-    const out = document.createElement('button'); out.className = 'icon-btn'; out.textContent = (it.inStock === false) ? 'Refill' : 'Out';
-    out.disabled = !uid;
-    out.addEventListener('click', () => {
-      if (!uid) return alert('Sign in to edit pantry');
-      updateDoc(doc(db, 'users', uid, 'pantry', it.id), { inStock: !(it.inStock === undefined ? true : it.inStock) }).catch(err => console.error(err));
-    });
-
-    const del = document.createElement('button'); del.className = 'icon-btn del'; del.title = 'Delete';
-    del.innerHTML = `<svg class="icon-svg" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>`;
-    del.disabled = !uid;
-    del.addEventListener('click', () => {
-      if (!uid) return alert('Sign in to delete');
-      deleteDoc(doc(db, 'users', uid, 'pantry', it.id)).catch(err => console.error(err));
-    });
-
-    actions.append(out, del);
-    li.append(left, actions);
-    pantryList.appendChild(li);
-  }
+  items.forEach((it, idx) => {
+    const exp = it.expirationDate ? formatDate(new Date(it.expirationDate.seconds ? it.expirationDate.toMillis() : it.expirationDate)) : '-';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHTML(it.name)}</td>
+      <td>${it.quantity ?? 1}</td>
+      <td>${exp}</td>
+      <td class="actions">
+        <button data-idx="${idx}" class="btn btn-edit btn-edit-pantry">Edit</button>
+        <button data-idx="${idx}" class="btn btn-danger btn-delete-pantry">Delete</button>
+      </td>
+    `;
+    pantryBody.appendChild(tr);
+  });
+  pantryBody.querySelectorAll('.btn-edit-pantry').forEach(btn => btn.addEventListener('click', onEditPantry));
+  pantryBody.querySelectorAll('.btn-delete-pantry').forEach(btn => btn.addEventListener('click', onDeletePantry));
 }
+
+function escapeHTML(s = '') {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function formatCurrency(n) {
+  if (n == null || n === '') return '-';
+  return '$' + (Number(n).toFixed(2));
+}
+function formatDate(d) {
+  if (!d) return '-';
+  const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const day = String(d.getDate()).padStart(2,'0');
+  return `${m}-${day}-${String(y).slice(-2)}`;
+}
+
+// Add grocery
+addGroceryBtn.addEventListener('click', () => {
+  if (!currentUser) return alert('Sign in to add items');
+  const name = gName.value && gName.value.trim();
+  if (!name) return alert('Enter a name');
+  const qty = Number(gQty.value) || 1;
+  const price = gPrice.value !== '' ? Number(gPrice.value) : null;
+  const item = { name, quantity: qty, price };
+  const list = profileData.groceryLists[activeGroceryListIndex];
+  list.items = list.items || [];
+  list.items.push(item);
+  scheduleSave();
+  renderAll();
+  gName.value = ''; gQty.value = 1; gPrice.value = '';
+});
+
+// Add pantry
+addPantryBtn.addEventListener('click', () => {
+  if (!currentUser) return alert('Sign in to add pantry items');
+  const name = pName.value && pName.value.trim();
+  if (!name) return alert('Enter a name');
+  const qty = Number(pQty.value) || 1;
+  const expirationDate = pExp.value ? new Date(pExp.value) : null;
+  const item = { name, quantity: qty };
+  if (expirationDate) item.expirationDate = expirationDate;
+  profileData.pantryItems = profileData.pantryItems || [];
+  profileData.pantryItems.push(item);
+  scheduleSave();
+  renderAll();
+  pName.value=''; pQty.value=1; pExp.value='';
+});
+
+// Custom ingredient now adds to groceries list
+customAddBtn.addEventListener('click', () => {
+  if (!currentUser) return alert('Sign in to add custom ingredients');
+  const name = customName.value && customName.value.trim();
+  if (!name) return alert('Enter a name');
+  const qty = Number(customQty.value) || 1;
+  const price = customPrice.value !== '' ? Number(customPrice.value) : null;
+  const calories = customCalories.value !== '' ? Number(customCalories.value) : null;
+
+  // push into groceries list (so it's managed like other grocery items)
+  const item = { name, quantity: qty, price, calories };
+  const list = profileData.groceryLists[activeGroceryListIndex];
+  list.items = list.items || [];
+  list.items.push(item);
+  // keep also in customIngredients optionally (keeps legacy data)
+  profileData.customIngredients = profileData.customIngredients || [];
+  profileData.customIngredients.push({ name, quantity: qty, price, calories });
+
+  scheduleSave();
+  renderAll();
+  customName.value=''; customQty.value=''; customPrice.value=''; customCalories.value='';
+  // small UX ack
+  alert('Custom ingredient added to Groceries list');
+});
+
+// Edit grocery
+function onEditGrocery(e) {
+  const idx = Number(e.currentTarget.dataset.idx);
+  const list = profileData.groceryLists[activeGroceryListIndex];
+  const item = list.items[idx];
+  editingContext = { type:'grocery', idx };
+  openModal('Edit Grocery Item', item.name, item.quantity, item.price);
+}
+function onDeleteGrocery(e) {
+  const idx = Number(e.currentTarget.dataset.idx);
+  if (!confirm('Delete this grocery item?')) return;
+  const list = profileData.groceryLists[activeGroceryListIndex];
+  list.items.splice(idx,1);
+  scheduleSave();
+  renderAll();
+}
+function onMoveToPantry(e) {
+  const idx = Number(e.currentTarget.dataset.idx);
+  const list = profileData.groceryLists[activeGroceryListIndex];
+  const item = list.items.splice(idx,1)[0];
+  const p = { name: item.name, quantity: item.quantity || 1 };
+  profileData.pantryItems = profileData.pantryItems || [];
+  profileData.pantryItems.push(p);
+  scheduleSave();
+  renderAll();
+}
+
+// Edit pantry handlers
+function onEditPantry(e) {
+  const idx = Number(e.currentTarget.dataset.idx);
+  const item = profileData.pantryItems[idx];
+  editingContext = { type:'pantry', idx };
+  openModal('Edit Pantry Item', item.name, item.quantity, item.price ?? '');
+}
+function onDeletePantry(e) {
+  const idx = Number(e.currentTarget.dataset.idx);
+  if (!confirm('Delete this pantry item?')) return;
+  profileData.pantryItems.splice(idx,1);
+  scheduleSave();
+  renderAll();
+}
+
+// modal
+function openModal(title, name='', qty='', price='') {
+  modalTitle.textContent = title;
+  mName.value = name || '';
+  mQty.value = qty || 1;
+  mPrice.value = price != null ? price : '';
+  modalBackdrop.style.display='flex';
+  mName.focus();
+}
+function closeModal() {
+  modalBackdrop.style.display='none';
+  editingContext = null;
+}
+modalCancel.addEventListener('click', closeModal);
+
+modalSave.addEventListener('click', () => {
+  if (!editingContext) return closeModal();
+  const name = mName.value && mName.value.trim(); if (!name) return alert('Enter a name');
+  const qty = Number(mQty.value) || 1;
+  const price = (mPrice.value !== '' && !isNaN(mPrice.value)) ? Number(mPrice.value) : null;
+
+  if (editingContext.type === 'grocery') {
+    const list = profileData.groceryLists[activeGroceryListIndex];
+    const it = list.items[editingContext.idx];
+    it.name = name; it.quantity = qty; it.price = price;
+  } else if (editingContext.type === 'pantry') {
+    const it = profileData.pantryItems[editingContext.idx];
+    it.name = name; it.quantity = qty;
+    if (mPrice.value !== '') it.price = price;
+    else delete it.price;
+  }
+  scheduleSave();
+  closeModal();
+  renderAll();
+});
+
+// esc to close modal
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+clearUI();
+
+// debugging helpers
+window._profile = () => profileData;
+window._saveNow = () => scheduleSave();
