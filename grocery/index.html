@@ -5,174 +5,323 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Groceries & Pantry</title>
 
-  <!-- Combined CSS (kept inside HTML as requested) -->
   <style>
     :root{
-      --bg:#f6f7fb; --panel-bg:#fff; --border:#e6e9ef; --muted:#6b7280;
-      --accent:#2563eb; --accent-2:#1f8a3d; --radius:12px; --shadow:0 6px 24px rgba(12,14,20,0.06);
-    }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{
-      margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background:var(--bg); color:#111827; -webkit-font-smoothing:antialiased;
-      padding:20px; display:flex; justify-content:center;
-    }
-
-    .page { width:100%; max-width:1100px; }
-
-    .page-title {
-      background: #000; color:#fff; text-align:center; padding:12px; border-radius:10px; font-weight:700;
-      margin-bottom:16px;
+      --page-bg: #ffffff;
+      --panel-bg: #ffffff;
+      --muted: #6b7280;
+      --border: #e6e6e6;
+      --accent: #1f8a3d;
+      --radius-lg: 18px;
+      --radius: 10px;
+      --input-h: 40px;
+      --gap: 18px;
+      --max-width: 1100px;
     }
 
-    .topbar {
-      display:flex; justify-content:space-between; align-items:center; gap:12px;
-      padding:14px 18px; background:var(--panel-bg); border-radius:var(--radius); box-shadow:var(--shadow);
-      margin-bottom:18px;
+    /* Reset / Base */
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; background:var(--page-bg); font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{padding:28px; color:#0b1220; -webkit-font-smoothing:antialiased; display:flex; justify-content:center;}
+
+    /* Outer centered panel that matches the mock */
+    .canvas {
+      width:100%;
+      max-width:var(--max-width);
+      border-radius:var(--radius-lg);
+      background:var(--panel-bg);
+      padding:28px;
     }
-    .brand { font-size:18px; font-weight:700 }
-    .auth-actions { display:flex; gap:8px; align-items:center }
-    .user-info { color:var(--muted); font-size:13px }
 
-    .lists { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-    @media (max-width:980px){ .lists{grid-template-columns:1fr} }
+    /* Top plain header (not boxed) */
+    .page-heading { text-align:center; margin:0 0 10px; }
+    .page-heading h1 { margin:0; font-size:28px; font-weight:800; }
+    .page-heading p { margin:8px 0 0; color:var(--muted); }
 
+    /* small gear in top-right (visual only) */
+    .settings-gear { position:relative; float:right; transform:translateY(-54px); opacity:.6; }
+
+    /* topbar row (site name left, actions right) - not boxed */
+    .sitebar {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      margin-bottom:6px;
+    }
+    .brand { font-weight:700; font-size:18px; color:#111827 }
+    .auth-actions { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:13px }
+
+    /* Two column lists area */
+    .lists {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:var(--gap);
+      margin-top:6px;
+    }
+    @media (max-width:920px) { .lists { grid-template-columns: 1fr; } }
+
+    /* panel boxes (thin border, no shadow) */
     .box {
-      background:var(--panel-bg); border-radius:var(--radius); padding:14px; border:1px solid var(--border);
-      box-shadow:var(--shadow);
+      background:var(--panel-bg);
+      border-radius:12px;
+      padding:18px;
+      border:1px solid var(--border);
     }
+.box {
+  background: var(--panel-bg);
+  border-radius: 12px;
+  padding: 18px;
+  border: 1px solid var(--border);
 
-    table { width:100%; border-collapse:collapse; margin-bottom:10px }
-    th,td { padding:8px 6px; border-bottom:1px solid #f1f1f1; font-size:14px; vertical-align:middle }
-    th { text-align:left; color:var(--muted); font-weight:600; font-size:13px }
+  /* soft, subtle shadow */
+  box-shadow: 0 6px 20px rgba(11,18,32,0.06), 0 1px 0 rgba(255,255,255,0.4) inset;
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
 
-    .btn { display:inline-block; padding:6px 10px; border-radius:8px; border:none; cursor:pointer; font-weight:600 }
-    .btn-add { background:var(--accent-2); color:#fff }
-    .btn-edit { background:#0ea5e9; color:#fff }
-    .btn-danger{ background:#ef4444; color:#fff }
-    .btn-muted{ background:#f3f4f6; color:#111 }
+    /* Box header */
+    .box h2 { margin:0 0 8px; font-size:18px; text-align:left; }
+    .note { color:var(--muted); font-size:13px; margin-bottom:10px; }
 
-    form.inline { display:flex; gap:8px; align-items:center }
-    form.inline input[type="text"], form.inline input[type="number"], input#customName{
-      padding:8px; border-radius:8px; border:1px solid var(--border); background:white; min-width:0;
+    /* table layout */
+    table { width:100%; border-collapse:collapse; margin-bottom:10px; }
+    thead th { text-align:left; padding:8px 6px; color:var(--muted); font-weight:700; font-size:13px; border-bottom:1px solid #f4f4f4; }
+    td { padding:10px 6px; border-bottom:1px solid #fafafa; font-size:14px; vertical-align:middle; }
+    td.actions { width:200px; text-align:right; }
+
+    /* Add row form */
+    .inline { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+    .inline input[type="text"], .inline input[type="number"], select.currency {
+      height:var(--input-h);
+      padding:8px 10px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      background:#fff;
+      font-size:14px;
     }
+    select.currency { width:70px; text-align:center; }
 
-    .small { font-size:13px; color:var(--muted) }
+    /* Buttons */
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:14px; }
+/* Gradient green "Add" buttons */
+.btn-add {
+  /* gradient from green -> teal */
+  background: linear-gradient(90deg, #17A34B 0%, #12B981 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
 
-    /* modal (simple) */
-    .modal-backdrop { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(2,6,23,0.45) }
-    .modal { background:white; padding:18px; border-radius:12px; width:420px; max-width:92%; box-shadow:0 18px 36px rgba(2,6,23,0.45) }
-    .modal h3 { margin:0 0 8px }
-    .modal .row { display:flex; gap:8px; margin-bottom:10px }
-    .modal input { flex:1; padding:8px; border-radius:8px; border:1px solid var(--border) }
+  /* gentle elevation */
+  box-shadow: 0 8px 20px rgba(18,185,129,0.12);
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+}
 
-    .note { color:var(--muted); font-size:13px }
-    .actions { display:flex; gap:8px; align-items:center }
+/* hover / focus */
+.btn-add:hover,
+.btn-add:focus {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(18,185,129,0.14);
+  filter: brightness(0.98);
+  outline: none;
+}
+
+/* active (press) state */
+.btn-add:active {
+  transform: translateY(0);
+  filter: brightness(0.94);
+}
+
+/* accessible focus ring (optional, visible on keyboard focus) */
+.btn-add:focus-visible {
+  box-shadow: 0 14px 36px rgba(18,185,129,0.14), 0 0 0 4px rgba(18,185,129,0.12);
+}
+    .btn-ghost { background:transparent; border:1px solid var(--border); color:#111; }
+    .btn-muted { background:#f6f6f6; border:1px solid var(--border); color:#111; }
+
+    /* Footer area inside groceries for custom button */
+    .groceries-footer { display:flex; justify-content:center; padding-top:8px; }
+
+    /* Centered AI recipes panel */
+    .ai-panel {
+      margin:50px;
+      text-align:center;
+    }
+    .ai-panel h3 { margin:0 0 8px; font-size:25px; }
+    .ai-actions { display:flex; flex-direction:column; gap:10px; margin-top:12px; align-items:center; }
+    .ai-btn {
+      width:100%;
+      max-width:620px;
+      font-family: 'Roboto', sans-serif;
+      text-align:left;
+      padding:12px 16px;
+      border-radius:10px;
+      background:#f7f8fa;
+      border:1px solid var(--border);
+      cursor:pointer;
+      font-weight:500;
+      margin:6px;
+      font-size: 16px;
+        box-shadow: 0 8px 20px rgba(11,18,32,0.06);
+
+    }
+    @media(min-width:720px){ .ai-actions .ai-btn{ width:80%; } }
+
+    /* modal */
+    .modal-backdrop {
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+      background: rgba(0,0,0,0.28); z-index:40;
+    }
+    .modal-backdrop.active { display:flex; }
+    .modal {
+      width:480px; max-width:94%; border-radius:12px; padding:18px; background:#fff; border:1px solid var(--border);
+    }
+    .modal h3 { margin:0 0 12px; }
+    .modal .row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
+    .modal label { min-width:62px; color:var(--muted); font-size:13px; }
+    .modal input[type="text"], .modal input[type="number"], .modal select { flex:1; height:40px; padding:8px 10px; border-radius:8px; border:1px solid var(--border); }
+
+    /* blur when modal open (JS should toggle) */
+    body.modal-open .canvas { filter: blur(4px) grayscale(.03); pointer-events:none; user-select:none; }
   </style>
 </head>
 <body>
-  <div class="page">
-    <div class="page-title">GROCERIES & PANTRY PAGE</div>
+  <div class="canvas" role="application" aria-label="Groceries and pantry app">
 
-    <!-- Topbar with auth controls -->
-    <div class="topbar">
-      <div class="brand">🥦 My Grocery & Pantry</div>
+    <!-- page header -->
+    <div class="page-heading">
+      <h1>Groceries & Pantry Log</h1>
+      <p>Date: MM-DD-YY</p>
+    </div>
+
+    <!-- small gear top-right -->
+    <div class="settings-gear" aria-hidden="true">⚙️</div>
+
+    <!-- plain sitebar -->
+    <div class="sitebar" role="banner" aria-label="Site header">
+      <div class="brand"> </div>
       <div class="auth-actions">
         <div id="signedState" class="user-info">Not signed in</div>
-        <button id="signinBtn" class="btn btn-add">Sign in (Google)</button>
-        <button id="signoutBtn" class="btn btn-muted" style="display:none">Sign out</button>
+        <button id="signinBtn" class="btn btn-muted" aria-label="Sign in">Sign in</button>
       </div>
     </div>
 
-    <!-- Main content -->
-    <div class="lists">
-      <!-- Groceries -->
-      <div class="box" id="groceriesBox">
-        <h2>Groceries</h2>
-        <div class="note">Items to buy</div>
+    <!-- two columns -->
+    <div class="lists" role="main">
 
-        <table aria-live="polite" id="groceriesTable">
+      <!-- GROCERIES -->
+      <section class="box" id="groceriesBox" aria-labelledby="groceriesHeading">
+        <h2 id="groceriesHeading">Groceries List</h2>
+        <div class="note">Add items to buy</div>
+
+        <table id="groceriesTable" aria-live="polite">
           <thead>
             <tr>
-              <th>Name</th><th>Qty</th><th>Price</th><th style="width:170px"></th>
+              <th>Name</th>
+              <th style="width:80px">Qty</th>
+              <th style="width:160px">Price</th>
+              <th style="width:160px"></th>
             </tr>
           </thead>
           <tbody id="groceriesBody">
-            <!-- rows populated by grocery/grocery.js -->
+            <!-- rows added by grocery/grocery.js -->
           </tbody>
         </table>
 
-        <form id="addGroceryForm" class="inline" onsubmit="return false;">
-          <input id="gName" placeholder="Name" required />
-          <input id="gQty" type="number" min="1" value="1" style="width:80px" />
-          <input id="gPrice" type="number" step="0.01" placeholder="Price" style="width:110px" />
-          <button id="addGroceryBtn" class="btn btn-add">Add</button>
+        <!-- add item row -->
+        <form id="addGroceryForm" class="inline" onsubmit="return false" aria-label="Add grocery item">
+          <input id="gName" type="text" placeholder="Name..." aria-label="Name (text)" required />
+          <input id="gQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
+          <input id="gPrice" type="number" step="0.01" placeholder="Price" aria-label="Price (number)" style="width:110px" />
+          <select id="gCurrency" class="currency" aria-label="Currency">
+            <option value="$">$</option>
+            <option value="€">€</option>
+            <option value="£">£</option>
+            <option value="¥">¥</option>
+            <option value="₹">₹</option>
+          </select>
+          <button id="addGroceryBtn" class="btn btn-add" aria-label="Add grocery">Add</button>
         </form>
-      </div>
 
-      <!-- Pantry -->
-      <div class="box" id="pantryBox">
-        <h2>Pantry</h2>
-        <div class="note">In-stock items</div>
+        <!-- custom ingredient button at bottom -->
+        <div class="groceries-footer">
+          <button id="openCustomBtn" class="btn btn-ghost" aria-haspopup="dialog">+ Add Custom Ingredient</button>
+        </div>
+      </section>
 
-        <table id="pantryTable">
+      <!-- PANTRY -->
+      <section class="box" id="pantryBox" aria-labelledby="pantryHeading">
+        <h2 id="pantryHeading">Pantry Items</h2>
+        <div class="note">Items in your pantry</div>
+
+        <table id="pantryTable" aria-live="polite">
           <thead>
-            <tr><th>Name</th><th>Qty</th><th>Expiration</th><th style="width:170px"></th></tr>
+            <tr>
+              <th>Name</th>
+              <th style="width:80px">Qty</th>
+              <th style="width:140px">Expiration</th>
+              <th style="width:160px"></th>
+            </tr>
           </thead>
-          <tbody id="pantryBody"></tbody>
+          <tbody id="pantryBody">
+            <!-- rows added by grocery/grocery.js -->
+          </tbody>
         </table>
 
-        <form id="addPantryForm" class="inline" onsubmit="return false;">
-          <input id="pName" placeholder="Name" />
-          <input id="pQty" type="number" min="1" value="1" style="width:80px" />
-          <input id="pExp" type="date" style="width:150px" />
-          <button id="addPantryBtn" class="btn btn-add">Add to Pantry</button>
+        <form id="addPantryForm" class="inline" onsubmit="return false" aria-label="Add pantry item">
+          <input id="pName" type="text" placeholder="Name..." aria-label="Name (text)" />
+          <input id="pQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
+          <input id="pExp" type="date" style="width:150px" aria-label="Expiration date" />
+          <button id="addPantryBtn" class="btn btn-add" aria-label="Add pantry item">Add to Pantry</button>
         </form>
+      </section>
+    </div>
+
+    <!-- AI panel -->
+    <div class="ai-panel" role="region" aria-label="AI recipes">
+      <h3>Generate AI Recipes</h3>
+      <p class="note">Suggestions and meal plans generated from your groceries & pantry</p>
+
+      <div class="ai-actions" role="group" aria-label="AI actions">
+        <button id="aiPantryBtn" class="ai-btn">✦ AI Suggestions based on your pantry...</button>
+        <button id="aiWeeklyBtn" class="ai-btn">✦ AI Suggestions based on your weekly groceries/pantry items...</button>
+        <button id="aiMealPlanBtn" class="ai-btn">✦ AI Meal plan for the week...</button>
       </div>
     </div>
 
-    <!-- Custom ingredient (now adds to Groceries) -->
-    <div style="height:18px"></div>
-    <div class="box">
-      <h3>Custom Ingredient (adds to Groceries)</h3>
-      <form id="customForm" onsubmit="return false;" style="display:flex;gap:10px;align-items:center">
-        <input id="customName" placeholder="Name..." required />
-        <input id="customQty" type="number" placeholder="Qty" style="width:90px" />
-        <input id="customPrice" type="number" step="0.01" placeholder="Price" style="width:100px" />
-        <input id="customCalories" type="number" placeholder="Calories" style="width:110px" />
-        <button id="customAddBtn" class="btn btn-add">Add</button>
-      </form>
-      <div class="small note">Custom ingredient items are appended to your groceries list so they can be edited, moved to pantry, or deleted.</div>
-    </div>
-
-    <!-- AI Recipes placeholder -->
-    <div style="height:18px"></div>
-    <div class="box">
-      <h3>AI Recipes</h3>
-      <div class="ai-recipes small">
-        <p>✦ AI suggestions would be generated here (this demo doesn't call an AI API).</p>
-        <p class="note">Enable `aiSuggestionsEnabled` in profile to toggle behavior.</p>
-      </div>
-    </div>
   </div>
 
-  <!-- simple modal for editing -->
-  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal" role="document">
-      <h3 id="modalTitle">Edit item</h3>
-      <div id="modalBody">
-        <div class="row"><input id="mName" /></div>
-        <div class="row"><input id="mQty" type="number" /></div>
-        <div class="row"><input id="mPrice" type="number" step="0.01" /></div>
+  <!-- modal (hidden by default) -->
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Add Custom Ingredient</h3>
+
+      <div class="row">
+        <label for="cName">Name</label>
+        <input id="cName" type="text" placeholder="e.g. Almond Butter" aria-label="Custom name" />
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+
+      <div class="row">
+        <label for="cQty">Qty</label>
+        <input id="cQty" type="number" min="1" value="1" aria-label="Custom quantity" style="width:140px" />
+        <label for="cPrice" style="margin-left:6px;">Price</label>
+        <input id="cPrice" type="number" step="0.01" placeholder="Price" aria-label="Custom price" style="width:110px" />
+        <select id="cCurrency" class="currency" aria-label="Currency">
+          <option value="$">$</option>
+          <option value="€">€</option>
+          <option value="£">£</option>
+          <option value="¥">¥</option>
+          <option value="₹">₹</option>
+        </select>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;">
         <button id="modalSave" class="btn btn-add">Save</button>
         <button id="modalCancel" class="btn btn-muted">Cancel</button>
       </div>
     </div>
   </div>
 
-  <!-- load separated JS (make sure grocery/grocery.js exists) -->
+  <!-- your behavior file (keeps HTML/CSS separate from JS) -->
   <script type="module" src="grocery/grocery.js"></script>
 </body>
 </html>
