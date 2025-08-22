@@ -94,8 +94,20 @@
 
     .btn { display:inline-flex; align-items:center; gap:.5rem; padding: .85rem 1.25rem; border-radius: 999px; font-weight: 700; border: 1px solid transparent; transition: transform .06s ease, background .2s ease, border-color .2s ease; will-change: transform; }
     .btn:active { transform: translateY(1px); }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-700); }
+
+    /* Primary buttons now use the requested green→teal gradient */
+    .btn-primary {
+      background: linear-gradient(90deg, #17A34B 0%, #12B981 100%);
+      color: white;
+      border: 1px solid rgba(0,0,0,0.04);
+      box-shadow: 0 8px 24px rgba(18, 163, 75, 0.10);
+    }
+    .btn-primary:hover {
+      /* removed translate transform to eliminate hover "bounce" */
+      background: linear-gradient(90deg, #12B981 0%, #17A34B 100%);
+      box-shadow: 0 16px 40px rgba(18, 163, 75, 0.12);
+    }
+
     .btn-outline { background: transparent; border-color: var(--border); color: var(--text); }
     .btn-outline:hover { border-color: color-mix(in oklab, var(--primary) 60%, var(--border)); color: var(--primary); }
 
@@ -138,20 +150,14 @@
 
     .section-alt { background: var(--surface-2); }
 
-    /* CTA band */
-    .cta-band { text-align: center; color: #fff; background: linear-gradient(135deg, var(--primary), #22c55e 60%, #86efac 110%); }
+    /* CTA band - updated gradient to requested green→teal */
+    .cta-band { text-align: center; color: #fff; background: linear-gradient(135deg, #17A34B 0%, #12B981 100%); }
     .cta-band .container { padding-block: var(--space-16); }
     .cta-band h2 { font-size: var(--step-2); line-height: 1.15; margin: 0 0 .5rem; }
     .cta-band p { margin: 0 0 var(--space-6); opacity: .95; }
     .btn-light { background: #fff; color: var(--primary-700);  }
     .btn-ghost { background: transparent; border-color: rgba(255,255,255,.35); color: #fff; }
     .btn-ghost:hover { border-color: #fff; }
-
-    /* Footer */
-    footer { background: #0f172a; color: #cbd5e1; padding-block: var(--space-12); }
-    footer .brand { color: #fff; font-weight: 800; letter-spacing: -0.02em; }
-    footer a { color: inherit; }
-    footer a:hover { color: #fff; }
 
     /* Motion preferences */
     @media (prefers-reduced-motion: reduce) {
@@ -161,26 +167,15 @@
 </head>
 <body>
   <!-- ============ Navigation ============ -->
-  <nav class="site-nav" id="siteNav">
-    <div class="container nav-inner">
-      <a href="#" class="logo" aria-label="GoodPlates home">
-        <span class="logo-mark">GP</span>
-        GoodPlates
-      </a>
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <div class="nav-links" role="navigation" aria-label="Primary">
-        <a href="/recipes/">Recipes</a>
-        <a href="/grocery-list/">Grocery List</a>
-        <a href="/order-online/">Order Online</a>
-        <a href="/statistics/">Statistics</a>
-        <a href="/courses/">Courses</a>
-        <a href="/contact/">Contact</a>
-        <a href="/onboarding/" class="btn btn-primary nav-cta">Onboarding</a>
-      </div>
-    </div>
-  </nav>
+  <div id="global-header"></div>
+  <script>
+    // change the filename depending on the page/user state
+    const headerType = "header-1"; // "header-2" or "header-3"
+    fetch(`/header/${headerType}.html`)
+      .then(res => res.text())
+      .then(html => document.querySelector("#global-header").innerHTML = html)
+      .catch(err => { console.error('Failed to load global header:', err); });
+  </script>
 
   <!-- ============ Hero ============ -->
   <header class="hero">
@@ -191,14 +186,14 @@
       <br>
       <br>
       <h1>Plan, Shop & Cook — all in one sleek app</h1>
-      <p class="lead">GoodPlates helps you discover delicious recipes, generate smart grocery lists, and track nutrition with a modern, distraction‑free design.</p>
+      <p class="lead">GoodPlates helps you discover delicious recipes, generate smart grocery lists, and track nutrition with a modern, distraction-free design.</p>
       <div class="hero-actions">
         <a class="btn btn-primary" href="#get-started">Get Started</a>
         <a class="btn btn-outline" href="#demo">Watch Demo</a>
         <br>
       </div>
       <br>
-      <div class="hero-proof">✅ Free to start &nbsp; • &nbsp; 50,000+ recipes &nbsp; • &nbsp; AI‑powered suggestions</div>
+      <div class="hero-proof">✅ Free to start &nbsp; • &nbsp; 50,000+ recipes &nbsp; • &nbsp; AI-powered suggestions</div>
       <div class="hero-media">
         <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1600&auto=format&fit=crop" alt="GoodPlates interface preview with fresh ingredients" />
       </div>
@@ -208,11 +203,11 @@
   <!-- ============ Features Overview ============ -->
   <section>
     <div class="container">
-      <h2 class="section-title">Everything you need for stress‑free cooking</h2>
+      <h2 class="section-title">Everything you need for stress-free cooking</h2>
       <div class="grid grid-4">
         <div class="card">
           <h3>👨‍🍳 Smart Meal Planning</h3>
-          <p>AI‑powered recipes based on your tastes and pantry.</p>
+          <p>AI-powered recipes based on your tastes and pantry.</p>
         </div>
         <div class="card">
           <h3>🛒 Instant Grocery Delivery</h3>
@@ -224,7 +219,7 @@
         </div>
         <div class="card">
           <h3>📖 Cooking Courses</h3>
-          <p>Level up skills with bite‑sized video lessons.</p>
+          <p>Level up skills with bite-sized video lessons.</p>
         </div>
       </div>
     </div>
@@ -236,12 +231,12 @@
       <div>
         <span class="badge">🔍 Advanced Filtering</span>
         <h2 class="" style="margin:.6rem 0 1rem; font-size: var(--step-2);">Find the perfect meal every time</h2>
-        <p class="" style="color: var(--muted); max-width: 60ch;">Dial in by diet, time, ingredients and budget. Save favorites and auto‑scale servings for any occasion.</p>
+        <p class="" style="color: var(--muted); max-width: 60ch;">Dial in by diet, time, ingredients and budget. Save favorites and auto-scale servings for any occasion.</p>
         <div class="grid" style="margin-top: var(--space-6); grid-template-columns: 1fr 1fr; gap: var(--space-6);">
-          <div class="feature"><div class="icon">⚙️</div><div><strong>Smart filters</strong><br><span style="color:var(--muted-2)">Vegan, gluten‑free, low‑carb & more</span></div></div>
+          <div class="feature"><div class="icon">⚙️</div><div><strong>Smart filters</strong><br><span style="color:var(--muted-2)">Vegan, gluten-free, low-carb & more</span></div></div>
           <div class="feature"><div class="icon">🎯</div><div><strong>Adjustable servings</strong><br><span style="color:var(--muted-2)">From solo to family feast</span></div></div>
           <div class="feature"><div class="icon">🤖</div><div><strong>AI recommendations</strong><br><span style="color:var(--muted-2)">Tailored to your tastes</span></div></div>
-          <div class="feature"><div class="icon">⏱️</div><div><strong>Time‑based filters</strong><br><span style="color:var(--muted-2)">15‑, 30‑ or 60‑minute meals</span></div></div>
+          <div class="feature"><div class="icon">⏱️</div><div><strong>Time-based filters</strong><br><span style="color:var(--muted-2)">15-, 30- or 60-minute meals</span></div></div>
         </div>
         <div style="margin-top: var(--space-8); display:flex; gap: var(--space-4); flex-wrap: wrap;">
           <a class="btn btn-primary" href="/recipes/">Explore Meal Planning</a>
@@ -270,7 +265,7 @@
         <span class="badge">🛍️ Seamless Shopping</span>
         <h2 style="margin:.6rem 0 1rem; font-size: var(--step-2);">From meal plan to doorstep</h2>
         <p style="color:var(--muted); max-width: 60ch;">Skip the store. Send optimized lists to your preferred grocery service with automatic substitutions and budget tracking.</p>
-        <div class="feature" style="margin-top:var(--space-6);"><div class="icon">📱</div><div><strong>Multi‑app integration</strong><br><span style="color:var(--muted-2)">Instacart, Uber Eats & more</span></div></div>
+        <div class="feature" style="margin-top:var(--space-6);"><div class="icon">📱</div><div><strong>Multi-app integration</strong><br><span style="color:var(--muted-2)">Instacart, Uber Eats & more</span></div></div>
         <div class="feature"><div class="icon">✅</div><div><strong>Smart lists</strong><br><span style="color:var(--muted-2)">Grouped by aisle, deduplicated</span></div></div>
         <div class="feature"><div class="icon">💸</div><div><strong>Budget insights</strong><br><span style="color:var(--muted-2)">See cost per meal</span></div></div>
         <div style="margin-top: var(--space-6);"><a class="btn btn-primary" href="/grocery-list/">Start Shopping Smart</a></div>
@@ -316,7 +311,7 @@
         </div>
         <div class="card">
           ⭐⭐⭐⭐⭐
-          <p><em>“As a student, the price filters and budget view are game‑changers.”</em></p>
+          <p><em>“As a student, the price filters and budget view are game-changers.”</em></p>
           <strong>Emma Rodriguez</strong> — College student
         </div>
       </div>
@@ -332,50 +327,24 @@
         <a class="btn btn-light" href="/onboarding/">Get Started Free</a>
         <a class="btn btn-ghost" href="#demo">Schedule Demo</a>
       </div>
-      <div class="hero-proof" style="color:#fff; opacity:.9;">✅ 14‑day free trial &nbsp; • &nbsp; No credit card &nbsp; • &nbsp; Cancel anytime</div>
+      <div class="hero-proof" style="color:#fff; opacity:.9;">✅ 14-day free trial &nbsp; • &nbsp; No credit card &nbsp; • &nbsp; Cancel anytime</div>
     </div>
   </section>
 
-  <!-- ============ Footer ============ -->
-  <footer>
-    <div class="container grid grid-3" style="gap: var(--space-12);">
-      <div>
-        <div class="brand" style="font-size: var(--step-1);">GoodPlates</div>
-        <p style="max-width: 40ch; color:#93a3b8">The modern way to plan meals, shop faster and eat better.</p>
-      </div>
-      <div style="display:grid; gap:.5rem;">
-        <strong style="color:#fff;">Product</strong>
-        <a href="/recipes/">Recipes</a>
-        <a href="/grocery-list/">Grocery List</a>
-        <a href="/order-online/">Order Online</a>
-        <a href="/courses/">Courses</a>
-      </div>
-      <div style="display:grid; gap:.5rem;">
-        <strong style="color:#fff;">Company</strong>
-        <a href="/contact/">Contact</a>
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
-        <a href="#">Support</a>
-      </div>
-    </div>
-    <div class="container" style="border-top:1px solid #1f2937; margin-top: var(--space-12); padding-top: var(--space-6); font-size: var(--step--1); color:#93a3b8; display:flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4);">
-      <span>© <span id="year"></span> GoodPlates. All rights reserved.</span>
-      <span>Made with ♥︎ for everyday cooks.</span>
-    </div>
-  </footer>
+  <!-- Footer has been moved out of this file per your request -->
 
   <script>
     // Mobile nav toggle
     const nav = document.getElementById('siteNav');
     const btn = document.getElementById('navToggle');
     btn?.addEventListener('click', () => {
-      const open = nav.getAttribute('data-open') === 'true';
-      nav.setAttribute('data-open', String(!open));
+      const open = nav?.getAttribute('data-open') === 'true';
+      nav?.setAttribute('data-open', String(!open));
       btn.setAttribute('aria-expanded', String(!open));
     });
 
-    // Year in footer
-    document.getElementById('year').textContent = new Date().getFullYear();
+    // Year in footer — guarded in case footer is loaded separately
+    document.getElementById('year')?.textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
