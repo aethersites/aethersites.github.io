@@ -1,0 +1,105 @@
+<!-- footer.html -->
+<style>
+  /* design tokens and small layout helpers needed by footer */
+  :root {
+    --bg: #ffffff;
+    --text: #0f172a;
+    --muted: #475569;
+    --muted-2: #64748b;
+    --surface: #ffffff;
+    --surface-2: #f8fafc;
+    --border: #e2e8f0;
+    --primary: #16a34a;
+    --primary-700: #15803d;
+    --primary-100: #dcfce7;
+    --shadow: 0 1px 2px rgba(2,6,23,.06), 0 10px 30px rgba(2,6,23,.08);
+    --radius: 16px;
+    --radius-lg: 24px;
+
+    --step--1: clamp(0.875rem, 0.82rem + 0.15vw, 0.95rem);
+    --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    --step-1: clamp(1.25rem, 1.06rem + 0.8vw, 1.6rem);
+    --step-2: clamp(1.6rem, 1.2rem + 1.6vw, 2.25rem);
+    --step-3: clamp(2rem, 1.6rem + 2.2vw, 3rem);
+    --step-4: clamp(2.5rem, 2rem + 3vw, 3.75rem);
+
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+  }
+
+  /* local reset and base for footer fragment */
+  footer, footer * { box-sizing: border-box; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans"; }
+  .container { width: min(1200px, 100% - calc(var(--space-8) * 2)); margin-inline: auto; }
+
+  /* grid helpers used by footer */
+  .grid { display: grid; gap: var(--space-8); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 960px) {
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+
+        footer a,
+        footer a:link,
+        footer a:visited {
+          text-decoration: none;
+          color: inherit;
+        }
+        
+        /* keep a visible focus style for keyboard users */
+        footer a:focus-visible {
+          outline: none;
+          box-shadow: 0 0 0 4px rgba(23,163,75,0.12); /* subtle green focus ring */
+          border-radius: 6px;
+        }
+
+  /* Footer (copied exactly from your page) */
+  footer { background: #0f172a; color: #cbd5e1; padding-block: var(--space-20); }
+  footer .brand { color: #fff; font-weight: 800; letter-spacing: -0.02em; }
+  footer a { color: inherit; }
+  footer a:hover { color: #fff; }
+
+  /* keep small utility spacing used inline in markup */
+  .footer-top { gap: var(--space-12); }
+  .footer-bottom { border-top:1px solid #1f2937; margin-top: var(--space-12); padding-top: var(--space-6); font-size: var(--step--1); color:#93a3b8; display:flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); }
+</style>
+
+<footer>
+  <div class="container grid grid-3 footer-top" style="gap: var(--space-12);">
+    <div>
+      <div class="brand" style="font-size: var(--step-1);">GoodPlates</div>
+      <p style="max-width: 40ch; color:#93a3b8">The modern way to plan meals, shop faster and eat better.</p>
+    </div>
+    <div style="display:grid; gap:.5rem;">
+      <strong style="color:#fff;">Product</strong>
+      <a href="/recipes/">Recipes</a>
+      <a href="/grocery-list/">Grocery List</a>
+      <a href="/order-online/">Order Online</a>
+      <a href="/courses/">Courses</a>
+    </div>
+    <div style="display:grid; gap:.5rem;">
+      <strong style="color:#fff;">Company</strong>
+      <a href="/contact/">Contact</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">Support</a>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <span>© <span id="year"></span> GoodPlates. All rights reserved.</span>
+    <span>Made with ♥︎ for everyday cooks.</span>
+  </div>
+</footer>
+
+<script>
+  // Year in footer (keeps same behavior as original)
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
