@@ -1,9 +1,14 @@
 
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import {
-  getFirestore, collection, addDoc, doc, updateDoc, deleteDoc,
-  onSnapshot, serverTimestamp, query, orderBy
+// === Import Firebase v10 ===
+import { initializeApp, getApps, getApp } 
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAnalytics } 
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
+import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider } 
+  from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { 
+  getFirestore, collection, addDoc, doc, getDoc, setDoc, updateDoc, deleteDoc, 
+  onSnapshot, serverTimestamp, query, orderBy 
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -16,12 +21,15 @@ const firebaseConfig = {
     measurementId: "G-HKMSHM726J"
   };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+// === Init Services ===
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
+// grocery/grocery.js (module)
 
-// UI refs
+// --- DOM refs ---
 const signinBtn = document.getElementById('signinBtn');
 const signoutBtn = document.getElementById('signoutBtn');
 const signedState = document.getElementById('signedState');
@@ -53,26 +61,24 @@ const mPrice = document.getElementById('mPrice');
 const modalSave = document.getElementById('modalSave');
 const modalCancel = document.getElementById('modalCancel');
 
-// state
+// --- state ---
 let currentUser = null;
 let profileDocRef = null;
 let profileData = null;
 let activeGroceryListIndex = 0;
-let editingContext = null;
+let editingContext = null; // {type:'grocery'|'pantry', idx}
 
+// --- auth handlers ---
 signinBtn.addEventListener('click', async () => {
   const provider = new GoogleAuthProvider();
-  try {
-    await signInWithPopup(auth, provider);
-  } catch (e) {
-    alert('Sign-in failed: ' + e.message);
-    console.error(e);
-  }
+  try { await signInWithPopup(auth, provider); }
+  catch (e) { alert('Sign-in failed: ' + e.message); console.error(e); }
 });
 signoutBtn.addEventListener('click', async () => {
   await signOut(auth);
 });
 
+// observe auth state
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   if (user) {
@@ -92,6 +98,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+// --- profile load/create ---
 async function loadOrCreateProfile() {
   const snap = await getDoc(profileDocRef);
   if (!snap.exists()) {
@@ -111,7 +118,7 @@ async function loadOrCreateProfile() {
   }
 }
 
-// debounce save
+// --- save (debounced) ---
 let pendingSave = null;
 function scheduleSave() {
   if (pendingSave) clearTimeout(pendingSave);
@@ -132,24 +139,22 @@ function scheduleSave() {
   }, 350);
 }
 
+// --- renderers ---
 function clearUI() {
   groceriesBody.innerHTML = '<tr><td colspan="4" class="small">Sign in to see your lists</td></tr>';
   pantryBody.innerHTML = '<tr><td colspan="4" class="small">Sign in to see your pantry</td></tr>';
 }
 
 function renderAll() {
-  const list = (profileData.groceryLists && profileData.groceryLists[activeGroceryListIndex]) || { name:'Default', items:[] };
+  const list = (profileData && profileData.groceryLists && profileData.groceryLists[activeGroceryListIndex]) || { name:'Default', items:[] };
   renderGroceries(list.items || []);
-  renderPantry(profileData.pantryItems || []);
-  document.getElementById('signedState').textContent = currentUser ? (currentUser.displayName || currentUser.email) : 'Not signed in';
+  renderPantry(profileData ? (profileData.pantryItems || []) : []);
+  signedState.textContent = currentUser ? (currentUser.displayName || currentUser.email) : 'Not signed in';
 }
 
 function renderGroceries(items) {
   groceriesBody.innerHTML = '';
-  if (!items.length) {
-    groceriesBody.innerHTML = '<tr><td colspan="4" class="small">No grocery items</td></tr>';
-    return;
-  }
+  if (!items.length) return groceriesBody.innerHTML = '<tr><td colspan="4" class="small">No grocery items</td></tr>';
   items.forEach((it, idx) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -171,12 +176,9 @@ function renderGroceries(items) {
 
 function renderPantry(items) {
   pantryBody.innerHTML = '';
-  if (!items.length) {
-    pantryBody.innerHTML = '<tr><td colspan="4" class="small">No pantry items</td></tr>';
-    return;
-  }
+  if (!items.length) return pantryBody.innerHTML = '<tr><td colspan="4" class="small">No pantry items</td></tr>';
   items.forEach((it, idx) => {
-    const exp = it.expirationDate ? formatDate(new Date(it.expirationDate.seconds ? it.expirationDate.toMillis() : it.expirationDate)) : '-';
+    const exp = it.expirationDate ? formatDate(convertMaybeTimestamp(it.expirationDate)) : '-';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${escapeHTML(it.name)}</td>
@@ -193,6 +195,7 @@ function renderPantry(items) {
   pantryBody.querySelectorAll('.btn-delete-pantry').forEach(btn => btn.addEventListener('click', onDeletePantry));
 }
 
+// --- helpers ---
 function escapeHTML(s = '') {
   return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
@@ -205,7 +208,16 @@ function formatDate(d) {
   const y = d.getFullYear(); const m = String(d.getMonth()+1).padStart(2,'0'); const day = String(d.getDate()).padStart(2,'0');
   return `${m}-${day}-${String(y).slice(-2)}`;
 }
+function convertMaybeTimestamp(v) {
+  // Firestore may return a Timestamp object or an ISO string or Date
+  if (!v) return null;
+  if (typeof v.toDate === 'function') return v.toDate();
+  if (typeof v === 'string' || typeof v === 'number') return new Date(v);
+  if (v instanceof Date) return v;
+  return null;
+}
 
+// --- actions ---
 // Add grocery
 addGroceryBtn.addEventListener('click', () => {
   if (!currentUser) return alert('Sign in to add items');
@@ -238,7 +250,7 @@ addPantryBtn.addEventListener('click', () => {
   pName.value=''; pQty.value=1; pExp.value='';
 });
 
-// Custom ingredient now adds to groceries list
+// Custom ingredient -> groceries list
 customAddBtn.addEventListener('click', () => {
   if (!currentUser) return alert('Sign in to add custom ingredients');
   const name = customName.value && customName.value.trim();
@@ -247,12 +259,12 @@ customAddBtn.addEventListener('click', () => {
   const price = customPrice.value !== '' ? Number(customPrice.value) : null;
   const calories = customCalories.value !== '' ? Number(customCalories.value) : null;
 
-  // push into groceries list (so it's managed like other grocery items)
   const item = { name, quantity: qty, price, calories };
   const list = profileData.groceryLists[activeGroceryListIndex];
   list.items = list.items || [];
   list.items.push(item);
-  // keep also in customIngredients optionally (keeps legacy data)
+
+  // keep optional record in customIngredients too
   profileData.customIngredients = profileData.customIngredients || [];
   profileData.customIngredients.push({ name, quantity: qty, price, calories });
 
@@ -260,10 +272,10 @@ customAddBtn.addEventListener('click', () => {
   renderAll();
   customName.value=''; customQty.value=''; customPrice.value=''; customCalories.value='';
   // small UX ack
-  alert('Custom ingredient added to Groceries list');
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch {}
 });
 
-// Edit grocery
+// Edit / Delete / Move grocery handlers
 function onEditGrocery(e) {
   const idx = Number(e.currentTarget.dataset.idx);
   const list = profileData.groceryLists[activeGroceryListIndex];
@@ -276,8 +288,7 @@ function onDeleteGrocery(e) {
   if (!confirm('Delete this grocery item?')) return;
   const list = profileData.groceryLists[activeGroceryListIndex];
   list.items.splice(idx,1);
-  scheduleSave();
-  renderAll();
+  scheduleSave(); renderAll();
 }
 function onMoveToPantry(e) {
   const idx = Number(e.currentTarget.dataset.idx);
@@ -286,11 +297,10 @@ function onMoveToPantry(e) {
   const p = { name: item.name, quantity: item.quantity || 1 };
   profileData.pantryItems = profileData.pantryItems || [];
   profileData.pantryItems.push(p);
-  scheduleSave();
-  renderAll();
+  scheduleSave(); renderAll();
 }
 
-// Edit pantry handlers
+// Edit pantry
 function onEditPantry(e) {
   const idx = Number(e.currentTarget.dataset.idx);
   const item = profileData.pantryItems[idx];
@@ -301,11 +311,10 @@ function onDeletePantry(e) {
   const idx = Number(e.currentTarget.dataset.idx);
   if (!confirm('Delete this pantry item?')) return;
   profileData.pantryItems.splice(idx,1);
-  scheduleSave();
-  renderAll();
+  scheduleSave(); renderAll();
 }
 
-// modal
+// --- modal ---
 function openModal(title, name='', qty='', price='') {
   modalTitle.textContent = title;
   mName.value = name || '';
@@ -336,16 +345,15 @@ modalSave.addEventListener('click', () => {
     if (mPrice.value !== '') it.price = price;
     else delete it.price;
   }
-  scheduleSave();
-  closeModal();
-  renderAll();
+  scheduleSave(); closeModal(); renderAll();
 });
 
-// esc to close modal
 window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
+// initial
 clearUI();
 
-// debugging helpers
+// debug helpers
 window._profile = () => profileData;
 window._saveNow = () => scheduleSave();
+
