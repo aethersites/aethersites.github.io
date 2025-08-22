@@ -3,50 +3,114 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Grocery & Pantry</title>
-  <link rel="stylesheet" href="grocery.css" />
-  <script type="module" src="grocery.js" defer></script>
+  <title>Groceries & Pantry</title>
+
+  <!-- link the separated CSS -->
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div id="global-header"></div>
-<script>
-  // change the filename depending on the page/user state
-  const headerType = "header-1"; // "header-2" or "header-3"
-  fetch(`/header/${headerType}.html`)
-    .then(res => res.text())
-    .then(html => document.querySelector("#global-header").innerHTML = html);
-</script>
-  <header class="topbar">
-    <div class="brand">🥦 My Grocery & Pantry</div>
-  </header>
+  <div class="page">
+    <div class="page-title">GROCERIES & PANTRY PAGE</div>
 
-  <!-- panels container -->
-  <main class="container" id="panelContainer">
-    <!-- Grocery panel -->
-    <section class="panel left-panel" aria-labelledby="groceryTitle">
-      <div class="panel-header">
-        <h2 id="groceryTitle">Grocery</h2>
-        <div class="add-row" role="search" aria-label="Add grocery item">
-          <input id="groceryInput" placeholder="e.g. Bananas" autocomplete="off" />
-          <input id="groceryQty" type="number" min="1" value="1" aria-label="quantity" />
-          <button id="addGrocery" class="btn" aria-disabled="true">Add</button>
-        </div>
+    <!-- Topbar with auth controls -->
+    <div class="topbar">
+      <div class="brand">🥦 My Grocery & Pantry</div>
+      <div class="auth-actions">
+        <div id="signedState" class="user-info">Not signed in</div>
+        <button id="signinBtn" class="btn btn-add">Sign in (Google)</button>
+        <button id="signoutBtn" class="btn btn-muted" style="display:none">Sign out</button>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="lists">
+      <!-- Groceries -->
+      <div class="box" id="groceriesBox">
+        <h2>Groceries</h2>
+        <div class="note">Items to buy</div>
+
+        <table aria-live="polite" id="groceriesTable">
+          <thead>
+            <tr>
+              <th>Name</th><th>Qty</th><th>Price</th><th style="width:170px"></th>
+            </tr>
+          </thead>
+          <tbody id="groceriesBody">
+            <!-- rows populated by JS -->
+          </tbody>
+        </table>
+
+        <form id="addGroceryForm" class="inline" onsubmit="return false;">
+          <input id="gName" placeholder="Name" required />
+          <input id="gQty" type="number" min="1" value="1" style="width:80px" />
+          <input id="gPrice" type="number" step="0.01" placeholder="Price" style="width:110px" />
+          <button id="addGroceryBtn" class="btn btn-add">Add</button>
+        </form>
       </div>
 
-      <ul id="groceryList" class="list" aria-live="polite" role="list"></ul>
-    </section>
+      <!-- Pantry -->
+      <div class="box" id="pantryBox">
+        <h2>Pantry</h2>
+        <div class="note">In-stock items</div>
 
-    <!-- Pantry panel -->
-    <section class="panel right-panel" aria-labelledby="pantryTitle">
-      <div class="panel-header">
-        <h2 id="pantryTitle">Pantry</h2>
-        <div class="note">Items in your pantry — ready to cook with.</div>
+        <table id="pantryTable">
+          <thead>
+            <tr><th>Name</th><th>Qty</th><th>Expiration</th><th style="width:170px"></th></tr>
+          </thead>
+          <tbody id="pantryBody"></tbody>
+        </table>
+
+        <form id="addPantryForm" class="inline" onsubmit="return false;">
+          <input id="pName" placeholder="Name" />
+          <input id="pQty" type="number" min="1" value="1" style="width:80px" />
+          <input id="pExp" type="date" style="width:150px" />
+          <button id="addPantryBtn" class="btn btn-add">Add to Pantry</button>
+        </form>
       </div>
+    </div>
 
-      <ul id="pantryList" class="list" aria-live="polite" role="list"></ul>
-    </section>
-        <div id="userDisplay" class="user-info">Not signed in</div>
-  </main>
+    <!-- Custom ingredient (now adds to Groceries list) -->
+    <div style="height:18px"></div>
+    <div class="box">
+      <h3>Custom Ingredient (adds to Groceries)</h3>
+      <form id="customForm" onsubmit="return false;" style="display:flex;gap:10px;align-items:center">
+        <input id="customName" placeholder="Name..." required />
+        <input id="customQty" type="number" placeholder="Qty" style="width:90px" />
+        <input id="customPrice" type="number" step="0.01" placeholder="Price" style="width:100px" />
+        <input id="customCalories" type="number" placeholder="Calories" style="width:110px" />
+        <button id="customAddBtn" class="btn btn-add">Add</button>
+      </form>
+      <div class="small note">Custom ingredient items are appended to your groceries list so they can be edited, moved to pantry, or deleted.</div>
+    </div>
 
+    <!-- AI Recipes placeholder -->
+    <div style="height:18px"></div>
+    <div class="box">
+      <h3>AI Recipes</h3>
+      <div class="ai-recipes small">
+        <p>✦ AI suggestions would be generated here (this demo doesn't call an AI API).</p>
+        <p class="note">Enable `aiSuggestionsEnabled` in profile to toggle behavior.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- simple modal for editing -->
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal" role="document">
+      <h3 id="modalTitle">Edit item</h3>
+      <div id="modalBody">
+        <div class="row"><input id="mName" /></div>
+        <div class="row"><input id="mQty" type="number" /></div>
+        <div class="row"><input id="mPrice" type="number" step="0.01" /></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+        <button id="modalSave" class="btn btn-add">Save</button>
+        <button id="modalCancel" class="btn btn-muted">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- app script (module) -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>
