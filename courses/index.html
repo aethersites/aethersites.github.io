@@ -567,7 +567,7 @@
         </div>
 
         <div class="text-center mt-12">
-          <button class="px-8 h-11 rounded-xl border border-green-300 text-green-700 bg-white hover:bg-green-50">
+          <button class="px-8 h-11 rounded-xl border border-gray-300 text-black-700 bg-white hover:bg-green-50">
             Load More Courses
           </button>
         </div>
@@ -609,6 +609,109 @@
       </div>
     </section>
 
+    
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recipes UI — Pure HTML/CSS</title>
+  <style>
+    /* ===== Tailwind-ish design tokens ===== */
+    :root{
+      --bg: #ffffff;
+      --fg: #0f172a;               /* slate-900 */
+      --muted: #6b7280;            /* gray-500 */
+      --muted-2: #9ca3af;          /* gray-400 */
+      --border: #e5e7eb;           /* gray-200 */
+      --surface: #ffffff;          /* white */
+      --surface-2: #f3f4f6;        /* gray-100 */
+      --primary: #16a34a;          /* green-600 */
+      --primary-700: #15803d;      /* green-700 */
+      --primary-100: #dcfce7;      /* green-100 */
+      --ring: rgba(16,185,129,.35);
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(2,6,23,.06);
+      --radius: 16px;
+    }
+
+    /* ===== Resets + base ===== */
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--fg); background:var(--bg);
+    }
+    img{max-width:100%; display:block}
+    a{color:inherit; text-decoration:none}
+    .container{max-width:1200px; margin:0 auto; padding:0 24px}
+
+    /* ===== Utilities ===== */
+    .flex{display:flex}
+    .items-center{align-items:center}
+    .justify-between{justify-content:space-between}
+    .gap-1{gap:.25rem} .gap-2{gap:.5rem} .gap-3{gap:.75rem} .gap-4{gap:1rem} .gap-6{gap:1.5rem} .gap-8{gap:2rem}
+    .w-100{width:100%}
+    .text-center{text-align:center}
+    .muted{color:var(--muted)}
+    .rounded{border-radius:var(--radius)}
+    .shadow{box-shadow:var(--shadow)}
+    .section{padding:48px 0}
+    .hidden{display:none}
+
+    /* ===== Cards ===== */
+    .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden}
+.card .card-media {
+  height: 192px;
+  background: linear-gradient(135deg,#ecfdf5,#f0fdf4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* 👈 This keeps absolutely-positioned elements inside */
+}
+    .card .card-body{padding:16px 16px 20px}
+    .card:hover{box-shadow:var(--shadow); transform:translateY(-2px); transition:transform .2s ease, box-shadow .2s ease}
+
+    /* ===== Grids ===== */
+    .grid{display:grid; gap:24px}
+    @media(min-width:768px){
+      .grid.cols-2{grid-template-columns:repeat(2,1fr)}
+      .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+      .grid.cols-4{grid-template-columns:repeat(4,1fr)}
+      .layout{grid-template-columns:320px 1fr}
+    }
+    @media(max-width:900px){
+      .layout{grid-template-columns:1fr}
+ine-clamp:2; -webkit-box-orient:vertical; overflow:hidden}
+  </style>
+
+  <!-- Main layout with sidebar -->
+
+      <!-- Browse by Cuisine -->
+      <section class="section" style="padding-top:24px">
+          
+        <div class="container">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="title-lg">Browse by Cuisine</h2>
+          </div>
+          <div class="grid cols-3">
+            <!-- 6 cuisine cards -->
+            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🇮🇹</div><div class="mb-1">Italian</div><div class="small muted">1240 recipes</div></div></div>
+            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🥢</div><div class="mb-1">Asian</div><div class="small muted">980 recipes</div></div></div>
+            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🌮</div><div class="mb-1">Mexican</div><div class="small muted">760 recipes</div></div></div>
+            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🫒</div><div class="mb-1">Mediterranean</div><div class="small muted">650 recipes</div></div></div>
+            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🇮🇳</div><div class="mb-1">Indian</div><div class="small muted">540 recipes</div></div></div>
+            <div class="card"><div class="card-body text-center"><div style="font-size:28px">🇫🇷</div><div class="mb-1">French</div><div class="small muted">420 recipes</div></div></div>
+          </div>
+        </div>
+      </section>
+  <!-- ===== end modal ===== -->
+
+   <script src="../recipes.js"></script>
+  <script src="../scripts.js"></script>
+</body>
+</html>
+
+
+
+
+
     <!-- CTA -->
     <section class="py-16 px-6 lg:px-8">
       <div class="max-w-4xl mx-auto text-center space-y-8">
@@ -618,7 +721,7 @@
         </div>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
           <button class="px-8 h-12 rounded-xl btn-gradient">Browse All Courses</button>
-          <button class="px-8 h-12 rounded-xl border border-green-300 text-green-700 bg-white hover:bg-green-50">Become an Instructor</button>
+          <button class="px-8 h-12 rounded-xl border border-gray-300 text-black-700 bg-white hover:bg-green-50">Become an Instructor</button>
         </div>
       </div>
     </section>
@@ -631,3 +734,6 @@
   </footer>
 </body>
 </html>
+
+
+  
