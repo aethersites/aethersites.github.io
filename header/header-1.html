@@ -217,6 +217,38 @@
       });
     })();
   </script>
+  <script>
+  (function(){
+    // Normalize path: remove trailing "index.html" and ensure trailing slash
+    function norm(path) {
+      path = String(path || '/').replace(/index\.html$/, '');
+      if (!path.endsWith('/')) path = path + '/';
+      return path;
+    }
+
+    const current = norm(window.location.pathname);
+
+    // Select both desktop and mobile nav links
+    const links = document.querySelectorAll('.gp-links a, .gp-mobile-links a');
+
+    // Clear any existing markers, then mark the matching link
+    links.forEach(a => {
+      a.classList.remove('is-active');
+      a.removeAttribute('aria-current');
+
+      const href = a.getAttribute('href') || '';
+      try {
+        const url = new URL(href, location.origin);
+        if (norm(url.pathname) === current) {
+          a.classList.add('is-active');
+          a.setAttribute('aria-current', 'page');
+        }
+      } catch (err) {
+        // ignore invalid hrefs
+      }
+    });
+  })();
+</script>
 </header>
 
 <!-- ===== main stylesheet (keeps rest of page intact) ===== -->
