@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="icon" href="favicon.ico" sizes="any"> 
+  <link rel="icon" href="favicon.png" type="image/png"> 
+  <link rel="apple-touch-icon" href="favicon.png" 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recipes UI — Pure HTML/CSS</title>
@@ -407,7 +410,7 @@
   }
   .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
   .gp-logo-sq{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; }
-  .gp-name{ font-weight:600; font-size:18px color:var(--fg); }
+  .gp-name{ font-weight:600; font-size:18px; color:var(--fg); }
   .gp-sub{ font-size:12px; color:var(--muted) }
 
   .gp-links ul{ list-style:none; padding:0; margin:0; display:flex; gap:22px; align-items:center; }
@@ -468,6 +471,21 @@
     .sidebar{ display:none }
     .open-sidebar{ display:block; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.35) }
     .sidebar.panel{ position:fixed; left:0; top:0; bottom:0; height:100%; transform:translateX(0); box-shadow: var(--shadow-2); }
+  }
+   /* ===== ADDED (minimal): Make the topnav fixed to the viewport and reserve page space ===== */
+  /* We add this at the end so it overrides earlier sticky rules. */
+  .gp-topnav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* keep above most UI */
+  }
+
+  /* Reserve vertical space so content doesn't sit under the fixed nav.
+     Using a safe fixed value here to keep edits minimal; adjust if you change header padding/height. */
+  body {
+    padding-top: 72px; /* adjust this if you make the header taller/shorter */
   }
 </style>
 
