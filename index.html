@@ -87,21 +87,7 @@
     .container { width: min(1200px, 100% - var(--space-8)*2); margin-inline: auto; }
     section { padding-block: clamp(var(--space-12), 6vw, var(--space-20)); }
 
-    /* ============ Navigation ============ */
-    .site-nav {
-      position: sticky; top: 0; z-index: 50;
-      backdrop-filter: saturate(180%) blur(12px);
-      background: color-mix(in oklab, var(--surface) 85%, transparent);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-6); padding-block: var(--space-4); }
-    .logo { font-weight: 800; letter-spacing: -0.02em; font-size: var(--step-1); display: inline-flex; align-items: center; gap: .625rem; }
-    .logo-mark { display:inline-grid; place-items:center; width: 2rem; height: 2rem; border-radius: 10px; background: linear-gradient(135deg, var(--primary), #22c55e); color: #fff; font-weight: 700; box-shadow: var(--shadow); }
-
-    .nav-links { display: flex; align-items: center; gap: var(--space-6); }
-    .nav-links a { font-weight: 600; color: var(--muted); }
-    .nav-links a:hover { color: var(--text); }
-
+    
     .btn { display:inline-flex; align-items:center; gap:.5rem; padding: .85rem 1.25rem; border-radius: 999px; font-weight: 700; border: 1px solid transparent; transition: transform .06s ease, background .2s ease, border-color .2s ease; will-change: transform; }
     .btn:active { transform: translateY(1px); }
 
@@ -121,17 +107,7 @@
     .btn-outline { background: transparent; border-color: var(--border); color: var(--text); }
     .btn-outline:hover { border-color: color-mix(in oklab, var(--primary) 60%, var(--border)); color: var(--primary); }
 
-    .nav-cta { padding: .75rem 1.15rem; }
-
-    /* Mobile Nav */
-    .nav-toggle { display: none; background: transparent; border: 0; padding: .5rem; border-radius: 10px; }
-    .nav-toggle svg { width: 28px; height: 28px; }
-    @media (max-width: 960px) {
-      .nav-toggle { display: inline-flex; }
-      .nav-links { position: fixed; inset: 64px 0 0 0; padding: var(--space-8); background: var(--bg); border-top: 1px solid var(--border); flex-direction: column; align-items: flex-start; gap: var(--space-4); transform: translateY(-105%); transition: transform .25s ease; }
-      .site-nav[data-open="true"] .nav-links { transform: translateY(0); }
-      .nav-cta { width: 100%; justify-content: center; }
-    }
+    
 
     /* ============ Hero ============ */
     .hero { text-align: center; }
@@ -333,19 +309,6 @@
 
   <!-- Footer has been moved out of this file per your request -->
 
-  <script>
-    // Mobile nav toggle
-    const nav = document.getElementById('siteNav');
-    const btn = document.getElementById('navToggle');
-    btn?.addEventListener('click', () => {
-      const open = nav?.getAttribute('data-open') === 'true';
-      nav?.setAttribute('data-open', String(!open));
-      btn.setAttribute('aria-expanded', String(!open));
-    });
-
-    // Year in footer — guarded in case footer is loaded separately
-    document.getElementById('year')?.textContent = new Date().getFullYear();
-  </script>
   <div id="footer"></div>
   <script>
   fetch("/footer/index.html")
