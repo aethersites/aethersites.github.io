@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet"></noscript>
-  <title>GoodPlates header</title>
+  <link rel="icon" href="favicon.ico" sizes="any"> 
+  <link rel="icon" href="favicon.png" type="image/png"> 
+  <link rel="apple-touch-icon" href="favicon.png"> 
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recipes UI — Pure HTML/CSS</title>
+
+  <!-- design font (optional, from prototype) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-
 <header class="gp-topnav" role="banner" aria-label="Main navigation">
   <div class="gp-container">
 
     <!-- Left: brand (icon + name) -->
     <a class="gp-brand" href="/" aria-label="GoodPlates home">
+      <!-- plate + fork SVG icon -->
       <div class="gp-logo-sq" aria-hidden="true">
-        <img id="gpLogo" src="/favicon.png" alt="GoodPlates logo" width="22" height="22"
-             style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;"
-             onerror="this.onerror=null; this.src='/assets/img/logo-fallback.png';">
+       <img id="gpLogo" src="/favicon.png" alt="GoodPlates logo" width="22" height="22"
+  style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;"
+  onerror="this.onerror=null; this.src='/assets/img/logo-fallback.png';">
+        <!-- svg bits removed for brevity -->
       </div>
 
       <div class="gp-brand-text" style="text-decoration:none;color:inherit">
@@ -28,6 +33,7 @@
     <!-- Center: links (desktop) -->
     <nav class="gp-links" role="navigation" aria-label="Primary">
       <ul>
+        <!-- mark the currently selected page as active with class "is-active" or aria-current="page" -->
         <li><a href="/">Home</a></li>
         <li><a href="/recipes/">Recipes</a></li>
         <li><a href="/features/">Features</a></li>
@@ -38,8 +44,10 @@
 
     <!-- Right: CTA + hamburger -->
     <div class="gp-actions">
+      <!-- Login CTA (replaces Onboarding) -->
       <a href="/login-form/" class="gp-cta cta" title="Login">Login</a>
 
+      <!-- mobile hamburger -->
       <button id="gpHamburger" class="gp-hamburger" aria-controls="gpMobileMenu" aria-expanded="false" aria-label="Open menu">
         <span class="bar"></span><span class="bar"></span><span class="bar"></span>
       </button>
@@ -47,7 +55,7 @@
 
   </div>
 
-  <!-- Mobile: slide-over -->
+  <!-- Mobile: slide-over menu (keeps all links + CTA) -->
   <aside id="gpMobileMenu" class="gp-mobile" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="gp-mobile-panel" role="document">
       <div class="gp-mobile-head">
@@ -73,147 +81,110 @@
       </div>
     </div>
 
+    <!-- overlay click closes -->
     <div class="gp-mobile-overlay" tabindex="-1" data-close></div>
   </aside>
 
-  <!-- Scoped header CSS (namespaced & hardened) -->
   <style>
-    /* IMPORTANT: All header variables & rules are scoped to header.gp-topnav
-       so other pages' CSS can't easily override them. Keep this style block
-       inside the header include OR in a dedicated header stylesheet loaded last. */
-
-    /* Header-local design tokens (scoped) */
-    header.gp-topnav {
-      --gp-primary: #16a34a;
-      --gp-primary-700: #15803d;
-      --gp-primary-100: #dcfce7;
-      --gp-fg: #0f172a;
-      --gp-muted: #6b7280;
-      --gp-border: #e6e9ee;
-      --gp-radius: 12px;
-      --gp-shadow-soft: 0 8px 24px rgba(2,6,23,0.06);
-      --gp-glass: rgba(255,255,255,0.72);
-      --gp-container: 1200px;
+    /* ===== tokens (consistency with page) ===== */
+    :root{
+      --primary: #16a34a;
+      --primary-700: #15803d;
+      --primary-100: #dcfce7;
+      --fg: #0f172a;      /* black for selected/hover */
+      --muted: #6b7280;   /* gray for default nav labels */
+      --border: #e6e9ee;
+      --radius: 12px;
+      --shadow-soft: 0 8px 24px rgba(2,6,23,0.06);
+      --glass: rgba(255,255,255,0.72);
+      --container: 1200px;
     }
 
-    /* Box sizing for header subtree only (keeps global resets untouched) */
-    header.gp-topnav, header.gp-topnav * { box-sizing: border-box; }
-
-    /* Layout & visual (use !important for critical layout to prevent accidental overrides) */
-    header.gp-topnav {
-      position: sticky !important;
-      top: 0 !important;
-      z-index: 9999 !important; /* high priority to sit above page elements */
+    /* container + topbar */
+    .gp-topnav {
+      position: sticky;
+      top: 0;
+      z-index: 80;
       backdrop-filter: blur(6px);
-      background: linear-gradient(180deg, var(--gp-glass), rgba(255,255,255,0.82)) !important;
-      border-bottom: 1px solid rgba(15,23,42,0.03) !important;
-      min-height: 64px !important;
-      display: flex;
-      align-items: center;
-      width: 100%;
-      /* small performance hint: prefer padding on container, but we set a default here */
-      padding: 0 !important;
-      /* keep header content from being impacted by parent's font-size */
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.82));
+      border-bottom: 1px solid rgba(15,23,42,0.03);
     }
 
-    /* Container */
-    header.gp-topnav .gp-container {
-      max-width: var(--gp-container);
+    .gp-container {
+      max-width: var(--container);
       margin: 0 auto;
-      padding: 12px 20px !important; /* consistent spacing across pages */
+      padding: 12px 0px;
       display: flex;
       align-items: center;
       gap: 70px;
       justify-content: flex-start;
     }
 
-    /* Brand */
-    header.gp-topnav .gp-brand {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      text-decoration: none;
-      color: inherit;
-    }
-    header.gp-topnav .gp-logo-sq { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; overflow:hidden; flex-shrink:0; }
-    header.gp-topnav .gp-name { font-weight:600; color:var(--gp-fg); }
+    /* CTA pill */
+ .gp-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  min-width: 120px;
+  border-radius: 999px;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(18,185,129,0.12);
+  overflow: hidden; /* ensure pseudo stays inside */
+  z-index: 0;
+}
 
-    /* Links (desktop) */
-    header.gp-topnav .gp-links ul { list-style:none; padding:0; margin:0; display:flex; gap:22px; align-items:center; }
-    header.gp-topnav .gp-links a {
-      display:inline-flex;
-      align-items:center;
-      padding:8px 10px;
-      border-radius:0;
-      color: var(--gp-muted) !important;
-      font-weight:500;
-      transition: color .12s ease;
-      border:none;
-      font-size:16px;
-      background:none;
-      box-shadow:none;
-      transform:none;
-    }
-    header.gp-topnav .gp-links a:hover { color: var(--gp-fg) !important; }
-    header.gp-topnav .gp-links a.is-active,
-    header.gp-topnav .gp-links a[aria-current="page"] {
-      color: var(--gp-fg) !important;
+/* Base gradient */
+.gp-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #17A34B, #12B981);
+  transition: opacity 0.3s ease-in-out;
+  z-index: -1;
+  opacity: 1;
+}
+
+/* Hover gradient overlay */
+.gp-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #119140, #0fa673);
+  transition: opacity 0.3s ease-in-out;
+  z-index: -1;
+  opacity: 0;
+}
+
+.gp-cta:hover::after {
+  opacity: 1;
+}
+    /* hamburger (mobile) */
+    .gp-hamburger{ display:none; width:44px; height:44px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
+    .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
+
+    /* mobile menu */
+    .gp-mobile{ display:none; position:fixed; inset:0; z-index:100; }
+    .gp-mobile-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px }
+    .gp-mobile-links ul{ list-style:none; padding:6px 0; margin:0; display:flex; flex-direction:column; gap:6px }
+    .gp-mobile-links a{ display:block; padding:12px 10px; border-radius:8px; font-weight:600; color:var(--fg) }
+    .gp-mobile-links a:hover{ background:var(--surface-2) }
+
+    .gp-mobile-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.28); right:0; }
+
+    @media (max-width:1100px){
+      .gp-links{ display:none }
+      .gp-hamburger{ display:inline-flex }
+      .gp-cta{ display:none }
     }
 
-    /* Actions (CTA + hamburger) */
-    header.gp-topnav .gp-actions { display:flex; gap:8px; align-items:center; margin-left:auto; }
-    header.gp-topnav .gp-cta {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 18px;
-      min-width: 120px;
-      border-radius: 999px;
-      color: white;
-      font-weight: 600;
-      text-decoration: none;
-      box-shadow: 0 8px 20px rgba(18,185,129,0.12);
-      overflow: hidden;
-      z-index: 0;
-    }
-    header.gp-topnav .gp-cta::before {
-      content: "";
-      position: absolute; inset: 0; border-radius: inherit;
-      background: linear-gradient(90deg, #17A34B, #12B981);
-      z-index: -1; opacity: 1;
-    }
-    header.gp-topnav .gp-cta::after {
-      content: "";
-      position: absolute; inset: 0; border-radius: inherit;
-      background: linear-gradient(90deg, #119140, #0fa673);
-      z-index: -1; opacity: 0; transition: opacity .3s;
-    }
-    header.gp-topnav .gp-cta:hover::after { opacity: 1; }
-
-    /* Hamburger (mobile) */
-    header.gp-topnav .gp-hamburger { display:none; width:44px; height:44px; border-radius:10px; border:1px solid var(--gp-border); background:transparent; align-items:center; justify-content:center; padding:8px; cursor:pointer; }
-    header.gp-topnav .gp-hamburger .bar { display:block; width:18px; height:2px; background:var(--gp-fg); margin:3px 0; transition:all .18s ease; }
-
-    /* Mobile menu */
-    header.gp-topnav .gp-mobile { display:none; position:fixed; inset:0; z-index:100; }
-    header.gp-topnav .gp-mobile-panel { max-width: 420px; width:100%; background:white; padding:18px; box-shadow: 0 16px 48px rgba(2,6,23,0.08); }
-    header.gp-topnav .gp-mobile-links ul { list-style:none; padding:6px 0; margin:0; display:flex; flex-direction:column; gap:6px; }
-    header.gp-topnav .gp-mobile-links a { display:block; padding:12px 10px; border-radius:8px; font-weight:600; color:var(--gp-fg); }
-    header.gp-topnav .gp-mobile-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.28); }
-
-    /* Small utilities */
-    header.gp-topnav .small { font-size:12px; color:var(--gp-muted); }
-    header.gp-topnav .muted { color:var(--gp-muted); }
-
-    /* Responsive breakpoint */
-    @media (max-width:1100px) {
-      header.gp-topnav .gp-links { display:none !important; }
-      header.gp-topnav .gp-hamburger { display:inline-flex !important; }
-      header.gp-topnav .gp-cta { display:none !important; }
-      header.gp-topnav .gp-container { gap: 16px !important; }
-    }
+    .small{ font-size:12px; color:var(--muted) }
+    .muted{ color:var(--muted) }
   </style>
 
   <script>
@@ -248,44 +219,154 @@
       });
     })();
   </script>
-
   <script>
-    (function(){
-      function norm(path) {
-        path = String(path || '/').replace(/index\.html$/, '');
-        if (!path.endsWith('/')) path = path + '/';
-        return path;
+  (function(){
+    // Normalize path: remove trailing "index.html" and ensure trailing slash
+    function norm(path) {
+      path = String(path || '/').replace(/index\.html$/, '');
+      if (!path.endsWith('/')) path = path + '/';
+      return path;
+    }
+
+    const current = norm(window.location.pathname);
+
+    // Select both desktop and mobile nav links
+    const links = document.querySelectorAll('.gp-links a, .gp-mobile-links a');
+
+    // Clear any existing markers, then mark the matching link
+    links.forEach(a => {
+      a.classList.remove('is-active');
+      a.removeAttribute('aria-current');
+
+      const href = a.getAttribute('href') || '';
+      try {
+        const url = new URL(href, location.origin);
+        if (norm(url.pathname) === current) {
+          a.classList.add('is-active');
+          a.setAttribute('aria-current', 'page');
+        }
+      } catch (err) {
+        // ignore invalid hrefs
       }
-
-      const current = norm(window.location.pathname);
-      const links = document.querySelectorAll('.gp-links a, .gp-mobile-links a');
-
-      links.forEach(a => {
-        a.classList.remove('is-active');
-        a.removeAttribute('aria-current');
-
-        const href = a.getAttribute('href') || '';
-        try {
-          const url = new URL(href, location.origin);
-          if (norm(url.pathname) === current) {
-            a.classList.add('is-active');
-            a.setAttribute('aria-current', 'page');
-          }
-        } catch (err) {}
-      });
-    })();
-  </script>
+    });
+  })();
+</script>
 </header>
 
-<!-- NOTE:
-  1) To stop page-to-page layout shifts caused by scrollbars, add this to your global CSS:
-       html { overflow-y: scroll; }
+<!-- ===== main stylesheet (keeps rest of page intact) ===== -->
+<style>
+  /* ===== Design tokens (adapted for compatibility) ===== */
+  :root{
+    --bg: #ffffff;
+    --fg: #0f172a;
+    --muted: #6b7280;
+    --muted-2: #9ca3af;
+    --border: #e6e9ee;
+    --surface: #ffffff;
+    --surface-2: #f7f8fa;
+    --primary: #16a34a;
+    --primary-700: #15803d;
+    --primary-100: #dcfce7;
+    --ring: rgba(16,185,129,0.18);
+    --shadow-soft: 0 8px 24px rgba(2,6,23,0.06);
+    --shadow-2: 0 16px 48px rgba(2,6,23,0.08);
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --radius: var(--radius-lg);
+    --container: 1200px;
+    --glass: rgba(255,255,255,0.72);
+  }
 
-  2) If you use Tailwind or other global CSS that could touch .gp-topnav, make sure this header CSS
-     is loaded after those styles OR keep it inline inside the header include (as above).
+  /* ===== Base / resets ===== */
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0}
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color:var(--fg);
+    background:linear-gradient(180deg,#fbfcfd 0%, var(--bg) 100%);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+  a{color:inherit; text-decoration:none}
+  img{max-width:100%; display:block}
+  .container{max-width:var(--container); margin:0 auto; padding:0 20px}
 
-  3) If you prefer avoiding !important, remove them and ensure header CSS is the last stylesheet loaded.
--->
+  /* ===== Topnav styling (keeps your header clean) ===== */
+  .gp-topnav,
+  .topnav {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 20px; gap:12px;
+    background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.82));
+    border-bottom:1px solid rgba(15,23,42,0.03);
+    position:sticky; top:0; z-index:60; backdrop-filter: blur(6px);
+  }
+  .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
+  .gp-logo-sq{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; }
+  .gp-name{ font-weight:600; color:var(--fg); }
+  .gp-sub{ font-size:12px; color:var(--muted) }
+
+  .gp-links ul{ list-style:none; padding:0; margin:0; display:flex; gap:22px; align-items:center; }
+
+  /* --------- NAV: minimal color-only hover/active (changed) --------- */
+  .gp-links a {
+    display:inline-flex;
+    align-items:center;
+    padding:8px 10px;
+    border-radius:0;                 /* no hover box */
+    color: var(--muted);             /* default gray */
+    font-weight:500;
+    transition: color .12s ease;     /* only animate color */
+    border:none;
+    font-size:16px;
+    background: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* hover: turn label black */
+  .gp-links a:hover {
+    color: var(--fg);                /* black on hover */
+    background: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* selected/current page: black */
+  .gp-links a.is-active,
+  .gp-links a[aria-current="page"] {
+    color: var(--fg);
+  }
+
+  .gp-actions{ display:flex; gap:8px; align-items:center; margin-left:auto }
+  .icon-btn{ width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--border); background:var(--surface); cursor:pointer; }
+  .icon-btn:hover{ box-shadow:var(--shadow-soft); }
+
+ 
+  .gp-hamburger{ display:none; width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
+  .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
+
+  @media (max-width:1100px){
+    .gp-links{ display:none }
+    .gp-hamburger{ display:inline-flex }
+    .gp-cta{ display:none }
+  }
+
+  /* ===== Layout (content + sidebar) ===== */
+  .layout{ display:grid; grid-template-columns:320px 1fr; gap:28px; padding:28px 0; align-items:start; height: 2000px !important;
+    max-height: 2000px !important;
+    min-height: 2000px !important;
+    overflow-y: auto;
+  }
+  @media (max-width:1100px)
+  {
+    .layout{ grid-template-columns:1fr }
+    .sidebar{ display:none }
+    .open-sidebar{ display:block; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.35) }
+    .sidebar.panel{ position:fixed; left:0; top:0; bottom:0; height:100%; transform:translateX(0); box-shadow: var(--shadow-2); }
+  }
+</style>
 
 </body>
 </html>
