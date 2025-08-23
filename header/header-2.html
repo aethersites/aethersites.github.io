@@ -396,9 +396,11 @@
     -webkit-tap-highlight-color: transparent;
   }
   a{color:inherit; text-decoration:none}
-  img{max-width:80%; display:block}
-  .container{max-width:var(--container); margin:0 auto; padding:0 20px}
+        img{max-width:80%; display:block}
+        img { display:block; }
+        .container img { max-width: 100%; }
 
+  
   /* ===== Topnav styling (keeps your header clean) ===== */
   .gp-topnav,
   .topnav {
