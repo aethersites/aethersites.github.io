@@ -23,11 +23,13 @@ import {
 
 /* ---------- CONFIG ---------- */
 const firebaseConfig = {
-  // <-- fill with your project config
-  apiKey: "REPLACE_ME",
-  authDomain: "REPLACE_ME",
-  projectId: "REPLACE_ME",
-  // etc...
+   apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
 };
 
 // init firebase (idempotent)
@@ -321,13 +323,15 @@ if (openCustomBtn) openCustomBtn.addEventListener('click', () => {
 });
 
 // modal save
+// inside modalSave handler — unify to use the modal's c* fields for both edit & custom:
 if (modalSave) modalSave.addEventListener('click', async () => {
   if (!editingContext) { setModalVisible(false); return; }
   const t = editingContext;
-  const name = (t.type === 'grocery' || t.type === 'pantry') ? (document.getElementById('mName')?.value?.trim() || '') : (cName?.value?.trim() || '');
+  // UNIFIED: always read from the modal's visible fields (cName/cQty/cPrice)
+  const name = (cName?.value?.trim() || '');
   if (!name) return alert('Enter a name');
-  const qty = Number((t.type === 'grocery' || t.type === 'pantry') ? (document.getElementById('mQty')?.value || 1) : (cQty?.value || 1));
-  const price = (t.type === 'grocery' || t.type === 'pantry') ? (Number(document.getElementById('mPrice')?.value) || null) : ((cPrice && cPrice.value !== '') ? Number(cPrice.value) : null);
+  const qty = Number(cQty?.value || 1);
+  const price = (cPrice && cPrice.value !== '') ? Number(cPrice.value) : null;
 
   if (t.type === 'grocery' && Number.isFinite(t.idx)) {
     const list = profileData.groceryLists[activeGroceryListIndex];
