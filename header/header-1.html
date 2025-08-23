@@ -3,7 +3,7 @@
 <head>
   <link rel="icon" href="favicon.ico" sizes="any"> 
   <link rel="icon" href="favicon.png" type="image/png"> 
-  <link rel="apple-touch-icon" href="favicon.png"> 
+  <link rel="apple-touch-icon" href="favicon.png" 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recipes UI — Pure HTML/CSS</title>
@@ -220,38 +220,45 @@
       });
     })();
   </script>
+
+  <!-- ======= REPLACED: more-robust "active link" script (runs after DOM ready) ======= -->
   <script>
   (function(){
-    // Normalize path: remove trailing "index.html" and ensure trailing slash
-    function norm(path) {
-      path = String(path || '/').replace(/index\.html$/, '');
-      if (!path.endsWith('/')) path = path + '/';
-      return path;
-    }
-
-    const current = norm(window.location.pathname);
-
-    // Select both desktop and mobile nav links
-    const links = document.querySelectorAll('.gp-links a, .gp-mobile-links a');
-
-    // Clear any existing markers, then mark the matching link
-    links.forEach(a => {
-      a.classList.remove('is-active');
-      a.removeAttribute('aria-current');
-
-      const href = a.getAttribute('href') || '';
-      try {
-        const url = new URL(href, location.origin);
-        if (norm(url.pathname) === current) {
-          a.classList.add('is-active');
-          a.setAttribute('aria-current', 'page');
-        }
-      } catch (err) {
-        // ignore invalid hrefs
+    // run after DOM ready to be robust in different embed situations
+    document.addEventListener('DOMContentLoaded', function(){
+      function norm(path) {
+        path = String(path || '/').replace(/index\.html$/, '');
+        if (!path.endsWith('/')) path = path + '/';
+        return path;
       }
+
+      const current = norm(window.location.pathname);
+      const links = document.querySelectorAll('.gp-links a, .gp-mobile-links a');
+
+      links.forEach(a => {
+        a.classList.remove('is-active');
+        a.removeAttribute('aria-current');
+
+        const href = a.getAttribute('href') || '';
+        try {
+          const url = new URL(href, location.origin);
+          const linkPath = norm(url.pathname);
+
+          // If the link is the root '/', only mark it active when current is root.
+          // Otherwise mark active when the current path starts with the link path
+          const isActive = (linkPath === '/') ? (current === '/') : current.startsWith(linkPath);
+
+          if (isActive) {
+            a.classList.add('is-active');
+            a.setAttribute('aria-current', 'page');
+          }
+        } catch (err) {
+          // ignore invalid hrefs
+        }
+      });
     });
   })();
-</script>
+  </script>
 </header>
 
 <!-- ===== main stylesheet (keeps rest of page intact) ===== -->
@@ -372,6 +379,22 @@
     .sidebar{ display:none }
     .open-sidebar{ display:block; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.35) }
     .sidebar.panel{ position:fixed; left:0; top:0; bottom:0; height:100%; transform:translateX(0); box-shadow: var(--shadow-2); }
+  }
+
+  /* ===== ADDED (minimal): Make the topnav fixed to the viewport and reserve page space ===== */
+  /* We add this at the end so it overrides earlier sticky rules. */
+  .gp-topnav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* keep above most UI */
+  }
+
+  /* Reserve vertical space so content doesn't sit under the fixed nav.
+     Using a safe fixed value here to keep edits minimal; adjust if you change header padding/height. */
+  body {
+    padding-top: 72px; /* adjust this if you make the header taller/shorter */
   }
 </style>
 
