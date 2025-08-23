@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calorie & Macro Calculator — Apple-style</title>
+  <div id="global-header"></div>
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-1"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => document.querySelector("#global-header").innerHTML = html);
+</script>
+
+
+  <meta name="description" content="A clean, rounded calorie calculator that estimates BMR, TDEE, and goal calories for losing or gaining weight. Includes macros and zigzag plan." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+  /* --- modal CSS (kept as you specified) --- */
+  #wg_modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5); /* semi-transparent overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+
+  .wg_modal_content {
+    background: var(--card);
+    padding: 24px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 320px;
+    box-shadow: var(--shadow);
+  }
+
+  .wg_modal_content button {
+    margin-top: 12px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+  }
+
+    :root{
+      --bg: #fff;
+      --card: #ffffff;
+      --text: #0b1321;
+      --muted: #6b7280;
+      --accent: linear-gradient(135deg, #17A34B, #12B981);
+      --good: #2ecc71;
+      --warn: #f59e0b;
+      --danger:#ef4444;
+      --ring: rgba(10,132,255,.25);
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(2, 6, 23, .08), 0 2px 8px rgba(2,6,23,.06);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#fff; --card:#111418; --text:#e5e7eb; --muted:#9ca3af; --accent:#0a84ff;
+        --ring: rgba(23,163,75,0.35);
+        --shadow: 0 10px 30px rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.35);
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: 
+                  radial-gradient(1000px 700px at 110% 10%, rgba(16,185,129,.05), transparent 60%), var(--bg);
+      color:var(--text); line-height:1.45;
+    }
+    .container{max-width:1080px; padding:28px; margin:0 auto}
+    header{display:flex; align-items:center; gap:16px; margin:10px 0 24px}
+    .logo{width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg,#0a84ff,#7dd3fc); box-shadow: var(--shadow); display:grid; place-items:center}
+    .logo span{color:white; font-weight:800; font-size:20px}
+    h1{font-size:clamp(22px, 2.6vw, 34px); margin:0}
+    .subtitle{color:var(--muted)}
+
+    .grid{display:grid; grid-template-columns: 1.1fr .9fr; gap:22px}
+    @media (max-width: 960px){.grid{grid-template-columns: 1fr}}
+
+    .card{background:var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding:18px 18px; backdrop-filter: saturate(1.2) blur(4px);}
+    .card h2{font-size:18px; margin:6px 6px 14px 6px}
+
+    .row{display:grid; grid-template-columns: repeat(12,1fr); gap:12px; align-items:end}
+    .input{display:flex; flex-direction:column; gap:8px; grid-column: span 4}
+    .input > label{font-size:13px; color:var(--muted)}
+    .field{display:flex; align-items:center; gap:8px; background: color-mix(in oklab, var(--card) 60%, var(--bg));
+      border:1px solid color-mix(in oklab, var(--muted) 18%, transparent);
+      outline:0; border-radius:14px; padding:12px 14px; transition:border .2s, box-shadow .2s}
+    .field:focus-within{border-color: var(--accent); box-shadow: 0 0 0 6px var(--ring)}
+    .field input, .field select{appearance:none; border:0; outline:0; background:transparent; color:var(--text); width:100%; font: inherit}
+    .seg{display:flex; background: color-mix(in oklab, var(--card) 50%, var(--bg)); border:1px solid color-mix(in oklab, var(--muted) 18%, transparent); border-radius:14px; padding:4px}
+    .seg button{flex:1; border:0; background:transparent; padding:10px 12px; border-radius:10px; color:var(--muted); font-weight:600; cursor:pointer}
+    .seg button[aria-pressed="true"]{background:var(--accent); color:white; box-shadow: 0 6px 16px rgba(23,163,75,0.35)}
+
+    .actions{display:flex; gap:10px; margin-top:12px}
+    .btn{border:0; background: var(--text); color: #fff; padding:12px 16px; border-radius:14px; font-weight:600; cursor:pointer}
+    .btn.secondary{background: color-mix(in oklab, var(--text) 8%, var(--card)); color:var(--text); border:1px solid color-mix(in oklab, var(--muted) 18%, transparent)}
+    .btn.ghost{background:transparent; color:var(--text); border:1px dashed color-mix(in oklab, var(--muted) 25%, transparent)}
+
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:6px 10px; background: color-mix(in oklab, var(--accent) 15%, var(--card)); color: var(--accent); border-radius:999px; font-size:12px; font-weight:700}
+    .muted{color:var(--muted)}
+
+    .stats{display:grid; grid-template-columns: repeat(4,1fr); gap:12px}
+    @media (max-width: 960px){.stats{grid-template-columns: repeat(2,1fr)}}
+    .stat{background: color-mix(in oklab, var(--card) 60%, var(--bg)); border-radius:16px; padding:14px; border:1px solid color-mix(in oklab, var(--muted) 12%, transparent)}
+    .stat h3{margin:0; font-size:12px; color:var(--muted)}
+    .stat .big{font-size:22px; font-weight:800; margin-top:6px}
+    .stat .sub{font-size:12px; color:var(--muted)}
+
+    table{width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border-radius:16px}
+    thead th{font-size:12px; text-align:left; color:var(--muted); background: color-mix(in oklab, var(--card) 50%, var(--bg)); padding:10px 12px; position:sticky; top:0}
+    tbody td{padding:12px; border-top:1px solid color-mix(in oklab, var(--muted) 15%, transparent)}
+
+    details{background: color-mix(in oklab, var(--card) 60%, var(--bg)); border:1px solid color-mix(in oklab, var(--muted) 15%, transparent); border-radius:16px; padding:12px 14px}
+    summary{font-weight:700; cursor:pointer}
+    footer{margin:36px 0 14px; color:var(--muted); font-size:12px}
+    .link{color:var(--accent); text-decoration:none}
+
+    /* small highlight for recommended row */
+    .recommended{background: linear-gradient(90deg, rgba(10,132,255,0.06), transparent); border-left:4px solid var(--accent); padding-left:8px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Calorie & Macro Calculator</h1>
+        <div class="subtitle">Rounded, clean, Apple-style UI. Pick your units, activity, and goals; get calories for maintenance, losing, or gaining—plus macros and a zigzag week.</div>
+      </div>
+    </header>
+
+    <div class="grid" id="app">
+      <section class="card">
+        <h2>Your Details</h2>
+        <div class="row" style="margin-bottom: 8px">
+          <div class="input" style="grid-column: span 4">
+            <label>Units</label>
+            <div class="seg" role="tablist" aria-label="Units">
+              <button id="uMetric" role="tab" aria-pressed="true">Metric</button>
+              <button id="uImperial" role="tab" aria-pressed="false">Imperial</button>
+            </div>
+          </div>
+          <div class="input" style="grid-column: span 4">
+            <label>Sex</label>
+            <div class="seg" role="tablist" aria-label="Sex">
+              <button id="sMale" aria-pressed="true">Male</button>
+              <button id="sFemale" aria-pressed="false">Female</button>
+            </div>
+          </div>
+          <div class="input" style="grid-column: span 4">
+            <label>Age</label>
+            <div class="field"><input type="number" id="age" min="14" max="90" value="30" inputmode="numeric"/></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="input">
+            <label>Height <span class="muted" id="hUnit">cm</span></label>
+            <div class="field"><input type="number" id="height" min="90" max="250" value="175"/></div>
+          </div>
+          <div class="input">
+            <label>Weight <span class="muted" id="wUnit">kg</span></label>
+            <div class="field"><input type="number" id="weight" min="35" max="250" value="72" step="0.1"/></div>
+          </div>
+          <div class="input">
+            <label>Body Fat % <span class="muted">optional</span></label>
+            <div class="field"><input type="number" id="bf" min="3" max="60" placeholder="e.g. 18"/></div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div class="input" style="grid-column: span 6">
+            <label>Activity</label>
+            <div class="field">
+              <select id="activity">
+                <option value="1">Basal Metabolic Rate (BMR only)</option>
+                <option value="1.2">Sedentary — little/no exercise</option>
+                <option value="1.375">Light — 1–3 days/week</option>
+                <option value="1.465" selected>Moderate — 4–5 days/week</option>
+                <option value="1.55">Active — daily or 3–4 intense/week</option>
+                <option value="1.725">Very Active — 6–7 intense/week</option>
+                <option value="1.9">Extra Active — physical job + training</option>
+              </select>
+            </div>
+          </div>
+          <div class="input" style="grid-column: span 6">
+            <label>Formula</label>
+            <div class="field">
+              <select id="formula">
+                <option value="mifflin">Mifflin-St Jeor</option>
+                <option value="harris">Revised Harris-Benedict</option>
+                <option value="katch">Katch-McArdle (needs body fat)</option>
+                <option value="auto" selected>Auto (uses Katch if BF% set)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <h2 style="margin-top:18px">Goal</h2>
+        <div class="row">
+          <div class="input" style="grid-column: span 5">
+            <label>Target</label>
+            <div class="field">
+              <select id="goal">
+                <option value="maintain">Maintain</option>
+                <option value="loss">Lose</option>
+                <option value="gain">Gain</option>
+              </select>
+            </div>
+          </div>
+          <div class="input">
+              <label>Rate (kg per week)</label>
+              <div class="field">
+                <select id="rate">
+                  <option value="0">0 (Maintain)</option>
+                  <option value="0.25">0.25</option>
+                  <option value="0.5" selected>0.5</option>
+                  <option value="0.75">0.75</option>
+                  <option value="1">1.0</option>
+                </select>
+              </div>
+            </div>
+          <div class="input" style="grid-column: span 3">
+            <label>Energy</label>
+            <div class="seg">
+              <button id="eKcal" aria-pressed="true">kcal</button>
+              <button id="eKJ" aria-pressed="false">kJ</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="calc">Calculate</button>
+          <button class="btn secondary" id="reset">Reset</button>
+          <button class="btn ghost" id="downloadCSV" title="Download weekly zigzag plan as CSV">Download Week CSV</button>
+          <span class="pill" id="autoNote" style="display:none">Auto: Katch-McArdle active</span>
+        </div>
+      </section>
+
+      <aside class="card">
+        <h2>Results</h2>
+        <div class="stats" id="stats">
+          <div class="stat"><h3>BMR</h3><div class="big" id="bmr">—</div><div class="sub" id="bmrMethod"> </div></div>
+          <div class="stat"><h3>TDEE</h3><div class="big" id="tdee">—</div><div class="sub" id="actLabel"> </div></div>
+          <div class="stat"><h3>Target</h3><div class="big" id="target">—</div><div class="sub" id="goalLabel"> </div></div>
+          <div class="stat"><h3>Deficit/Surplus</h3><div class="big" id="delta">—</div><div class="sub" id="deltaLabel"> </div></div>
+        </div>
+
+        <h2 style="margin-top:16px">Suggested Macros</h2>
+        <div class="row">
+          <div class="input">
+            <label>Protein (g/kg)</label>
+            <div class="field"><input type="number" id="pPerKg" min="1.2" max="2.8" step="0.1" value="1.8"/></div>
+          </div>
+          <div class="input">
+            <label>Fat (g/kg)</label>
+            <div class="field"><input type="number" id="fPerKg" min="0.5" max="1.2" step="0.1" value="0.8"/></div>
+          </div>
+          <div class="input">
+            <label>Carbs (auto)</label>
+            <div class="field" aria-live="polite"><input disabled id="carbInfo" value="rest of calories"/></div>
+          </div>
+        </div>
+
+        <table aria-label="Macro targets" style="margin-top:12px">
+          <thead><tr><th>Macro</th><th>Grams</th><th>Calories</th><th>Percent</th></tr></thead>
+          <tbody id="macroTable"><tr><td colspan="4" class="muted" style="text-align:center">— calculate to see macros —</td></tr></tbody>
+        </table>
+      </aside>
+    </div>
+
+    <!-- NEW: Weekly Goal Planner container -->
+    <section class="card" style="margin-top:18px" id="weeklyGoalCard">
+      <h2>Weekly Goal Planner</h2>
+      <div class="row" style="align-items:start">
+        <div class="input" style="grid-column: span 4">
+            
+          <label>Weight <span class="muted" id="wg_wUnit">kg</span></label>
+          <div class="field">
+            <!-- linked weight field: will sync with #weight -->
+            <input type="number" id="wg_weight" min="30" max="300" step="0.1" value="72" />
+          </div>
+          <div class="muted" style="font-size:12px;margin-top:6px">This is linked to the main weight field — edit either one.</div>
+        </div>
+
+        <div class="input" style="grid-column: span 4">
+          <label>Amount to lose (kg)</label>
+          <div class="field"><input type="number" id="wg_amount" min="0" step="0.1" placeholder="e.g. 8" /></div>
+        </div>
+
+        <div class="input" style="grid-column: span 4">
+          <label>Action</label>
+          <div class="actions" style="margin-top:6px">
+            <button class="btn" id="wg_calc">Calculate</button>
+            <button class="btn secondary" id="wg_reset">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="wg_result" style="margin-top:12px">
+        <div class="muted">Enter how much you want to lose and click Calculate to get recommended weekly rates and weeks required.</div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:18px">
+      <h2>Zigzag Week (same weekly total)</h2>
+      <details style="margin-bottom:10px"><summary>What is this?</summary>
+        Zigzagging alternates higher and lower days to combat plateaus while keeping the same weekly calories. Default spread uses two higher days and five lower days (~+15%/−10%). You can still hit your weekly target and plan social days more flexibly.
+      </details>
+      <table aria-label="Zigzag plan">
+        <thead><tr><th>Day</th><th>Calories</th><th>Δ vs target</th></tr></thead>
+        <tbody id="zigzag"><tr><td colspan="3" class="muted" style="text-align:center">— calculate to generate week —</td></tr></tbody>
+      </table>
+    </section>
+
+    <footer>
+      <div>Formulas: Mifflin-St Jeor, Revised Harris-Benedict, and Katch-McArdle (if body fat% provided). 1 kg ≈ 7,700 kcal. Suggested macro ranges: protein 1.6–2.2 g/kg (cut towards higher), fat 0.6–1.0 g/kg, remainder carbs.</div>
+      <div style="margin-top:6px">This tool gives estimates—individual needs vary. For medical questions, consult a clinician or registered dietitian.</div>
+    </footer>
+  </div>
+
+  <!-- --- MOVED: modal markup placed BEFORE the script so it's present when JS runs --- -->
+  <div id="wg_modal" style="display:none;">
+    <div class="wg_modal_content">
+      <p id="wg_modal_text"></p>
+      <!-- use existing .btn class so it matches your other buttons -->
+      <button id="wg_modal_close" class="btn">OK</button>
+    </div>
+  </div>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+    const fmt = (n, unit) => isFinite(n) ? `${Math.round(n).toLocaleString()} ${unit}` : '—';
+    const kcToKJ = (kc) => kc * 4.1868;
+
+    let state = {
+      units: 'metric', // or 'imperial'
+      sex: 'male',
+      age: 30,
+      heightCm: 175,
+      weightKg: 72,
+      bf: null,
+      activity: 1.465,
+      formula: 'auto',
+      goal: 'maintain',
+      rateKg: 0.5,
+      energy: 'kcal',
+      pPerKg: 1.8,
+      fPerKg: 0.8
+    };
+
+    // showModal + close handler (safe null-guards)
+    function showModal(message) {
+      const textEl = $('#wg_modal_text');
+      const modalEl = $('#wg_modal');
+      if (!textEl || !modalEl) return console.warn('Modal elements not found');
+      textEl.textContent = message;
+      modalEl.style.display = 'flex';
+    }
+    const modalCloseBtn = $('#wg_modal_close');
+    if (modalCloseBtn) modalCloseBtn.addEventListener('click', () => {
+      const modalEl = $('#wg_modal');
+      if (modalEl) modalEl.style.display = 'none';
+    });
+
+    // UI bindings
+    function syncInputs(){
+      $('#age').value = state.age;
+      $('#height').value = state.units==='metric' ? state.heightCm : cmToIn(state.heightCm);
+      $('#weight').value = state.units==='metric' ? state.weightKg : kgToLb(state.weightKg);
+      $('#wg_weight').value = $('#weight').value; // sync linked weight field
+      $('#bf').value = state.bf ?? '';
+      $('#activity').value = String(state.activity);
+      $('#formula').value = state.formula;
+      $('#goal').value = state.goal;
+      $('#rate').value = String(state.rateKg);
+      $('#pPerKg').value = state.pPerKg;
+      $('#fPerKg').value = state.fPerKg;
+      $('#uMetric').setAttribute('aria-pressed', state.units==='metric');
+      $('#uImperial').setAttribute('aria-pressed', state.units==='imperial');
+      $('#sMale').setAttribute('aria-pressed', state.sex==='male');
+      $('#sFemale').setAttribute('aria-pressed', state.sex==='female');
+      $('#eKcal').setAttribute('aria-pressed', state.energy==='kcal');
+      $('#eKJ').setAttribute('aria-pressed', state.energy==='kJ');
+      $('#hUnit').textContent = state.units==='metric' ? 'cm' : 'in';
+      $('#wUnit').textContent = state.units==='metric' ? 'kg' : 'lb';
+      $('#wg_wUnit').textContent = state.units==='metric' ? 'kg' : 'lb';
+      $('#autoNote').style.display = (state.formula==='auto' && state.bf!=null && state.bf!=='') ? 'inline-flex' : 'none';
+    }
+    
+    // Unit helpers
+    const inToCm = (i) => i * 2.54;
+    const cmToIn = (cm) => cm / 2.54;
+    const lbToKg = (lb) => lb * 0.45359237;
+    const kgToLb = (kg) => kg / 0.45359237;
+
+    // BMR formulas
+    function bmrMifflin({sex, weightKg, heightCm, age}){
+      return (10*weightKg) + (6.25*heightCm) - (5*age) + (sex==='male' ? 5 : -161);
+    }
+    function bmrHarris({sex, weightKg, heightCm, age}){
+      return sex==='male'
+        ? (13.397*weightKg) + (4.799*heightCm) - (5.677*age) + 88.362
+        : (9.247*weightKg) + (3.098*heightCm) - (4.330*age) + 447.593;
+    }
+    function bmrKatch({weightKg, bf}){
+      if(bf==null || bf==='') return NaN;
+      const F = Math.min(Math.max(parseFloat(bf)/100, 0.03), 0.6);
+      const LM = (1 - F) * weightKg;
+      return 370 + 21.6 * LM;
+    }
+
+    function resolveFormula(){
+      const want = state.formula;
+      if(want==='auto') return (state.bf!=null && state.bf!=='') ? 'katch' : 'mifflin';
+      return want;
+    }
+
+    function calcAll(){
+      // read inputs
+      state.age = +$('#age').value;
+      state.pPerKg = +$('#pPerKg').value;
+      state.fPerKg = +$('#fPerKg').value;
+      state.activity = parseFloat($('#activity').value);
+      state.formula = $('#formula').value;
+      state.goal = $('#goal').value;
+      state.rateKg = parseFloat($('#rate').value) || 0;
+      state.bf = $('#bf').value.trim()==='' ? null : +$('#bf').value;
+
+      const rawH = +$('#height').value;
+      const rawW = +$('#weight').value;
+      state.heightCm = state.units==='metric' ? rawH : inToCm(rawH);
+      state.weightKg = state.units==='metric' ? rawW : lbToKg(rawW);
+
+      // guardrails -> replaced alerts with modal
+      if(!(state.age>=14 && state.age<=90)) { showModal('Age must be 14–90'); return; }
+      if(!(state.heightCm>=90 && state.heightCm<=250)) { showModal('Height is out of range. Please change the amount.'); return; }
+      if(!(state.weightKg>=30 && state.weightKg<=300)) { showModal('Weight is out of range. Please change the amount.'); return; }
+      if(state.bf!=null && !(state.bf>=3 && state.bf<=60)) { showModal('Body fat % must be 3–60'); return; }
+
+      const ctx = {sex: state.sex, weightKg: state.weightKg, heightCm: state.heightCm, age: state.age, bf: state.bf};
+      const which = resolveFormula();
+      let bmr;
+      if(which==='katch') bmr = bmrKatch(ctx); else if(which==='harris') bmr = bmrHarris(ctx); else bmr = bmrMifflin(ctx);
+      const tdee = bmr * state.activity;
+
+      // weekly rate => daily delta. 1 kg ~ 7700 kcal
+      const sign = state.goal==='gain' ? 1 : (state.goal==='loss' ? -1 : 0);
+      const dailyDelta = sign * (state.rateKg || 0) * 7700 / 7;
+      const target = tdee + dailyDelta;
+
+      // Macros
+      const pG = state.pPerKg * state.weightKg; // grams
+      const fG = state.fPerKg * state.weightKg;
+      const pKc = pG * 4; const fKc = fG * 9;
+      const remaining = Math.max(target - (pKc + fKc), 0);
+      const cG = remaining / 4;
+
+      // Zigzag (2 high, 5 low; +15% / −10%), adjust to preserve weekly sum precisely
+      const high = target * 1.15; const low = target * 0.9;
+      let plan = [high, low, low, high, low, low, low];
+      const weeklyTarget = target * 7;
+      let diff = weeklyTarget - plan.reduce((a,b)=>a+b,0);
+      const step = diff / 7; // distribute tiny rounding difference
+      plan = plan.map(v => v + step);
+
+      // Presentation
+      const useKJ = state.energy==='kJ';
+      const unit = useKJ ? 'kJ' : 'kcal';
+      const conv = (x)=> useKJ ? kcToKJ(x) : x;
+
+      $('#bmr').textContent = fmt(conv(bmr), unit);
+      $('#bmrMethod').textContent = {
+        mifflin:'Mifflin-St Jeor', harris:'Revised Harris-Benedict', katch:'Katch-McArdle'
+      }[which];
+      $('#tdee').textContent = fmt(conv(tdee), unit);
+      $('#actLabel').textContent = `Activity ×${state.activity}`;
+      $('#target').textContent = fmt(conv(target), unit);
+      $('#goalLabel').textContent = state.goal==='maintain' ? 'Maintenance' : `${state.goal==='loss'?'Cut':'Gain'} • ${state.rateKg} kg/week`;
+      $('#delta').textContent = (sign===0) ? '—' : ( (sign>0?'+':'−') + Math.round(conv(Math.abs(dailyDelta))).toLocaleString() + ' ' + unit + '/day');
+      $('#deltaLabel').textContent = sign===0 ? 'No change' : (sign>0?'Surplus':'Deficit');
+
+      // macro table
+      const pPct = (pKc/target)*100;
+      const fPct = (fKc/target)*100;
+      const cPct = (remaining/target)*100;
+      $('#macroTable').innerHTML = `
+        <tr><td>Protein</td><td>${Math.round(pG)} g</td><td>${Math.round(conv(pKc))} ${unit}</td><td>${Math.round(pPct)}%</td></tr>
+        <tr><td>Fat</td><td>${Math.round(fG)} g</td><td>${Math.round(conv(fKc))} ${unit}</td><td>${Math.round(fPct)}%</td></tr>
+        <tr><td>Carbs</td><td>${Math.round(cG)} g</td><td>${Math.round(conv(remaining))} ${unit}</td><td>${Math.round(cPct)}%</td></tr>
+      `;
+      $('#carbInfo').value = `${Math.round(cG)} g from remaining calories`;
+
+      // zigzag table
+      const rows = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((d,i)=>{
+        const v = plan[i];
+        const diff = v - target;
+        const sign = diff>0?'+':'';
+        return `<tr><td>${d}</td><td>${Math.round(conv(v)).toLocaleString()} ${unit}</td><td style="color:${diff>0?'var(--good)':(diff<0?'var(--warn)':'var(--muted)')}">${sign}${Math.round(conv(diff))} ${unit}</td></tr>`
+      }).join('');
+      $('#zigzag').innerHTML = rows;
+
+      return {bmr, tdee, target, plan, unit, useKJ};
+    }
+
+    // CSV download
+    function downloadCSV(){
+      const res = calcAll();
+      if(!res) return;
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+      const conv = (x)=> res.useKJ ? kcToKJ(x) : x;
+      const lines = ['Day,Calories ('+res.unit+')'];
+      for(let i=0;i<7;i++) lines.push(`${days[i]},${Math.round(conv(res.plan[i]))}`);
+      const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'zigzag_week.csv'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // --- Weekly Goal Planner logic ---
+    // rates we'll show (kg/week)
+    const WG_RATES = [0.25, 0.5, 0.75];
+
+    function wgSyncFromMainWeight(){
+      // main #weight displays current unit; copy to wg_weight
+      const val = $('#weight').value;
+      if(document.activeElement !== $('#wg_weight')) $('#wg_weight').value = val;
+    }
+    function mainWeightFromWg(){
+      const val = $('#wg_weight').value;
+      if(document.activeElement !== $('#weight')) $('#weight').value = val;
+    }
+
+    function wgCalculate(){
+      // determine current weight in kg (convert if necessary)
+      const displayedWeight = parseFloat($('#weight').value);
+      if(isNaN(displayedWeight)) { showModal('Please enter your current weight first.'); return; }
+      const currentKg = state.units === 'metric' ? displayedWeight : lbToKg(displayedWeight);
+
+      const amount = parseFloat($('#wg_amount').value);
+      if(isNaN(amount) || amount <= 0) { showModal('Enter an amount to lose (kg).'); return; }
+
+      // compute weeks for each preset rate and daily kcal deficit
+      const rows = WG_RATES.map(rate => {
+        const weeks = Math.ceil((amount / rate) * 10) / 10; // round up to 0.1 week
+        const dailyKc = rate * 7700 / 7;
+        return {rate, weeks, dailyKc};
+      });
+
+      // choose a recommended rate using simple heuristic:
+      // small goals -> conservative; medium goals -> moderate; large goals -> moderate but note long duration
+      let recommendedRate = 0.5;
+      if(amount <= 2) recommendedRate = 0.25;
+      else if(amount <= 15) recommendedRate = 0.5;
+      else recommendedRate = 0.5; // keep moderate for larger total loss, but user should be aware it's a long process
+
+      // build result HTML
+      let html = `<div style="margin-bottom:10px"><strong>Recommended weekly pace:</strong> <span class="pill">${recommendedRate} kg/week</span> — estimated ${Math.ceil((amount/recommendedRate)*10)/10} weeks</div>`;
+      html += `<div class="muted" style="margin-bottom:8px">Common safe ranges often fall between 0.25–1.0 kg/week. Below is a quick comparison (kg/week → weeks required → approx. daily kcal deficit).</div>`;
+      html += `<table><thead><tr><th>Rate (kg/week)</th><th>Weeks</th><th>Daily kcal deficit</th></tr></thead><tbody>`;
+      rows.forEach(r=>{
+        const cls = (r.rate === recommendedRate) ? ' class="recommended"' : '';
+        html += `<tr${cls}><td>${r.rate} kg/week</td><td>${r.weeks} weeks</td><td>${Math.round(r.dailyKc)} kcal/day</td></tr>`;
+      });
+      html += `</tbody></table>`;
+
+      // small advisory
+      html += `<div style="margin-top:10px" class="muted">Note: these are estimates. Faster rates mean larger daily deficits and may be harder to sustain. For very large total losses, plan for a longer timeline and consider consulting a healthcare professional.</div>`;
+
+      $('#wg_result').innerHTML = html;
+    }
+
+    // Event wiring
+    $('#uMetric').addEventListener('click', ()=>{ state.units='metric'; syncInputs(); calcAll();});
+    $('#uImperial').addEventListener('click', ()=>{ state.units='imperial'; syncInputs(); calcAll();});
+    $('#sMale').addEventListener('click', ()=>{state.sex='male'; syncInputs();});
+    $('#sFemale').addEventListener('click', ()=>{state.sex='female'; syncInputs();});
+    $('#eKcal').addEventListener('click', ()=>{state.energy='kcal'; syncInputs(); calcAll();});
+    $('#eKJ').addEventListener('click', ()=>{state.energy='kJ'; syncInputs(); calcAll();});
+
+    $('#calc').addEventListener('click', (e)=>{e.preventDefault(); calcAll();});
+    $('#reset').addEventListener('click', (e)=>{
+      e.preventDefault();
+      state = {units:'metric', sex:'male', age:30, heightCm:175, weightKg:72, bf:null, activity:1.465, formula:'auto', goal:'maintain', rateKg:0.5, energy:'kcal', pPerKg:1.8, fPerKg:0.8};
+      syncInputs();
+      // clear output
+      ['#bmr','#tdee','#target','#delta'].forEach(sel=> $(sel).textContent='—');
+      ['#bmrMethod','#actLabel','#goalLabel','#deltaLabel'].forEach(sel=> $(sel).textContent=' ');
+      $('#macroTable').innerHTML = '<tr><td colspan="4" class="muted" style="text-align:center">— calculate to see macros —</td></tr>';
+      $('#zigzag').innerHTML = '<tr><td colspan="3" class="muted" style="text-align:center">— calculate to generate week —</td></tr>';
+      // clear weekly goal
+      $('#wg_amount').value = '';
+      $('#wg_result').innerHTML = '<div class="muted">Enter how much you want to lose and click Calculate to get recommended weekly rates and weeks required.</div>';
+    });
+    $('#downloadCSV').addEventListener('click', (e)=>{e.preventDefault(); downloadCSV();});
+
+    // Activity change updates label on the fly
+    $('#activity').addEventListener('change', ()=>{ $('#actLabel').textContent = `Activity ×${$('#activity').value}`; });
+
+    // Link weight fields: when either changes, update the other (respecting current units)
+    $('#weight').addEventListener('input', ()=> {
+      // copy visible value into wg field
+      if(document.activeElement !== $('#wg_weight')) $('#wg_weight').value = $('#weight').value;
+    });
+    $('#wg_weight').addEventListener('input', ()=> {
+      if(document.activeElement !== $('#weight')) $('#weight').value = $('#wg_weight').value;
+    });
+
+    // When units change, sync displayed values (syncInputs handles wg_weight)
+    // Also update min/max attributes so both fields have same constraints
+    function updateWeightFieldConstraints(){
+      if(state.units === 'metric'){
+        $('#weight').min = 35; $('#weight').max = 300; $('#weight').step = 0.1;
+        $('#wg_weight').min = 35; $('#wg_weight').max = 300; $('#wg_weight').step = 0.1;
+      } else {
+        $('#weight').min = 77; $('#weight').max = 660; $('#weight').step = 0.1; // lb approx of kg range
+        $('#wg_weight').min = 77; $('#wg_weight').max = 660; $('#wg_weight').step = 0.1;
+      }
+    }
+
+    // Weekly goal events
+    $('#wg_calc').addEventListener('click', (e)=>{ e.preventDefault(); wgCalculate(); });
+    $('#wg_reset').addEventListener('click', (e)=>{ e.preventDefault(); $('#wg_amount').value=''; $('#wg_result').innerHTML = '<div class="muted">Enter how much you want to lose and click Calculate to get recommended weekly rates and weeks required.</div>'; });
+
+    // ensure constraints sync when units toggle or page loads
+    // Update constraints inside syncInputs
+    const origSync = syncInputs;
+    syncInputs = function(){
+      origSync();
+      updateWeightFieldConstraints();
+    };
+
+    // Initialize
+    syncInputs();
+    calcAll();
+  </script>
+<div id="footer"></div>
+<script>
+  fetch("/footer/index.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("footer").innerHTML = data;
+    });
+</script>
+
+</body>
+</html>
+
+
