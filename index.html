@@ -7,6 +7,16 @@
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="icon" href="favicon.png" type="image/png">
     <link rel="apple-touch-icon" href="favicon.png">  <meta charset="utf-8" />
+    <!-- ============ Navigation ============ -->
+ <div id="global-header"></div>
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-1"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => document.querySelector("#global-header").innerHTML = html);
+</script>
+
   <style>
     /* ============ Design Tokens ============ */
     :root {
@@ -166,16 +176,6 @@
   </style>
 </head>
 <body>
-  <!-- ============ Navigation ============ -->
-  <div id="global-header"></div>
-  <script>
-    // change the filename depending on the page/user state
-    const headerType = "header-1"; // "header-2" or "header-3"
-    fetch(`/header/${headerType}.html`)
-      .then(res => res.text())
-      .then(html => document.querySelector("#global-header").innerHTML = html)
-      .catch(err => { console.error('Failed to load global header:', err); });
-  </script>
 
   <!-- ============ Hero ============ -->
   <header class="hero">
