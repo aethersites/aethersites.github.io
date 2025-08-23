@@ -352,7 +352,14 @@
   font-weight: 700;
   -webkit-font-smoothing: antialiased;
 }
-
+  <style>
+    /* Tailwind-powered override for active links */
+    .gp-links a.is-active,
+    .gp-links a[aria-current="page"],
+    .gp-mobile-links a.is-active,
+    .gp-mobile-links a[aria-current="page"] {
+      @apply text-black font-bold;
+    }
   .gp-actions{ display:flex; gap:8px; align-items:center; margin-left:auto }
   .icon-btn{ width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--border); background:var(--surface); cursor:pointer; }
   .icon-btn:hover{ box-shadow:var(--shadow-soft); }
