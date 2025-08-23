@@ -102,7 +102,6 @@
 
     /* container + topbar */
         .gp-topnav {
-      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
@@ -302,7 +301,7 @@
     padding:12px 20px; gap:12px;
     background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.82));
     border-bottom:1px solid rgba(15,23,42,0.03);
-    position:sticky; top:0; z-index:60; backdrop-filter: blur(6px);
+    position:relative; top:0; z-index:60; backdrop-filter: blur(6px);
   }
   .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
   .gp-logo-sq{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; }
