@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Recipes UI — Pure HTML/CSS</title>
+
+  <!-- design font (optional, from prototype) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="gp-topnav" role="banner" aria-label="Main navigation">
+  <div class="gp-container">
+
+    <!-- Left: brand (icon + name) -->
+    <a class="gp-brand" href="/" aria-label="GoodPlates home">
+      <!-- plate + fork SVG icon -->
+      <div class="gp-logo-sq" aria-hidden="true">
+       <img src="favicon.png"
+     alt="GoodPlates logo"
+     width="22" height="22"
+     style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;">
+        <!-- svg bits removed for brevity -->
+      </div>
+
+      <div class="gp-brand-text" style="text-decoration:none;color:inherit">
+        <div class="gp-name">GoodPlates</div>
+      </div>
+    </a>
+
+    <!-- Center: links (desktop) -->
+    <nav class="gp-links" role="navigation" aria-label="Primary">
+      <ul>
+        <!-- mark the currently selected page as active with class "is-active" or aria-current="page" -->
+        <li><a href="/dashboard/">Dashboard</a></li>
+        <li><a href="/recipes/">Recipes</a></li>
+        <li><a href="/groceries-and-pantry/">Groceries &amp; Pantry</a></li>
+        <li><a href="/order-online/">Order Online</a></li>
+        <li><a href="/statistics/">Statistics</a></li>
+        <li><a href="/courses/">Courses</a></li>
+      </ul>
+    </nav>
+
+    <!-- Right: CTA + hamburger -->
+    <div class="gp-actions">
+      <!-- REPLACED: Logged-in controls (Home, Cart, Avatar) -->
+      <a
+        href="/"
+        class="w-9 h-9 rounded-full flex items-center justify-center hover:opacity-90 transition"
+        style="width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background: linear-gradient(270deg, #10b981, #16a34a);"
+        aria-label="Home" title="Home">
+        <img
+          src="https://raw.githubusercontent.com/aethersites/aethersites.github.io/90eef6d3bd32bac358155d82a6be2a6762b5ae78/homeicon.png"
+          alt="Home"
+          width="300" height="300"
+          style="width:80%; height:80%; object-fit:cover; border-radius:50%; display:block;" />
+      </a>
+
+      <!-- Replaced notifications -> Cart (preserve small circular appearance; preserve intrinsic 400x400 image) -->
+      <a
+        href="/order-online/"
+        class="w-9 h-9 rounded-full flex items-center justify-center hover:opacity-90 transition"
+        style="width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background: linear-gradient(270deg, #10b981, #16a34a);"
+        aria-label="Cart" title="Cart">
+        <img
+          src="https://raw.githubusercontent.com/aethersites/aethersites.github.io/380eb2a13ae60cdf47c15dc4b0c260c76ea31c9e/carticon.png"
+          alt="Cart"
+          width="300" height="300"
+          style="width:80%; height:80%; object-fit:cover; border-radius:50%; display:block;" />
+      </a>
+
+      <!-- Avatar + dropdown (desktop) -->
+      <div style="position:relative; display:inline-block;">
+        <button id="avatarBtn" aria-haspopup="true" aria-expanded="false" title="Account"
+                style="background:transparent;border:0;padding:0;cursor:pointer;">
+          <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#dff7ea;">
+            <img id="avatarImg"
+                 src="https://raw.githubusercontent.com/aethersites/aethersites.github.io/90eef6d3bd32bac358155d82a6be2a6762b5ae78/usericon.png"
+                 alt="avatar"
+                 width="400" height="400"
+                 style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;"/>
+          </div>
+        </button>
+
+        <!-- dropdown -->
+        <div id="avatarMenu" role="menu" aria-labelledby="avatarBtn" hidden
+             style="position:absolute; right:0; top:calc(100% + 8px); background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; z-index:200;">
+          <a role="menuitem" href="/overview/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Overview</a>
+          <a role="menuitem" href="/profile/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
+          <a role="menuitem" href="/wallet/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
+          <a role="menuitem" href="/subscription/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Subscription</a>
+          <a role="menuitem" href="/logout/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;border-top:1px solid rgba(15,23,42,0.04;margin-top:6px);">Logout</a>
+        </div>
+      </div>
+
+      <!-- mobile hamburger -->
+      <button id="gpHamburger" class="gp-hamburger" aria-controls="gpMobileMenu" aria-expanded="false" aria-label="Open menu">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mobile: slide-over menu (keeps all links + CTA) -->
+  <aside id="gpMobileMenu" class="gp-mobile" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="gp-mobile-panel" role="document">
+      <div class="gp-mobile-head">
+        <div class="gp-mobile-brand" style="display:flex;align-items:center;gap:10px">
+          <div class="gp-logo-sq" style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;background:linear-gradient(90deg,#16a34a,#15803d)">G</div>
+          <div class="gp-name">GoodPlates</div>
+        </div>
+        <button id="gpMobileClose" class="icon-btn" aria-label="Close menu">✕</button>
+      </div>
+
+      <nav class="gp-mobile-links" aria-label="Mobile primary">
+        <ul>
+          <li><a href="/dashboard/">Dashboard</a></li>
+          <li><a href="/recipes/">Recipes</a></li>
+          <li><a href="/groceries-and-pantry/">Groceries &amp; Pantry</a></li>
+          <li><a href="/order-online/">Order Online</a></li>
+          <li><a href="/statistics/">Statistics</a></li>
+          <li><a href="/courses/">Courses</a></li>
+        </ul>
+      </nav>
+
+      <div class="gp-mobile-foot" style="margin-top:18px">
+        <!-- REPLACED: Mobile logged-in controls (Home, Cart, Avatar) -->
+        <div style="display:flex; gap:8px; align-items:center;">
+          <a
+            href="/"
+            class="w-9 h-9 rounded-full flex items-center justify-center hover:opacity-90 transition"
+            style="width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background: linear-gradient(270deg, #10b981, #16a34a);"
+            aria-label="Home" title="Home">
+            <img
+              src="https://raw.githubusercontent.com/aethersites/aethersites.github.io/90eef6d3bd32bac358155d82a6be2a6762b5ae78/homeicon.png"
+              alt="Home"
+              width="400" height="400"
+              style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;" />
+          </a>
+
+          <a
+            href="/order-online/"
+            class="w-9 h-9 rounded-full flex items-center justify-center hover:opacity-90 transition"
+            style="width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background: linear-gradient(270deg, #10b981, #16a34a);"
+            aria-label="Cart" title="Cart">
+            <img
+              src="https://raw.githubusercontent.com/aethersites/aethersites.github.io/66c1b57c27716a6c3c14e2aa71467615ccc25b70/bellicon.png"
+              alt="Cart"
+              width="400" height="400"
+              style="width:60%; height:60%; object-fit:contain; border-radius:50%; display:block;" />
+          </a>
+
+          <!-- Avatar + dropdown (mobile) -->
+          <div style="position:relative; display:inline-block;">
+            <button id="avatarBtnMobile" aria-haspopup="true" aria-expanded="false" title="Account"
+                    style="background:transparent;border:0;padding:0;cursor:pointer;">
+              <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#dff7ea;">
+                <img id="avatarImgMobile"
+                     src="https://raw.githubusercontent.com/aethersites/aethersites.github.io/90eef6d3bd32bac358155d82a6be2a6762b5ae78/usericon.png"
+                     alt="avatar"
+                     width="400" height="400"
+                     style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;"/>
+              </div>
+            </button>
+
+            <div id="avatarMenuMobile" role="menu" aria-labelledby="avatarBtnMobile" hidden
+                 style="position:absolute; right:0; top:calc(100% + 8px); background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; z-index:200;">
+              <a role="menuitem" href="/overview/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Overview</a>
+              <a role="menuitem" href="/profile/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
+              <a role="menuitem" href="/wallet/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
+              <a role="menuitem" href="/subscription/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Subscription</a>
+              <a role="menuitem" href="/logout/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;border-top:1px solid rgba(15,23,42,0.04;margin-top:6px);">Logout</a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- overlay click closes -->
+    <div class="gp-mobile-overlay" tabindex="-1" data-close></div>
+  </aside>
+
+  <style>
+    /* ===== tokens (consistency with page) ===== */
+    :root{
+      --primary: #16a34a;
+      --primary-700: #15803d;
+      --primary-100: #dcfce7;
+      --fg: #0f172a;      /* black for selected/hover */
+      --muted: #6b7280;   /* gray for default nav labels */
+      --border: #e6e9ee;
+      --radius: 12px;
+      --shadow-soft: 0 8px 24px rgba(2,6,23,0.06);
+      --glass: rgba(255,255,255,0.72);
+      --container: 1200px;
+    }
+
+    /* container + topbar */
+    .gp-topnav {
+      position: sticky;
+      top: 0;
+      z-index: 80;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.82));
+      border-bottom: 1px solid rgba(15,23,42,0.03);
+    }
+
+    .gp-container {
+      max-width: var(--container);
+      margin: 0 auto;
+      padding: 12px 0px;
+      display: flex;
+      align-items: center;
+      gap: 70px;
+      justify-content: flex-start;
+    }
+
+    /* CTA pill */
+ .gp-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  min-width: 120px;
+  border-radius: 999px;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(18,185,129,0.12);
+  overflow: hidden; /* ensure pseudo stays inside */
+  z-index: 0;
+}
+
+/* Base gradient */
+.gp-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #17A34B, #12B981);
+  transition: opacity 0.3s ease-in-out;
+  z-index: -1;
+  opacity: 1;
+}
+
+/* Hover gradient overlay */
+.gp-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #119140, #0fa673);
+  transition: opacity 0.3s ease-in-out;
+  z-index: -1;
+  opacity: 0;
+}
+
+.gp-cta:hover::after {
+  opacity: 1;
+}
+    /* hamburger (mobile) */
+    .gp-hamburger{ display:none; width:44px; height:44px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
+    .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
+
+    /* mobile menu */
+    .gp-mobile{ display:none; position:fixed; inset:0; z-index:100; }
+    .gp-mobile-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px }
+    .gp-mobile-links ul{ list-style:none; padding:6px 0; margin:0; display:flex; flex-direction:column; gap:6px }
+    .gp-mobile-links a{ display:block; padding:12px 10px; border-radius:8px; font-weight:600; color:var(--fg) }
+    .gp-mobile-links a:hover{ background:var(--surface-2) }
+
+    .gp-mobile-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.28); right:0; }
+
+    @media (max-width:1100px){
+      .gp-links{ display:none }
+      .gp-hamburger{ display:inline-flex }
+      .gp-cta{ display:none }
+    }
+
+    .small{ font-size:12px; color:var(--muted) }
+    .muted{ color:var(--muted) }
+  </style>
+
+  <script>
+    (function(){
+      const hamb = document.getElementById('gpHamburger');
+      const mobile = document.getElementById('gpMobileMenu');
+      const closeBtn = document.getElementById('gpMobileClose');
+      const overlay = mobile?.querySelector('[data-close]');
+
+      function openMobile(){
+        mobile.style.display = 'block';
+        mobile.setAttribute('aria-hidden','false');
+        hamb.setAttribute('aria-expanded','true');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeMobile(){
+        mobile.style.display = 'none';
+        mobile.setAttribute('aria-hidden','true');
+        hamb.setAttribute('aria-expanded','false');
+        document.body.style.overflow = '';
+      }
+
+      hamb?.addEventListener('click', openMobile);
+      closeBtn?.addEventListener('click', closeMobile);
+      overlay?.addEventListener('click', closeMobile);
+      document.addEventListener('keydown', (e)=> { if(e.key === 'Escape') closeMobile(); });
+
+      window.addEventListener('resize', ()=> {
+        if(window.matchMedia('(min-width:1101px)').matches){
+          closeMobile();
+        }
+      });
+    })();
+  </script>
+
+  <!-- avatar dropdown behaviour (minimal) -->
+  <script>
+    (() => {
+      const btn = document.getElementById('avatarBtn');
+      const menu = document.getElementById('avatarMenu');
+      const btnMobile = document.getElementById('avatarBtnMobile');
+      const menuMobile = document.getElementById('avatarMenuMobile');
+
+      function toggle(menuEl, btnEl) {
+        if (!menuEl) return;
+        const isHidden = menuEl.hasAttribute('hidden');
+        if (isHidden) {
+          menuEl.removeAttribute('hidden');
+          btnEl?.setAttribute('aria-expanded','true');
+        } else {
+          menuEl.setAttribute('hidden','');
+          btnEl?.setAttribute('aria-expanded','false');
+        }
+      }
+
+      // desktop toggle
+      btn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggle(menu, btn);
+      });
+
+      // mobile toggle
+      btnMobile?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggle(menuMobile, btnMobile);
+      });
+
+      // close when clicking outside
+      document.addEventListener('click', (e) => {
+        if (menu && !menu.hasAttribute('hidden')) {
+          if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.setAttribute('hidden','');
+            btn.setAttribute('aria-expanded','false');
+          }
+        }
+        if (menuMobile && !menuMobile.hasAttribute('hidden')) {
+          if (!menuMobile.contains(e.target) && !btnMobile.contains(e.target)) {
+            menuMobile.setAttribute('hidden','');
+            btnMobile.setAttribute('aria-expanded','false');
+          }
+        }
+      });
+
+      // close on Escape
+      document.addEventListener('keydown', (e)=> {
+        if (e.key === 'Escape') {
+          if (menu && !menu.hasAttribute('hidden')) { menu.setAttribute('hidden',''); btn.setAttribute('aria-expanded','false'); }
+          if (menuMobile && !menuMobile.hasAttribute('hidden')) { menuMobile.setAttribute('hidden',''); btnMobile.setAttribute('aria-expanded','false'); }
+        }
+      });
+    })();
+  </script>
+</header>
+
+<!-- ===== main stylesheet (keeps rest of page intact) ===== -->
+<style>
+  /* ===== Design tokens (adapted for compatibility) ===== */
+  :root{
+    --bg: #ffffff;
+    --fg: #0f172a;
+    --muted: #6b7280;
+    --muted-2: #9ca3af;
+    --border: #e6e9ee;
+    --surface: #ffffff;
+    --surface-2: #f7f8fa;
+    --primary: #16a34a;
+    --primary-700: #15803d;
+    --primary-100: #dcfce7;
+    --ring: rgba(16,185,129,0.18);
+    --shadow-soft: 0 8px 24px rgba(2,6,23,0.06);
+    --shadow-2: 0 16px 48px rgba(2,6,23,0.08);
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --radius: var(--radius-lg);
+    --container: 1200px;
+    --glass: rgba(255,255,255,0.72);
+  }
+
+  /* ===== Base / resets ===== */
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0}
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color:var(--fg);
+    background:linear-gradient(180deg,#fbfcfd 0%, var(--bg) 100%);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+  a{color:inherit; text-decoration:none}
+  img{max-width:100%; display:block}
+  .container{max-width:var(--container); margin:0 auto; padding:0 20px}
+
+  /* ===== Topnav styling (keeps your header clean) ===== */
+  .gp-topnav,
+  .topnav {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 20px; gap:12px;
+    background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.82));
+    border-bottom:1px solid rgba(15,23,42,0.03);
+    position:sticky; top:0; z-index:60; backdrop-filter: blur(6px);
+  }
+  .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
+  .gp-logo-sq{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; }
+  .gp-name{ font-weight:600; color:var(--fg); }
+  .gp-sub{ font-size:12px; color:var(--muted) }
+
+  .gp-links ul{ list-style:none; padding:0; margin:0; display:flex; gap:22px; align-items:center; }
+
+  /* --------- NAV: minimal color-only hover/active (changed) --------- */
+  .gp-links a {
+    display:inline-flex;
+    align-items:center;
+    padding:8px 10px;
+    border-radius:0;                 /* no hover box */
+    color: var(--muted);             /* default gray */
+    font-weight:500;
+    transition: color .12s ease;     /* only animate color */
+    border:none;
+    font-size:16px;
+    background: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* hover: turn label black */
+  .gp-links a:hover {
+    color: var(--fg);                /* black on hover */
+    background: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* selected/current page: black */
+  .gp-links a.is-active,
+  .gp-links a[aria-current="page"] {
+    color: var(--fg);
+  }
+
+  .gp-actions{ display:flex; gap:8px; align-items:center; margin-left:auto }
+  .icon-btn{ width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--border); background:var(--surface); cursor:pointer; }
+  .icon-btn:hover{ box-shadow:var(--shadow-soft); }
+
+ 
+  .gp-hamburger{ display:none; width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
+  .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
+
+  @media (max-width:1100px){
+    .gp-links{ display:none }
+    .gp-hamburger{ display:inline-flex }
+    .gp-cta{ display:none }
+  }
+
+  /* ===== Layout (content + sidebar) ===== */
+  .layout{ display:grid; grid-template-columns:320px 1fr; gap:28px; padding:28px 0; align-items:start; height: 2000px !important;
+    max-height: 2000px !important;
+    min-height: 2000px !important;
+    overflow-y: auto;
+  }
+  @media (max-width:1100px)
+  {
+    .layout{ grid-template-columns:1fr }
+    .sidebar{ display:none }
+    .open-sidebar{ display:block; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.35) }
+    .sidebar.panel{ position:fixed; left:0; top:0; bottom:0; height:100%; transform:translateX(0); box-shadow: var(--shadow-2); }
+  }
+</style>
+<script type="module">
+/* --- Minimal avatar loader: replace firebaseConfig with your values --- */
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "REPLACE_ME",
+  authDomain: "REPLACE_ME",
+  projectId: "REPLACE_ME",
+  // ...other config fields
+};
+
+// Initialize app (if not already)
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+
+const auth = getAuth();
+const db = getFirestore();
+const storage = getStorage();
+
+const avatarImg = document.getElementById('avatarImg');
+const avatarImgMobile = document.getElementById('avatarImgMobile');
+
+// fallback: use whatever src is already present (so you keep existing placeholder)
+const FALLBACK = (avatarImg && avatarImg.src) ? avatarImg.src : '/favicon.png';
+
+function toRawGitHub(url) {
+  // convert github blob url -> raw url
+  try {
+    if (!url) return url;
+    if (url.includes('raw.githubusercontent.com')) return url;
+    if (url.includes('github.com') && url.includes('/blob/')) {
+      return url.replace('https://github.com/', 'https://raw.githubusercontent.com/').replace('/blob/', '/');
+    }
+    return url;
+  } catch (e) { return url; }
+}
+
+async function resolveUrl(url){
+  if (!url || !url.trim()) return FALLBACK;
+  url = url.trim();
+
+  // GitHub blob -> raw
+  url = toRawGitHub(url);
+
+  // gs:// path -> getDownloadURL
+  if (url.startsWith('gs://')) {
+    try {
+      // storageRef(storage, 'path') expects path after bucket, but getDownloadURL accepts the ref
+      const ref = storageRef(storage, url);
+      return await getDownloadURL(ref);
+    } catch (err) {
+      console.warn('Failed to resolve gs:// url', err);
+      return FALLBACK;
+    }
+  }
+
+  // If it's already an http(s) URL, return as-is
+  return url;
+}
+
+function applyAvatar(url) {
+  const final = url || FALLBACK;
+  if (avatarImg) {
+    avatarImg.src = final;
+    avatarImg.setAttribute('width', '400');
+    avatarImg.setAttribute('height', '400');
+  }
+  if (avatarImgMobile) {
+    avatarImgMobile.src = final;
+    avatarImgMobile.setAttribute('width', '400');
+    avatarImgMobile.setAttribute('height', '400');
+  }
+}
+
+/* Listen for auth state and fetch users/{uid}.profilePicture */
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    applyAvatar(FALLBACK);
+    return;
+  }
+  try {
+    const udocRef = doc(db, 'users', user.uid);
+    const udocSnap = await getDoc(udocRef);
+    if (!udocSnap.exists()) { applyAvatar(FALLBACK); return; }
+    const data = udocSnap.data();
+    let profilePicture = data?.profilePicture ?? '';
+    if (!profilePicture) { applyAvatar(FALLBACK); return; }
+
+    const resolved = await resolveUrl(profilePicture);
+    applyAvatar(resolved);
+  } catch (err) {
+    console.error('Error loading avatar:', err);
+    applyAvatar(FALLBACK);
+  }
+});
+</script>
+
+</body>
+</html>
