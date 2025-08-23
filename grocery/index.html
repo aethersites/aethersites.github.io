@@ -3,325 +3,295 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Groceries & Pantry</title>
-
+  <title>GoodPlates - Groceries & Nutrition Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
+    /* ===== GoodPlates tokens (minimal replacements) ===== */
     :root{
-      --page-bg: #ffffff;
-      --panel-bg: #ffffff;
-      --muted: #6b7280;
-      --border: #e6e6e6;
-      --accent: #1f8a3d;
-      --radius-lg: 18px;
-      --radius: 10px;
-      --input-h: 40px;
-      --gap: 18px;
-      --max-width: 1100px;
+      --bg: #ffffff;               /* page background */
+      --fg: #0f172a;               /* primary text (black-ish) */
+      --muted: #6b7280;            /* muted text */
+      --muted-2: #9ca3af;          /* secondary muted */
+      --border: #e5e7eb;           /* card border */
+      --surface: #ffffff;          /* card surface */
+      --surface-2: #f3f4f6;        /* subtle panel bg */
+      --primary: #16a34a;          /* green-600 */
+      --primary-700: #15803d;      /* green-700 */
+      --primary-100: #dcfce7;      /* green-100 */
+      --ring: rgba(16,185,129,.35);
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(2,6,23,.06);
+      --radius: 16px;
+
+      /* kept names used by the existing CSS for minimal change */
+      --accent: var(--primary);
+      --accent-soft: rgba(22,163,74,0.08);
+      --card: var(--surface);
     }
 
-    /* Reset / Base */
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0; background:var(--page-bg); font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-    body{padding:28px; color:#0b1220; -webkit-font-smoothing:antialiased; display:flex; justify-content:center;}
-
-    /* Outer centered panel that matches the mock */
-    .canvas {
-      width:100%;
-      max-width:var(--max-width);
-      border-radius:var(--radius-lg);
-      background:var(--panel-bg);
-      padding:28px;
+    /* Base */
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
 
-    /* Top plain header (not boxed) */
-    .page-heading { text-align:center; margin:0 0 10px; }
-    .page-heading h1 { margin:0; font-size:28px; font-weight:800; }
-    .page-heading p { margin:8px 0 0; color:var(--muted); }
-
-    /* small gear in top-right (visual only) */
-    .settings-gear { position:relative; float:right; transform:translateY(-54px); opacity:.6; }
-
-    /* topbar row (site name left, actions right) - not boxed */
-    .sitebar {
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      margin-bottom:6px;
+    /* minimal tweaks to match GoodPlates card styles while preserving layout */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
     }
-    .brand { font-weight:700; font-size:18px; color:#111827 }
-    .auth-actions { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:13px }
 
-    /* Two column lists area */
-    .lists {
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:var(--gap);
-      margin-top:6px;
+    /* badges / active pill tuned to green tokens */
+    .pro-badge{
+      background: linear-gradient(90deg,var(--primary-100), #e6ffef);
+      color:var(--primary);
+      font-weight:600; padding:4px 8px; border-radius:999px; font-size:12px;
     }
-    @media (max-width:920px) { .lists { grid-template-columns: 1fr; } }
-
-    /* panel boxes (thin border, no shadow) */
-    .box {
-      background:var(--panel-bg);
-      border-radius:12px;
-      padding:18px;
-      border:1px solid var(--border);
+    .active-pill{
+      background: linear-gradient(90deg,var(--primary),var(--primary-700));
+      color:white; padding:10px 18px; border-radius:999px;
     }
-.box {
-  background: var(--panel-bg);
-  border-radius: 12px;
-  padding: 18px;
-  border: 1px solid var(--border);
 
-  /* soft, subtle shadow */
-  box-shadow: 0 6px 20px rgba(11,18,32,0.06), 0 1px 0 rgba(255,255,255,0.4) inset;
-  transition: box-shadow 180ms ease, transform 180ms ease;
-}
+    .small-dot{ width:6px;height:6px;border-radius:99px;background:var(--surface-2); }
+    .dot-active{ background:linear-gradient(90deg,var(--primary),#34d399); }
 
-    /* Box header */
-    .box h2 { margin:0 0 8px; font-size:18px; text-align:left; }
-    .note { color:var(--muted); font-size:13px; margin-bottom:10px; }
+    .dots { width:8px;height:8px;border-radius:999px;background:#f3f4f6; }
+    .shadow-soft{ box-shadow: 0 6px 20px rgba(16,24,40,0.06); }
 
-    /* table layout */
-    table { width:100%; border-collapse:collapse; margin-bottom:10px; }
-    thead th { text-align:left; padding:8px 6px; color:var(--muted); font-weight:700; font-size:13px; border-bottom:1px solid #f4f4f4; }
-    td { padding:10px 6px; border-bottom:1px solid #fafafa; font-size:14px; vertical-align:middle; }
-    td.actions { width:200px; text-align:right; }
-
-    /* Add row form */
-    .inline { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; }
-    .inline input[type="text"], .inline input[type="number"], select.currency {
-      height:var(--input-h);
-      padding:8px 10px;
-      border-radius:8px;
-      border:1px solid var(--border);
-      background:#fff;
-      font-size:14px;
+    /* floating save button tuned to primary */
+    .upgrade-btn{
+      position:fixed; right:28px; bottom:28px;
+      background: linear-gradient(90deg,var(--primary),var(--primary-700));
+      color:white; padding:12px 20px; border-radius:999px;
+      box-shadow:0 8px 30px rgba(22,163,74,0.18);
     }
-    select.currency { width:70px; text-align:center; }
 
-    /* Buttons */
-    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:14px; }
-/* Gradient green "Add" buttons */
-.btn-add {
-  /* gradient from green -> teal */
-  background: linear-gradient(90deg, #17A34B 0%, #12B981 100%);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 8px 12px;
-  font-weight: 700;
-  cursor: pointer;
+    .chart-ghost { stroke:var(--primary-100); stroke-width:3; stroke-linecap:round; }
 
-  /* gentle elevation */
-  box-shadow: 0 8px 20px rgba(18,185,129,0.12);
-  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
-}
+    /* override a few Tailwind utility colors used in markup so they match tokens (keeps utility classes) */
+    .text-slate-700 { color: var(--fg) !important; }
+    .text-slate-600 { color: var(--muted) !important; }
+    .text-slate-500 { color: var(--muted) !important; }
+    .text-slate-400 { color: var(--muted-2) !important; }
+    .text-slate-800 { color: var(--fg) !important; }
 
-/* hover / focus */
-.btn-add:hover,
-.btn-add:focus {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 36px rgba(18,185,129,0.14);
-  filter: brightness(0.98);
-  outline: none;
-}
+    .bg-white { background: var(--surface) !important; }
+    .bg-green-50 { background: var(--primary-100) !important; }
+    .bg-slate-50 { background: var(--surface-2) !important; }
 
-/* active (press) state */
-.btn-add:active {
-  transform: translateY(0);
-  filter: brightness(0.94);
-}
-
-/* accessible focus ring (optional, visible on keyboard focus) */
-.btn-add:focus-visible {
-  box-shadow: 0 14px 36px rgba(18,185,129,0.14), 0 0 0 4px rgba(18,185,129,0.12);
-}
-    .btn-ghost { background:transparent; border:1px solid var(--border); color:#111; }
-    .btn-muted { background:#f6f6f6; border:1px solid var(--border); color:#111; }
-
-    /* Footer area inside groceries for custom button */
-    .groceries-footer { display:flex; justify-content:center; padding-top:8px; }
-
-    /* Centered AI recipes panel */
-    .ai-panel {
-      margin:50px;
-      text-align:center;
-    }
-    .ai-panel h3 { margin:0 0 8px; font-size:25px; }
-    .ai-actions { display:flex; flex-direction:column; gap:10px; margin-top:12px; align-items:center; }
-    .ai-btn {
-      width:100%;
-      max-width:620px;
-      font-family: 'Roboto', sans-serif;
-      text-align:left;
-      padding:12px 16px;
-      border-radius:10px;
-      background:#f7f8fa;
-      border:1px solid var(--border);
-      cursor:pointer;
-      font-weight:500;
-      margin:6px;
-      font-size: 16px;
-        box-shadow: 0 8px 20px rgba(11,18,32,0.06);
-
-    }
-    @media(min-width:720px){ .ai-actions .ai-btn{ width:80%; } }
-
-    /* modal */
-    .modal-backdrop {
-      position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-      background: rgba(0,0,0,0.28); z-index:40;
-    }
-    .modal-backdrop.active { display:flex; }
-    .modal {
-      width:480px; max-width:94%; border-radius:12px; padding:18px; background:#fff; border:1px solid var(--border);
-    }
-    .modal h3 { margin:0 0 12px; }
-    .modal .row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
-    .modal label { min-width:62px; color:var(--muted); font-size:13px; }
-    .modal input[type="text"], .modal input[type="number"], .modal select { flex:1; height:40px; padding:8px 10px; border-radius:8px; border:1px solid var(--border); }
-
-    /* blur when modal open (JS should toggle) */
-    body.modal-open .canvas { filter: blur(4px) grayscale(.03); pointer-events:none; user-select:none; }
+    .border-slate-100 { border-color: var(--border) !important; }
+    .rounded-md { border-radius: 10px !important; }
   </style>
 </head>
-<body>
-  <div class="canvas" role="application" aria-label="Groceries and pantry app">
+<body class="antialiased">
+  <div class="flex min-h-screen">
 
-    <!-- page header -->
-    <div class="page-heading">
-      <h1>Groceries & Pantry Log</h1>
-      <p>Date: MM-DD-YY</p>
-    </div>
+    <!-- Main content -->
+    <main class="flex-1 p-8">
 
-    <!-- small gear top-right -->
-    <div class="settings-gear" aria-hidden="true">⚙️</div>
-
-    <!-- plain sitebar -->
-    <div class="sitebar" role="banner" aria-label="Site header">
-      <div class="brand"> </div>
-      <div class="auth-actions">
-        <div id="signedState" class="user-info">Not signed in</div>
-        <button id="signinBtn" class="btn btn-muted" aria-label="Sign in">Sign in</button>
-      </div>
-    </div>
-
-    <!-- two columns -->
-    <div class="lists" role="main">
-
-      <!-- GROCERIES -->
-      <section class="box" id="groceriesBox" aria-labelledby="groceriesHeading">
-        <h2 id="groceriesHeading">Groceries List</h2>
-        <div class="note">Add items to buy</div>
-
-        <table id="groceriesTable" aria-live="polite">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th style="width:80px">Qty</th>
-              <th style="width:160px">Price</th>
-              <th style="width:160px"></th>
-            </tr>
-          </thead>
-          <tbody id="groceriesBody">
-            <!-- rows added by grocery/grocery.js -->
-          </tbody>
-        </table>
-
-        <!-- add item row -->
-        <form id="addGroceryForm" class="inline" onsubmit="return false" aria-label="Add grocery item">
-          <input id="gName" type="text" placeholder="Name..." aria-label="Name (text)" required />
-          <input id="gQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
-          <input id="gPrice" type="number" step="0.01" placeholder="Price" aria-label="Price (number)" style="width:110px" />
-          <select id="gCurrency" class="currency" aria-label="Currency">
-            <option value="$">$</option>
-            <option value="€">€</option>
-            <option value="£">£</option>
-            <option value="¥">¥</option>
-            <option value="₹">₹</option>
-          </select>
-          <button id="addGroceryBtn" class="btn btn-add" aria-label="Add grocery">Add</button>
-        </form>
-
-        <!-- custom ingredient button at bottom -->
-        <div class="groceries-footer">
-          <button id="openCustomBtn" class="btn btn-ghost" aria-haspopup="dialog">+ Add Custom Ingredient</button>
+      <!-- cards grid -->
+      <div class="grid grid-cols-12 gap-6">
+        <!-- Calorie Summary card (keeps exact style) -->
+        <div class="col-span-4 card p-6">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-slate-600 font-semibold">Calorie Summary</div>
+              <div class="text-sm text-slate-400">Total kcal per 100g (sample)</div>
+              <div id="bigKcal" class="mt-4 text-3xl font-bold text-slate-800">-- kcal</div>
+              <div id="pctTarget" class="text-sm text-slate-500 mt-1">-- of daily target</div>
+              <button id="viewRecipes" class="mt-4 px-4 py-2 rounded-md bg-gradient-to-r from-blue-600 to-indigo-500 text-white text-sm font-semibold">View Recipes</button>
+            </div>
+            <div class="ml-4 flex items-center">
+              <!-- trophy svg kept as decorative -->
+              <svg width="92" height="92" viewBox="0 0 92 92"><defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset="1" stop-color="#ffb86b"/></linearGradient></defs><g fill="none" fill-rule="evenodd"><rect width="92" height="92" rx="12" fill="#fff"/><g transform="translate(10,10)"><path d="M35 8c-1 0-2 .9-2 2v9h-6c-3 0-6 3-6 6v7c0 3 3 6 6 6h4v6h22v-6h4c3 0 6-3 6-6v-7c0-3-3-6-6-6h-6V10c0-1.1-.9-2-2-2H35z" fill="url(#g)"/></g></g></svg>
+            </div>
+          </div>
         </div>
-      </section>
 
-      <!-- PANTRY -->
-      <section class="box" id="pantryBox" aria-labelledby="pantryHeading">
-        <h2 id="pantryHeading">Pantry Items</h2>
-        <div class="note">Items in your pantry</div>
+        <!-- Ingredients Overview (kept structure, changed content) -->
+        <div class="col-span-8 card p-6">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="font-semibold text-slate-700">Ingredients Overview</div>
+              <div class="text-sm text-slate-400">Calories, categories and quick stats</div>
+            </div>
+            <div class="dots"></div>
+          </div>
 
-        <table id="pantryTable" aria-live="polite">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th style="width:80px">Qty</th>
-              <th style="width:140px">Expiration</th>
-              <th style="width:160px"></th>
-            </tr>
-          </thead>
-          <tbody id="pantryBody">
-            <!-- rows added by grocery/grocery.js -->
-          </tbody>
-        </table>
+          <div class="mt-6 grid grid-cols-4 gap-4">
+            <div class="p-3 rounded-lg bg-green-50 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-md bg-white shadow flex items-center justify-center">🥇</div>
+              <div>
+                <div class="text-sm text-slate-400">Top Ingredient</div>
+                <div id="topIngredient" class="font-semibold">—</div>
+              </div>
+            </div>
+            <div class="p-3 rounded-lg bg-purple-50 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-md bg-white shadow flex items-center justify-center">📦</div>
+              <div>
+                <div class="text-sm text-slate-400">Distinct Items</div>
+                <div id="distinctItems" class="font-semibold">—</div>
+              </div>
+            </div>
+            <div class="p-3 rounded-lg bg-yellow-50 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-md bg-white shadow flex items-center justify-center">⚖️</div>
+              <div>
+                <div class="text-sm text-slate-400">Avg kcal / 100g</div>
+                <div id="avgKcal" class="font-semibold">—</div>
+              </div>
+            </div>
+            <div class="p-3 rounded-lg bg-blue-50 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-md bg-white shadow flex items-center justify-center">💸</div>
+              <div>
+                <div class="text-sm text-slate-400">Monthly Budget</div>
+                <div id="budgetVal" class="font-semibold">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <form id="addPantryForm" class="inline" onsubmit="return false" aria-label="Add pantry item">
-          <input id="pName" type="text" placeholder="Name..." aria-label="Name (text)" />
-          <input id="pQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
-          <input id="pExp" type="date" style="width:150px" aria-label="Expiration date" />
-          <button id="addPantryBtn" class="btn btn-add" aria-label="Add pantry item">Add to Pantry</button>
-        </form>
-      </section>
-    </div>
+        <!-- Calories Line (replace previous weekly SVG but keep card look) -->
+        <div class="col-span-5 card p-6">
+          <div class="flex items-start justify-between">
+            <div class="font-semibold text-slate-700">Calories Line (ingredients)</div>
+            <div class="dots"></div>
+          </div>
 
-    <!-- AI panel -->
-    <div class="ai-panel" role="region" aria-label="AI recipes">
-      <h3>Generate AI Recipes</h3>
-      <p class="note">Suggestions and meal plans generated from your groceries & pantry</p>
+          <div class="mt-6">
+     <div style="height:300px;">
+      <canvas id="lineChart" style="width:100%;height:100%;display:block;"></canvas>
+     </div>
 
-      <div class="ai-actions" role="group" aria-label="AI actions">
-        <button id="aiPantryBtn" class="ai-btn">✦ AI Suggestions based on your pantry...</button>
-        <button id="aiWeeklyBtn" class="ai-btn">✦ AI Suggestions based on your weekly groceries/pantry items...</button>
-        <button id="aiMealPlanBtn" class="ai-btn">✦ AI Meal plan for the week...</button>
+
+            <div class="mt-4 flex items-center justify-between">
+              <div id="lineSummary" class="text-2xl font-bold">-- kcal</div>
+              <div class="text-sm text-slate-400">Total kcal (sum of loaded items / 100g)</div>
+            </div>
+            <button id="detailBtn" class="mt-4 w-full py-2 rounded-md bg-gradient-to-r from-orange-600 to-yellow-500 text-white font-semibold">View Details</button>
+          </div>
+        </div>
+
+        <!-- Grocery Spend (replaces Total Earning) -->
+        <div class="col-span-4 card p-6">
+          <div class="flex items-start justify-between">
+            <div class="font-semibold text-slate-700">Grocery Spend</div>
+            <div class="dots"></div>
+          </div>
+
+          <div class="mt-4">
+            <div class="text-3xl font-bold" id="spentVal">—</div>
+            <div class="text-sm text-slate-400 mt-2">Estimated spend this month</div>
+
+            <div class="mt-6 space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-md bg-gradient-to-r from-green-50 to-green-100 flex items-center justify-center">F</div>
+                  <div>
+                    <div class="font-medium">Fruits</div>
+                    <div class="text-sm text-slate-400">Apples, Berries</div>
+                  </div>
+                </div>
+                <div id="spendFruits" class="text-sm font-semibold">—</div>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-md bg-gradient-to-r from-yellow-50 to-red-50 flex items-center justify-center">V</div>
+                  <div>
+                    <div class="font-medium">Veg</div>
+                    <div class="text-sm text-slate-400">Broccoli, Potato</div>
+                  </div>
+                </div>
+                <div id="spendVeg" class="text-sm font-semibold">—</div>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-md bg-gradient-to-r from-gray-50 to-slate-50 flex items-center justify-center">P</div>
+                  <div>
+                    <div class="font-medium">Protein</div>
+                    <div class="text-sm text-slate-400">Chicken, Fish</div>
+                  </div>
+                </div>
+                <div id="spendProt" class="text-sm font-semibold">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Small stat cards (right column) — calories focused -->
+        <div class="col-span-3 card p-4">
+          <div class="text-slate-600 font-semibold" id="totalMonthCalories">-- kcal</div>
+          <div class="text-sm text-slate-400">Total calories (month estimate)</div>
+          <div class="mt-4 h-16 flex items-center justify-center">
+            <!-- mini sparkline (keeps green stroke) -->
+            <svg viewBox="0 0 120 40" class="w-full h-full">
+              <polyline points="0,30 20,24 40,28 60,20 80,24 100,18 120,16" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="col-span-2 card p-4">
+          <div class="flex items-center justify-between">
+            <div class="text-slate-600 font-semibold">Avg / day</div>
+            <div class="dots"></div>
+          </div>
+          <div id="avgPerDay" class="mt-4 text-2xl font-bold">-- kcal</div>
+          <div class="text-sm text-green-500 mt-1">based on loaded ingredients</div>
+        </div>
+
+        <div class="col-span-2 card p-4">
+          <div class="text-slate-600 font-semibold">Nutrition Score</div>
+          <div id="nutriScore" class="text-2xl font-bold mt-2">--%</div>
+          <div class="text-sm text-slate-400 mt-2">Protein vs total kcal</div>
+        </div>
+
+        <div class="col-span-2 card p-4">
+          <div class="text-slate-600 font-semibold">Items Loaded</div>
+          <div id="itemsLoaded" class="text-2xl font-bold mt-2">--</div>
+          <div class="mt-3 text-sm text-slate-400">Distinct ingredients</div>
+        </div>
+
+        <!-- lower big card: Calories by Category (pie) - replaces Sales by Countries but keeps size) -->
+        <div class="col-span-6 card p-6">
+          <div class="font-semibold text-slate-700">Calories by Category</div>
+          <div class="mt-4 text-sm text-slate-400">Distribution of calories (per 100g) across categories</div>
+          <div class="mt-6 h-48 rounded-md flex items-center justify-center">
+            <canvas id="pieChart" class="w-full h-full" ></canvas>
+          </div>
+        </div>
+
+        <!-- Budget widgets (keeps layout, rename) -->
+        <div class="col-span-3 card p-6">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold text-slate-700">Monthly Budget</div>
+            <a class="text-sm text-green-600">Manage</a>
+          </div>
+          <div class="mt-4 text-2xl font-bold" id="budgetMain">—</div>
+          <div class="mt-6 h-28 bg-slate-50 rounded-md flex items-center justify-center text-slate-300">[spend breakdown]</div>
+        </div>
+
+        <div class="col-span-3 card p-6">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold text-slate-700">Shopping List</div>
+            <a class="text-sm text-green-600">View All</a>
+          </div>
+          <div class="mt-4 text-2xl font-bold" id="shoppingCount">—</div>
+          <div class="mt-6 h-28 bg-slate-50 rounded-md flex items-center justify-center text-slate-300">[quick list]</div>
+        </div>
+
       </div>
-    </div>
 
+    </main>
   </div>
 
-  <!-- modal (hidden by default) -->
-  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal" role="document" aria-labelledby="modalTitle">
-      <h3 id="modalTitle">Add Custom Ingredient</h3>
+  <button class="upgrade-btn">Save Snapshot</button>
 
-      <div class="row">
-        <label for="cName">Name</label>
-        <input id="cName" type="text" placeholder="e.g. Almond Butter" aria-label="Custom name" />
-      </div>
-
-      <div class="row">
-        <label for="cQty">Qty</label>
-        <input id="cQty" type="number" min="1" value="1" aria-label="Custom quantity" style="width:140px" />
-        <label for="cPrice" style="margin-left:6px;">Price</label>
-        <input id="cPrice" type="number" step="0.01" placeholder="Price" aria-label="Custom price" style="width:110px" />
-        <select id="cCurrency" class="currency" aria-label="Currency">
-          <option value="$">$</option>
-          <option value="€">€</option>
-          <option value="£">£</option>
-          <option value="¥">¥</option>
-          <option value="₹">₹</option>
-        </select>
-      </div>
-
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;">
-        <button id="modalSave" class="btn btn-add">Save</button>
-        <button id="modalCancel" class="btn btn-muted">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- your behavior file (keeps HTML/CSS separate from JS) -->
-  <script type="module" src="grocery/grocery.js"></script>
 </body>
 </html>
