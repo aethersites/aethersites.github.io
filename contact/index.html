@@ -155,18 +155,77 @@
   <section class="py-16 px-6 lg:px-8 bg-white">
     <div class="max-w-4xl mx-auto">
       <h2 class="text-3xl font-bold text-gray-900 mb-8">Frequently Asked Questions</h2>
+
+      <!-- ===== Added CSS for smooth animation ===== -->
+      <style>
+        /* remove default marker if you want custom arrow (optional) */
+        details summary::-webkit-details-marker { display: none; }
+        details summary { list-style: none; }
+
+        /* make sure details doesn't overflow while animating */
+        details { overflow: hidden; border-radius: 0.5rem; }
+
+        /* container for the answer we animate */
+        .faq-content {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 280ms cubic-bezier(.2,.9,.2,1), opacity 200ms ease;
+          opacity: 0;
+        }
+
+        /* when details is open, we'll set the measured max-height via JS */
+        details[open] .faq-content { opacity: 1; }
+
+        /* subtle summary arrow + spacing */
+        summary {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          cursor: pointer;
+        }
+
+        /* arrow using pseudo-element */
+        summary .arrow {
+          transition: transform 220ms ease;
+          transform: rotate(0deg);
+          font-size: 0.875rem;
+          color: #065f46; /* green-800 (optional) */
+        }
+        details[open] summary .arrow {
+          transform: rotate(90deg);
+        }
+      </style>
+
       <div class="space-y-4">
         <details class="border border-gray-200 rounded-lg p-4">
-          <summary class="font-semibold text-gray-900 cursor-pointer">How long does it take to receive a reply?</summary>
-          <p class="mt-2 text-gray-600">We aim to reply to all queries within 24 hours, but usually much faster.</p>
+          <summary class="font-semibold text-gray-900 cursor-pointer">
+            <span>How long does it take to receive a reply?</span>
+            <span class="arrow">▸</span>
+          </summary>
+          <div class="faq-content mt-2">
+            <p class="text-gray-600">We aim to reply to all queries within 24 hours, but usually much faster.</p>
+          </div>
         </details>
+
         <details class="border border-gray-200 rounded-lg p-4">
-          <summary class="font-semibold text-gray-900 cursor-pointer">Do you offer support on weekends?</summary>
-          <p class="mt-2 text-gray-600">Our email support is available 24/7, but phone and live chat are only open on weekdays.</p>
+          <summary class="font-semibold text-gray-900 cursor-pointer">
+            <span>Do you offer support on weekends?</span>
+            <span class="arrow">▸</span>
+          </summary>
+          <div class="faq-content mt-2">
+            <p class="text-gray-600">Our email support is available 24/7, but phone and live chat are only open on weekdays.</p>
+          </div>
         </details>
+
         <details class="border border-gray-200 rounded-lg p-4">
-          <summary class="font-semibold text-gray-900 cursor-pointer">Can I get help with meal planning?</summary>
-          <p class="mt-2 text-gray-600">Yes! Our team can help you set up your first week’s plan and customize it to your needs.</p>
+          <summary class="font-semibold text-gray-900 cursor-pointer">
+            <span>Can I get help with meal planning?</span>
+            <span class="arrow">▸</span>
+          </summary>
+          <div class="faq-content mt-2">
+            <p class="text-gray-600">Yes! Our team can help you set up your first week’s plan and customize it to your needs.</p>
+          </div>
         </details>
       </div>
     </div>
@@ -202,7 +261,48 @@
     });
 </script>
 
+<!-- ===== Tiny JS to animate details open/close smoothly (measures content height) ===== -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('details').forEach(function(details){
+      var content = details.querySelector('.faq-content');
+      if (!content) return;
 
-  
+      // If details starts open, set its maxHeight to content's scrollHeight
+      if (details.hasAttribute('open')) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+      } else {
+        content.style.maxHeight = '0';
+      }
+
+      details.addEventListener('toggle', function () {
+        if (details.open) {
+          // Opening: set max-height to the full content height
+          content.style.maxHeight = content.scrollHeight + 'px';
+        } else {
+          // Closing: animate from current height to 0
+          // set to current height first (in case it was 'none' or a larger value)
+          content.style.maxHeight = content.scrollHeight + 'px';
+          // then in next frame set to 0 so transition runs
+          requestAnimationFrame(function(){
+            content.style.maxHeight = '0';
+          });
+        }
+      });
+
+      // If content changes size while open, keep maxHeight in sync
+      // (use ResizeObserver if available)
+      if (window.ResizeObserver) {
+        const ro = new ResizeObserver(() => {
+          if (details.open) {
+            content.style.maxHeight = content.scrollHeight + 'px';
+          }
+        });
+        ro.observe(content);
+      }
+    });
+  });
+</script>
+
 </body>
 </html>
