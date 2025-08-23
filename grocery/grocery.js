@@ -2,41 +2,30 @@
 // Module for Groceries & Pantry UI — wired to Firestore using your schema.
 // NOTE: fill firebaseConfig below if not provided in your app shell.
 
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-analytics.js";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut,
-  signInWithPopup,
-  GoogleAuthProvider
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  onSnapshot,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-/* ---------- CONFIG ---------- */
-const firebaseConfig = {
-   apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
     authDomain: "goodplates-7ae36.firebaseapp.com",
     projectId: "goodplates-7ae36",
     storageBucket: "goodplates-7ae36.firebasestorage.app",
     messagingSenderId: "541149626283",
     appId: "1:541149626283:web:928888f0b42cda49b7dcee",
     measurementId: "G-HKMSHM726J"
-};
+  };
 
-// init firebase (idempotent)
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-try { getAnalytics(app); } catch (e) { /* optional */ }
-const auth = getAuth(app);
-const db = getFirestore(app);
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
 
 /* ---------- DOM refs (guards) ---------- */
 const signinBtn = document.getElementById('signinBtn');
