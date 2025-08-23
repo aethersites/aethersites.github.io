@@ -201,7 +201,9 @@
       <div class="brand"> </div>
       <div class="auth-actions">
         <div id="signedState" class="user-info">Not signed in</div>
-        <button id="signinBtn" class="btn btn-muted" aria-label="Sign in">Sign in</button>
+        <button id="signinBtn" class="btn btn-muted" aria-label="Sign in" type="button">Sign in</button>
+        <!-- signout button included so JS can show/hide it reliably -->
+        <button id="signoutBtn" class="btn btn-muted" aria-label="Sign out" type="button" style="display:none">Sign out</button>
       </div>
     </div>
 
@@ -239,12 +241,12 @@
             <option value="¥">¥</option>
             <option value="₹">₹</option>
           </select>
-          <button id="addGroceryBtn" class="btn btn-add" aria-label="Add grocery">Add</button>
+          <button id="addGroceryBtn" class="btn btn-add" aria-label="Add grocery" type="button">Add</button>
         </form>
 
         <!-- custom ingredient button at bottom -->
         <div class="groceries-footer">
-          <button id="openCustomBtn" class="btn btn-ghost" aria-haspopup="dialog">+ Add Custom Ingredient</button>
+          <button id="openCustomBtn" class="btn btn-ghost" aria-haspopup="dialog" type="button">+ Add Custom Ingredient</button>
         </div>
       </section>
 
@@ -271,7 +273,7 @@
           <input id="pName" type="text" placeholder="Name..." aria-label="Name (text)" />
           <input id="pQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
           <input id="pExp" type="date" style="width:150px" aria-label="Expiration date" />
-          <button id="addPantryBtn" class="btn btn-add" aria-label="Add pantry item">Add to Pantry</button>
+          <button id="addPantryBtn" class="btn btn-add" aria-label="Add pantry item" type="button">Add to Pantry</button>
         </form>
       </section>
     </div>
@@ -282,9 +284,9 @@
       <p class="note">Suggestions and meal plans generated from your groceries & pantry</p>
 
       <div class="ai-actions" role="group" aria-label="AI actions">
-        <button id="aiPantryBtn" class="ai-btn">✦ AI Suggestions based on your pantry...</button>
-        <button id="aiWeeklyBtn" class="ai-btn">✦ AI Suggestions based on your weekly groceries/pantry items...</button>
-        <button id="aiMealPlanBtn" class="ai-btn">✦ AI Meal plan for the week...</button>
+        <button id="aiPantryBtn" class="ai-btn" type="button">✦ AI Suggestions based on your pantry...</button>
+        <button id="aiWeeklyBtn" class="ai-btn" type="button">✦ AI Suggestions based on your weekly groceries/pantry items...</button>
+        <button id="aiMealPlanBtn" class="ai-btn" type="button">✦ AI Meal plan for the week...</button>
       </div>
     </div>
 
@@ -298,13 +300,17 @@
       <div class="row">
         <label for="cName">Name</label>
         <input id="cName" type="text" placeholder="e.g. Almond Butter" aria-label="Custom name" />
+        <!-- keep edit-friendly IDs too (mName) so different JS flows can target them if needed -->
+        <input id="mName" type="hidden" />
       </div>
 
       <div class="row">
         <label for="cQty">Qty</label>
         <input id="cQty" type="number" min="1" value="1" aria-label="Custom quantity" style="width:140px" />
+        <input id="mQty" type="hidden" />
         <label for="cPrice" style="margin-left:6px;">Price</label>
         <input id="cPrice" type="number" step="0.01" placeholder="Price" aria-label="Custom price" style="width:110px" />
+        <input id="mPrice" type="hidden" />
         <select id="cCurrency" class="currency" aria-label="Currency">
           <option value="$">$</option>
           <option value="€">€</option>
@@ -315,8 +321,8 @@
       </div>
 
       <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;">
-        <button id="modalSave" class="btn btn-add">Save</button>
-        <button id="modalCancel" class="btn btn-muted">Cancel</button>
+        <button id="modalSave" class="btn btn-add" type="button">Save</button>
+        <button id="modalCancel" class="btn btn-muted" type="button">Cancel</button>
       </div>
     </div>
   </div>
