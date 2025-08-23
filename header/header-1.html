@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <link rel="icon" href="favicon.ico" sizes="any"> 
+  <link rel="icon" href="favicon.png" type="image/png"> 
+  <link rel="apple-touch-icon" href="favicon.png" 
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Recipes UI — Pure HTML/CSS</title>
 
@@ -14,10 +17,12 @@
 
     <!-- Left: brand (icon + name) -->
     <a class="gp-brand" href="/" aria-label="GoodPlates home">
+      <!-- plate + fork SVG icon -->
       <div class="gp-logo-sq" aria-hidden="true">
-        <img id="gpLogo" src="/favicon.png" alt="GoodPlates logo" width="22" height="22"
-             style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;"
-             onerror="this.onerror=null; this.src='/assets/img/logo-fallback.png';">
+       <img id="gpLogo" src="/favicon.png" alt="GoodPlates logo" width="22" height="22"
+  style="width:100%; height:100%; object-fit:cover; border-radius:inherit; display:block;"
+  onerror="this.onerror=null; this.src='/assets/img/logo-fallback.png';">
+        <!-- svg bits removed for brevity -->
       </div>
 
       <div class="gp-brand-text" style="text-decoration:none;color:inherit">
@@ -39,8 +44,10 @@
 
     <!-- Right: CTA + hamburger -->
     <div class="gp-actions">
+      <!-- Login CTA (replaces Onboarding) -->
       <a href="/login-form/" class="gp-cta cta" title="Login">Login</a>
 
+      <!-- mobile hamburger -->
       <button id="gpHamburger" class="gp-hamburger" aria-controls="gpMobileMenu" aria-expanded="false" aria-label="Open menu">
         <span class="bar"></span><span class="bar"></span><span class="bar"></span>
       </button>
@@ -48,7 +55,7 @@
 
   </div>
 
-  <!-- Mobile: slide-over menu -->
+  <!-- Mobile: slide-over menu (keeps all links + CTA) -->
   <aside id="gpMobileMenu" class="gp-mobile" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="gp-mobile-panel" role="document">
       <div class="gp-mobile-head">
@@ -74,6 +81,7 @@
       </div>
     </div>
 
+    <!-- overlay click closes -->
     <div class="gp-mobile-overlay" tabindex="-1" data-close></div>
   </aside>
 
@@ -93,7 +101,7 @@
     }
 
     /* container + topbar */
-    .gp-topnav {
+        .gp-topnav {
       top: 0;
       left: 0;
       width: 100%;
@@ -102,7 +110,7 @@
       background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.82));
       border-bottom: 1px solid rgba(15,23,42,0.03);
     }
-
+  
     .gp-container {
       max-width: var(--container);
       margin: 0 auto;
@@ -114,45 +122,49 @@
     }
 
     /* CTA pill */
-    .gp-cta {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 18px;
-      min-width: 120px;
-      border-radius: 999px;
-      color: white;
-      font-weight: 600;
-      text-decoration: none;
-      box-shadow: 0 8px 20px rgba(18,185,129,0.12);
-      overflow: hidden;
-      z-index: 0;
-    }
+ .gp-cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  min-width: 120px;
+  border-radius: 999px;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(18,185,129,0.12);
+  overflow: hidden; /* ensure pseudo stays inside */
+  z-index: 0;
+}
 
-    .gp-cta::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #17A34B, #12B981);
-      z-index: -1;
-      opacity: 1;
-    }
+/* Base gradient */
+.gp-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #17A34B, #12B981);
+  transition: opacity 0.3s ease-in-out;
+  z-index: -1;
+  opacity: 1;
+}
 
-    .gp-cta::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #119140, #0fa673);
-      transition: opacity 0.3s ease-in-out;
-      z-index: -1;
-      opacity: 0;
-    }
+/* Hover gradient overlay */
+.gp-cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #119140, #0fa673);
+  transition: opacity 0.3s ease-in-out;
+  z-index: -1;
+  opacity: 0;
+}
 
-    .gp-cta:hover::after { opacity: 1; }
-
+.gp-cta:hover::after {
+  opacity: 1;
+}
     /* hamburger (mobile) */
     .gp-hamburger{ display:none; width:44px; height:44px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
     .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
@@ -174,99 +186,6 @@
 
     .small{ font-size:12px; color:var(--muted) }
     .muted{ color:var(--muted) }
-
-    /* ===== Topnav styling (keeps your header clean) ===== */
-    .gp-topnav,
-    .topnav {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:12px 20px; gap:12px;
-      background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.82));
-      border-bottom:1px solid rgba(15,23,42,0.03);
-      position:sticky; top:0; z-index:60; backdrop-filter: blur(6px);
-    }
-    .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
-    .gp-logo-sq{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; }
-    .gp-name{ font-weight:600; font-size:18px; color:var(--fg); }
-    .gp-sub{ font-size:12px; color:var(--muted) }
-
-    .gp-links ul{ list-style:none; padding:0; margin:0; display:flex; gap:22px; align-items:center; }
-
-    .gp-links a {
-      display:inline-flex;
-      align-items:center;
-      padding:8px 10px;
-      border-radius:0;
-      color: var(--muted);
-      font-weight:550;
-      transition: color .12s ease;
-      border:none;
-      font-size:16px;
-      background: none;
-      box-shadow: none;
-      transform: none;
-    }
-
-    .gp-links a:hover {
-      color: var(--fg);
-    }
-
-    /* selected/current page: default var(--fg) fallback */
-    .gp-links a.is-active,
-    .gp-links a[aria-current="page"],
-    .gp-mobile-links a.is-active,
-    .gp-mobile-links a[aria-current="page"] {
-      color: var(--fg);
-      font-weight: 700;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ===== PLAIN-CSS override for active links (minimal change; guaranteed to work in browser) ===== */
-    /* This forces active link to pure black (#000) and bold. */
-    .gp-links a.is-active,
-    .gp-links a[aria-current="page"],
-    .gp-mobile-links a.is-active,
-    .gp-mobile-links a[aria-current="page"] {
-      color: #000 !important;
-      font-weight: 700 !important;
-    }
-
-    /* ===== Layout (content + sidebar) ===== */
-    .gp-actions{ display:flex; gap:8px; align-items:center; margin-left:auto }
-    .icon-btn{ width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--border); background:var(--surface); cursor:pointer; }
-    .icon-btn:hover{ box-shadow:var(--shadow-soft); }
-
-    .gp-hamburger{ display:none; width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
-    .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
-
-    @media (max-width:1100px){
-      .gp-links{ display:none }
-      .gp-hamburger{ display:inline-flex }
-      .gp-cta{ display:none }
-    }
-
-    .layout{ display:grid; grid-template-columns:320px 1fr; gap:28px; padding:28px 0; align-items:start; min-height:600px; }
-
-    /* ===== ADDED (minimal): Make the topnav fixed to the viewport and reserve page space ===== */
-    .gp-topnav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-    }
-
-    /* Reserve vertical space so content doesn't sit under the fixed nav.
-       Adjust padding-top if you change header height. */
-    body {
-      padding-top: 72px;
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      color:var(--fg);
-      background:linear-gradient(180deg,#fbfcfd 0%, #ffffff 100%);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      -webkit-tap-highlight-color: transparent;
-    }
   </style>
 
   <script>
@@ -302,8 +221,10 @@
     })();
   </script>
 
-  <!-- ===== Active-link script (robust, uses <a> resolver so it works with file:// and http(s)) ===== -->
+  <!-- ======= REPLACED: more-robust "active link" script (runs after DOM ready) ======= -->
   <script>
+  (function(){
+    // run after DOM ready to be robust in different embed situations
     document.addEventListener('DOMContentLoaded', function(){
       function norm(path) {
         path = String(path || '/').replace(/index\.html$/, '');
@@ -311,42 +232,178 @@
         return path;
       }
 
-      var current = norm(window.location.pathname);
-      var links = document.querySelectorAll('.gp-links a, .gp-mobile-links a');
+      const current = norm(window.location.pathname);
+      const links = document.querySelectorAll('.gp-links a, .gp-mobile-links a');
 
-      links.forEach(function(a){
+      links.forEach(a => {
         a.classList.remove('is-active');
         a.removeAttribute('aria-current');
 
-        var href = a.getAttribute('href') || '';
+        const href = a.getAttribute('href') || '';
+        try {
+          const url = new URL(href, location.origin);
+          const linkPath = norm(url.pathname);
 
-        // Create an anchor element to reliably resolve href -> pathname across protocols
-        var resolver = document.createElement('a');
-        resolver.href = href;
-        var linkPath = norm(resolver.pathname);
+          // If the link is the root '/', only mark it active when current is root.
+          // Otherwise mark active when the current path starts with the link path
+          const isActive = (linkPath === '/') ? (current === '/') : current.startsWith(linkPath);
 
-        // Home ('/') should only be active on exact root
-        var isActive = (linkPath === '/') ? (current === '/') : current.startsWith(linkPath);
-
-        if (isActive) {
-          a.classList.add('is-active');
-          a.setAttribute('aria-current','page');
+          if (isActive) {
+            a.classList.add('is-active');
+            a.setAttribute('aria-current', 'page');
+          }
+        } catch (err) {
+          // ignore invalid hrefs
         }
       });
     });
+  })();
   </script>
 </header>
 
-<!-- Minimal demo content so page scrolls -->
-<main class="container layout">
-  <aside class="sidebar">Sidebar</aside>
-  <section>
-    <h1>Page content</h1>
-    <p>Scroll and check the navbar. The active nav item should be black.</p>
-    <p>Use different URL paths (e.g. /recipes/ or /recipes/chocolate/) to test that the `/recipes/` nav item lights up.</p>
-    <div style="height:1200px"></div>
-  </section>
-</main>
+<!-- ===== main stylesheet (keeps rest of page intact) ===== -->
+<style>
+  /* ===== Design tokens (adapted for compatibility) ===== */
+  :root{
+    --bg: #ffffff;
+    --fg: #0f172a;
+    --muted: #6b7280;
+    --muted-2: #9ca3af;
+    --border: #e6e9ee;
+    --surface: #ffffff;
+    --surface-2: #f7f8fa;
+    --primary: #16a34a;
+    --primary-700: #15803d;
+    --primary-100: #dcfce7;
+    --ring: rgba(16,185,129,0.18);
+    --shadow-soft: 0 8px 24px rgba(2,6,23,0.06);
+    --shadow-2: 0 16px 48px rgba(2,6,23,0.08);
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --radius: var(--radius-lg);
+    --container: 1200px;
+    --glass: rgba(255,255,255,0.72);
+  }
+
+  /* ===== Base / resets ===== */
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0}
+  body{
+    margin:0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    color:var(--fg);
+    background:linear-gradient(180deg,#fbfcfd 0%, var(--bg) 100%);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+  a{color:inherit; text-decoration:none}
+  img{max-width:100%; display:block}
+  .container{max-width:var(--container); margin:0 auto; padding:0 20px}
+
+  /* ===== Topnav styling (keeps your header clean) ===== */
+  .gp-topnav,
+  .topnav {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 20px; gap:12px;
+    background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.82));
+    border-bottom:1px solid rgba(15,23,42,0.03);
+    position:sticky; top:0; z-index:60; backdrop-filter: blur(6px);
+  }
+  .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
+  .gp-logo-sq{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; }
+  .gp-name{ font-weight:600; font-size:18px; color:var(--fg); }
+  .gp-sub{ font-size:12px; color:var(--muted) }
+
+  .gp-links ul{ list-style:none; padding:0; margin:0; display:flex; gap:22px; align-items:center; }
+
+  /* --------- NAV: minimal color-only hover/active (changed) --------- */
+  .gp-links a {
+    display:inline-flex;
+    align-items:center;
+    padding:8px 10px;
+    border-radius:0;                 /* no hover box */
+    color: var(--muted);             /* default gray */
+    font-weight:550;
+    transition: color .12s ease;     /* only animate color */
+    border:none;
+    font-size:16px;
+    background: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* hover: turn label black */
+  .gp-links a:hover {
+    color: var(--fg);                /* black on hover */
+    background: none;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* selected/current page: black (stronger, also covers mobile) */
+  .gp-links a.is-active,
+  .gp-links a[aria-current="page"],
+  .gp-links ul li a.is-active,
+  .gp-links ul li a[aria-current="page"],
+  .gp-mobile-links a.is-active,
+  .gp-mobile-links a[aria-current="page"] {
+  color: var(--fg);
+  font-weight: 700;
+  -webkit-font-smoothing: antialiased;
+}
+  <style>
+    /* Tailwind-powered override for active links */
+    .gp-links a.is-active,
+    .gp-links a[aria-current="page"],
+    .gp-mobile-links a.is-active,
+    .gp-mobile-links a[aria-current="page"] {
+      @apply text-black font-bold;
+    }
+  .gp-actions{ display:flex; gap:8px; align-items:center; margin-left:auto }
+  .icon-btn{ width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; border:1px solid var(--border); background:var(--surface); cursor:pointer; }
+  .icon-btn:hover{ box-shadow:var(--shadow-soft); }
+
+ 
+  .gp-hamburger{ display:none; width:40px; height:40px; border-radius:10px; border:1px solid var(--border); background:var(--surface); align-items:center; justify-content:center; padding:8px; cursor:pointer }
+  .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
+
+  @media (max-width:1100px){
+    .gp-links{ display:none }
+    .gp-hamburger{ display:inline-flex }
+    .gp-cta{ display:none }
+  }
+
+  /* ===== Layout (content + sidebar) ===== */
+  .layout{ display:grid; grid-template-columns:320px 1fr; gap:28px; padding:28px 0; align-items:start; height: 2000px !important;
+    max-height: 2000px !important;
+    min-height: 2000px !important;
+    overflow-y: auto;
+  }
+  @media (max-width:1100px)
+  {
+    .layout{ grid-template-columns:1fr }
+    .sidebar{ display:none }
+    .open-sidebar{ display:block; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.35) }
+    .sidebar.panel{ position:fixed; left:0; top:0; bottom:0; height:100%; transform:translateX(0); box-shadow: var(--shadow-2); }
+  }
+
+  /* ===== ADDED (minimal): Make the topnav fixed to the viewport and reserve page space ===== */
+  /* We add this at the end so it overrides earlier sticky rules. */
+  .gp-topnav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* keep above most UI */
+  }
+
+  /* Reserve vertical space so content doesn't sit under the fixed nav.
+     Using a safe fixed value here to keep edits minimal; adjust if you change header padding/height. */
+  body {
+    padding-top: 72px; /* adjust this if you make the header taller/shorter */
+  }
+</style>
 
 </body>
 </html>
