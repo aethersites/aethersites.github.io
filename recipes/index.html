@@ -151,7 +151,11 @@
       .range{ width:100% }
       .btn{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--fg); padding:8px 14px; border-radius:10px; cursor:pointer; transition:all .14s ease; font-weight:600 }
       .btn:hover{ transform:translateY(-2px); box-shadow:var(--shadow-soft) }
-      .btn.primary{ background:linear-gradient(90deg,var(--primary),var(--primary-700)); color:white; border:0 }
+.btn.primary {
+  background: linear-gradient(90deg, #17A34B, #12B981);
+  color: white;
+  border: 0;
+}
       .btn.ghost{ background:transparent; border:1px dashed rgba(15,23,42,0.04) }
   
       /* compatibility: preserve original .block selectors used in functional file */
