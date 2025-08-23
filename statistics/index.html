@@ -4,6 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Budget Page</title>
+  <div id="global-header"></div>
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-2"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => document.querySelector("#global-header").innerHTML = html);
+</script>
+
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen bg-white-50 font-sans text-gray-900">
@@ -289,11 +298,15 @@
 
    <script type="module">
   <script src="../statistics/statistics.js"></script>
+<div id="footer"></div>
+<script>
+  fetch("/footer/index.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("footer").innerHTML = data;
+    });
+</script>
 
 </body>
-<footer class="bg-white border-t border-gray-200 py-6">
-    <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center text-sm text-gray-500">
-      © 2025 Healthly. All rights reserved.
-    </div>
-  </footer>
+
 </html>
