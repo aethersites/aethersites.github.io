@@ -4,6 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>GoodPlates - Groceries & Nutrition Dashboard</title>
+  <div id="global-header"></div>
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-2"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => document.querySelector("#global-header").innerHTML = html);
+</script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
@@ -292,5 +301,14 @@
   </div>
   <button class="upgrade-btn">Save Snapshot</button>
     <script type="module" src="../dashboard/dashboard.js"></script>
+  <div id="footer"></div>
+<script>
+  fetch("/footer/index.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("footer").innerHTML = data;
+    });
+</script>
+
 </body>
 </html>
