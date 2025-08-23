@@ -150,7 +150,7 @@
               <div class="w-10 h-10 rounded-md bg-white shadow flex items-center justify-center">💸</div>
               <div>
                 <div class="text-sm text-slate-400">Monthly Budget</div>
-                <div id="budgetVal" class="font-semibold">$420</div>
+                <div id="budgetVal" class="font-semibold">—</div>
               </div>
             </div>
           </div>
@@ -185,7 +185,7 @@
           </div>
 
           <div class="mt-4">
-            <div class="text-3xl font-bold" id="spentVal">$300</div>
+            <div class="text-3xl font-bold" id="spentVal">—</div>
             <div class="text-sm text-slate-400 mt-2">Estimated spend this month</div>
 
             <div class="mt-6 space-y-4">
@@ -197,7 +197,7 @@
                     <div class="text-sm text-slate-400">Apples, Berries</div>
                   </div>
                 </div>
-                <div id="spendFruits" class="text-sm font-semibold">$120</div>
+                <div id="spendFruits" class="text-sm font-semibold">—</div>
               </div>
 
               <div class="flex items-center justify-between">
@@ -208,7 +208,7 @@
                     <div class="text-sm text-slate-400">Broccoli, Potato</div>
                   </div>
                 </div>
-                <div id="spendVeg" class="text-sm font-semibold">$90</div>
+                <div id="spendVeg" class="text-sm font-semibold">—</div>
               </div>
 
               <div class="flex items-center justify-between">
@@ -219,7 +219,7 @@
                     <div class="text-sm text-slate-400">Chicken, Fish</div>
                   </div>
                 </div>
-                <div id="spendProt" class="text-sm font-semibold">$90</div>
+                <div id="spendProt" class="text-sm font-semibold">—</div>
               </div>
             </div>
           </div>
@@ -273,7 +273,7 @@
             <div class="font-semibold text-slate-700">Monthly Budget</div>
             <a class="text-sm text-green-600">Manage</a>
           </div>
-          <div class="mt-4 text-2xl font-bold" id="budgetMain">$420</div>
+          <div class="mt-4 text-2xl font-bold" id="budgetMain">—</div>
           <div class="mt-6 h-28 bg-slate-50 rounded-md flex items-center justify-center text-slate-300">[spend breakdown]</div>
         </div>
 
@@ -282,7 +282,7 @@
             <div class="font-semibold text-slate-700">Shopping List</div>
             <a class="text-sm text-green-600">View All</a>
           </div>
-          <div class="mt-4 text-2xl font-bold" id="shoppingCount">12</div>
+          <div class="mt-4 text-2xl font-bold" id="shoppingCount">—</div>
           <div class="mt-6 h-28 bg-slate-50 rounded-md flex items-center justify-center text-slate-300">[quick list]</div>
         </div>
 
@@ -293,177 +293,5 @@
 
   <button class="upgrade-btn">Save Snapshot</button>
 
-  <!-- Script: fetch ingredients.json, parse calories and render charts (minimal UI changes) -->
-  <script>
-    const tryPaths = ['./ingredients.json', '../ingredients.json', '/ingredients.json'];
-    const fallback = [
-      { "FoodCategory":"CannedFruit", "FoodItem":"Applesauce", "per100grams":"100g", "Cals_per100grams":"62 cal", "KJ_per100grams":"260 kJ" },
-      { "FoodCategory":"CannedFruit", "FoodItem":"Canned Apricots", "per100grams":"100g", "Cals_per100grams":"48 cal", "KJ_per100grams":"202 kJ" },
-      { "FoodCategory":"CannedFruit", "FoodItem":"Canned Blackberries", "per100grams":"100g", "Cals_per100grams":"92 cal", "KJ_per100grams":"386 kJ" },
-      { "FoodCategory":"CannedFruit", "FoodItem":"Canned Blueberries", "per100grams":"100g", "Cals_per100grams":"88 cal", "KJ_per100grams":"370 kJ" },
-      { "FoodCategory":"Vegetable", "FoodItem":"Broccoli", "per100grams":"100g", "Cals_per100grams":"34 cal", "KJ_per100grams":"142 kJ" },
-      { "FoodCategory":"Protein", "FoodItem":"Chicken Breast", "per100grams":"100g", "Cals_per100grams":"165 cal", "KJ_per100grams":"690 kJ" },
-      { "FoodCategory":"Grain", "FoodItem":"Brown Rice", "per100grams":"100g", "Cals_per100grams":"123 cal", "KJ_per100grams":"515 kJ" },
-      { "FoodCategory":"Carb", "FoodItem":"Potato", "per100grams":"100g", "Cals_per100grams":"77 cal", "KJ_per100grams":"322 kJ" }
-    ];
-
-    const categoryMap = {
-      'CannedFruit': 'Fruit',
-      'Fruit': 'Fruit',
-      'Vegetable': 'Vegetables',
-      'Protein': 'Protein',
-      'Grain': 'Grain',
-      'Carb': 'Carbs'
-    };
-
-    function parseCals(str){
-      if(!str) return 0;
-      const m = (''+str).match(/([0-9]+\.?[0-9]*)/);
-      return m ? parseFloat(m[1]) : 0;
-    }
-
-    async function loadJSON(){
-      for(const p of tryPaths){
-        try{
-          const r = await fetch(p, {cache:'no-store'});
-          if(!r.ok) throw new Error('not ok '+p);
-          const j = await r.json();
-          if(Array.isArray(j) && j.length>0) return j;
-        }catch(e){
-          // try next
-        }
-      }
-      return fallback;
-    }
-
-    function aggregateByCategory(items){
-      const agg = {};
-      items.forEach(it=>{
-        const raw = it.FoodCategory || it.Category || 'Other';
-        const cat = categoryMap[raw] || raw || 'Other';
-        const c = parseCals(it.Cals_per100grams || it.calories || it.kcal || 0);
-        agg[cat] = (agg[cat] || 0) + c;
-      });
-      return agg;
-    }
-
-    function safeText(id, v){ const el = document.getElementById(id); if(el) el.textContent = v; }
-
-    window.addEventListener('load', async ()=>{
-      const items = await loadJSON();
-      // filter out empty objects
-      const cleaned = items.filter(it => it && (it.FoodItem || it.name || it.FoodCategory));
-      const names = cleaned.map(i => i.FoodItem || i.name || 'item');
-      const calsArray = cleaned.map(i => parseCals(i.Cals_per100grams));
-
-      // line chart: calories per ingredient
-      const lineCtx = document.getElementById('lineChart').getContext('2d');
-      new Chart(lineCtx, {
-        type: 'line',
-        data: {
-          labels: names,
-          datasets: [{
-            label: 'kcal / 100g',
-            data: calsArray,
-            borderColor: '#16a34a',
-            backgroundColor: 'rgba(22,163,74,0.08)',
-            tension: 0.25,
-            pointBackgroundColor: '#16a34a',
-            borderWidth: 2,
-            fill: true
-          }]
-        },
-      options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true } },
-       plugins: { legend: { display: false } }
-         }
-      });
-
-      // pie chart: calories by category
-      const agg = aggregateByCategory(cleaned);
-      const pieLabels = Object.keys(agg);
-      const pieData = pieLabels.map(l => agg[l]);
-
-      const pieCtx = document.getElementById('pieChart').getContext('2d');
-      new Chart(pieCtx, {
-        type: 'pie',
-        data: {
-          labels: pieLabels,
-          datasets: [{ data: pieData, backgroundColor: ['#16a34a','#34d399','#facc15','#60a5fa','#f97316','#a78bfa'] }]
-        },
-        options: { plugins:{ legend:{ position:'bottom' } }, maintainAspectRatio:false }
-      });
-
-      // UI counters and summaries
-      const totalKcal = calsArray.reduce((s,x)=>s+x,0);
-      const avg = Math.round((calsArray.length ? totalKcal / calsArray.length : 0));
-      const monthlyEstimate = Math.round(avg * 30); // mock assumption
-      const topIngredient = cleaned.reduce((a,b)=> parseCals(b.Cals_per100grams) > parseCals(a.Cals_per100grams) ? b : a, cleaned[0] || {FoodItem:'—'});
-      const proteinShare = agg['Protein'] || 0;
-      const nutriScore = cleaned.length ? Math.round((proteinShare / (totalKcal || 1)) * 100) : 0;
-
-      safeText('bigKcal', totalKcal ? (totalKcal + ' kcal') : '-- kcal');
-      safeText('pctTarget', avg ? Math.round((avg / 2000) * 100) + '% of 2000kcal' : '-- of daily target');
-      safeText('topIngredient', (topIngredient && (topIngredient.FoodItem||topIngredient.name)) || '—');
-      safeText('distinctItems', cleaned.length || '—');
-      safeText('avgKcal', avg ? (avg + ' kcal') : '-- kcal');
-      safeText('budgetVal', '$420');
-      safeText('lineSummary', totalKcal ? (totalKcal + ' kcal') : '-- kcal');
-      safeText('totalMonthCalories', monthlyEstimate ? (monthlyEstimate + ' kcal') : '-- kcal');
-      safeText('avgPerDay', avg ? (avg + ' kcal') : '-- kcal');
-      safeText('nutriScore', (isFinite(nutriScore) ? (Math.max(0, Math.min(100,nutriScore)) + '%') : '--%'));
-      safeText('itemsLoaded', cleaned.length || 0);
-      // fill spends (mock)
-      safeText('spentVal', '$300');
-      safeText('spendFruits', '$120');
-      safeText('spendVeg', '$90');
-      safeText('spendProt', '$90');
-      safeText('budgetMain', '$420');
-      safeText('shoppingCount', '12');
-
-      // preserve original click behavior where possible
-      document.getElementById('viewRecipes')?.addEventListener('click', ()=> alert('Open recipes (mock)'));
-      document.getElementById('detailBtn')?.addEventListener('click', ()=> alert('Open details (mock)'));
-    });
-  </script>
-  <!-- Add at the bottom of your <body> just before the closing </body> -->
-<script type="module">
-  // Import Firebase SDK modules (use your correct version)
-  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-
-  // Your Firebase config (same as in your grocery.js)
-  const firebaseConfig = {
-    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-    authDomain: "goodplates-7ae36.firebaseapp.com",
-    projectId: "goodplates-7ae36",
-    storageBucket: "goodplates-7ae36.appspot.com",
-    messagingSenderId: "541149626283",
-    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
-  };
-
-  // Initialize Firebase app (or get existing)
-  let app;
-  if (getApps().length === 0) {
-    app = initializeApp(firebaseConfig);
-  } else {
-    app = getApp();
-  }
-
-  // Get Firebase Auth instance
-  const auth = getAuth(app);
-
-  // Listen for auth state changes
-  onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      // Not signed in! Redirect to login page (edit path as needed)
-      window.location.href = "/login.html";
-    }
-    // else: user is signed in, do nothing (let dashboard render)
-  });
-</script>
 </body>
 </html>
