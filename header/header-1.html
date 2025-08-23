@@ -101,10 +101,12 @@
     }
 
     /* container + topbar */
-    .gp-topnav {
-      position: sticky;
+        .gp-topnav {
+      position: fixed;
       top: 0;
-      z-index: 80;
+      left: 0;
+      width: 100%;
+      z-index: 100; /* keep it above everything */
       backdrop-filter: blur(6px);
       background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.82));
       border-bottom: 1px solid rgba(15,23,42,0.03);
