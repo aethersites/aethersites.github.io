@@ -1,0 +1,366 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GoodPlates — Features</title>
+<div id="global-header"></div>
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-1"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => document.querySelector("#global-header").innerHTML = html);
+</script>
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CDN -->
+  <script>
+    window.tailwind = window.tailwind || {};
+    window.tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { inter: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial'] },
+          borderRadius: { '2xl': '1rem' },
+          boxShadow: { 'soft-lg': '0 10px 30px -8px rgba(10,20,10,0.12)' }
+        }
+      }
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Design tokens & base (includes requested gradient tokens) */
+    :root{
+      --neutral-900: 0 0% 9%;
+      --fg: hsl(var(--neutral-900));
+      --muted: #6b7280;
+      --muted-2: #9ca3af;
+      --border: #e5e7eb;
+      --surface: #ffffff;
+
+      /* Gradient endpoints */
+      --green-500: #17A34B;
+      --teal-500: #12B981;
+
+      /* Gradients (your requested variants) */
+      --gradient-primary: linear-gradient(135deg, var(--green-500) 0%, var(--teal-500) 100%);
+      --gradient-primary-hsl: linear-gradient(135deg, hsl(142 82% 45%), hsl(142 82% 55%));
+      --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 98%));
+      --gradient-feature: linear-gradient(135deg, hsl(142 15% 95%), hsl(0 0% 98%));
+      --gradient-green-teal: linear-gradient(135deg, hsl(142 71% 38%), hsl(158 64% 52%));
+
+      /* Shadows & shape */
+      --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+      --shadow-lg: 0 10px 30px -8px rgba(10,20,10,0.12);
+      --radius: 16px;
+    }
+
+    /* Page base */
+    html,body { height:100%; }
+    body {
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color: var(--fg);
+      background: white;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Small helpers */
+    .muted { color: var(--muted); }
+    .muted-2 { color: var(--muted-2); }
+    .container-max { max-width: 1120px; margin-left:auto; margin-right:auto;  }
+    .rounded-2xl { border-radius: 1rem; }
+    .card-border { border: 1px solid var(--border); }
+    .shadow-soft { box-shadow: var(--shadow-lg); }
+    .stat-card { background: var(--surface); border-radius: 12px; padding: 1rem; box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.03); }
+
+    /* Buttons */
+    .btn-gradient {
+      background: var(--gradient-primary);
+      color: #fff;
+      padding: .6rem 1rem;
+      border-radius: 999px;
+      font-weight: 600;
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      text-decoration:none;
+      transition: box-shadow .15s ease, transform .15s ease;
+    }
+    .btn-gradient:hover { box-shadow: 0 5px 10px rgba(17,136,101,0.14); }
+
+    .btn-ghost {
+      background: #fff; color: var(--fg);
+      border: 0.5px solid #9CA3AF;
+      padding: .55rem .9rem; border-radius: 999rem; display:inline-flex; align-items:center; gap:.5rem; text-decoration:none;
+    }
+    .btn-ghost:hover { box-shadow: 0 5px 10px #f5f5f5; }
+
+    /* Badge */
+    .badge {
+      display:inline-flex; align-items:center;
+      font-size: .875rem; padding: .25rem .75rem; border-radius: 999px;
+      border: 1px solid rgba(23,163,75,.12);
+      background: rgba(23,163,75,.06); color: var(--green-500); font-weight:600;
+    }
+
+    /* Images / hero */
+    .hero-img { border-radius: var(--radius); box-shadow: var(--shadow-lg); display:block;  width: 600px;   /* rectangle width */
+  height: 450px; object-fit:cover; }
+  
+        .rect-img {
+          width: 500px;      /* rectangle width */
+          height: 300px;     /* rectangle height */
+          object-fit: cover; /* fill rectangle, crop if needed */
+          border-radius: 20px; /* optional rounded corners */
+          display: block;    /* removes extra space under inline images */
+        }
+    /* Responsive container tweak */
+    @media (min-width: 1024px) { .container-pad { padding-left: 2rem; padding-right: 2rem; } }
+  </style>
+</head>
+<body>
+
+
+  <!-- HERO -->
+<header class="bg-[#f1fdf4]">
+    <div class="container-max container-pad mx-auto grid lg:grid-cols-2 gap-10 items-center py-10 px-5">
+      <div>
+        <span class="badge">💡 Key Features </span>
+<h1 class="mt-4 text-4xl font-extrabold text-[40px] leading-tight">
+  Plan Meals To <span class="text-green-600">Shop Smarter</span>
+</h1>        <p class="mt-4 text-lg muted max-w-xl">GoodPlates combines meal planning, grocery integrations, nutrition tracking and budgeting tools so you save time and money without compromising on deliciousness.</p>
+        <div class="mt-6 flex gap-4">
+          <a href="/onboarding" class="btn-gradient" aria-label="Start free trial">Start free</a>
+          <a href="#snapshot" class="btn-ghost" aria-label="See Recipes">See snapshot →</a>
+        </div>
+      </div>
+
+      <div>
+        <img src="https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=1010&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="GoodPlates app dashboard preview" class="hero-img" />
+      </div>
+    </div>
+  </header>
+
+  <main class="container-max container-pad mx-auto py-16 px-4">
+
+    <!-- Alternating 1: image left / text right -->
+    <section class="grid lg:grid-cols-2 gap-12 items-center mb-20">
+      <div>
+        <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Grocery integration cart" class=rect-img />
+      </div>
+      <div>
+        <span class="badge">🛒 Grocery Integration</span>
+        <h2 class="text-2xl font-bold mt-4">One-click shopping</h2>
+        <p class="muted mt-3">Send a curated order to multiple partners, edit the cart, and choose delivery slot — all from GoodPlates.</p>
+        <ul class="muted mt-4 space-y-2">
+          <li>• Instant cart creation from your meal plan</li>
+          <li>• Save preferred stores & delivery options</li>
+          <li>• Price & availability preview before checkout</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Alternating 2: text left / image right -->
+    <section class="grid lg:grid-cols-2 gap-12 items-center mb-20">
+      <div>
+        <span class="badge">💪 Health & Nutrition</span>
+        <h2 class="text-2xl font-bold mt-4">Deep nutrition insights</h2>
+        <p class="muted mt-3">Daily & weekly targets, plus long-term nutrient trends to help you stay on course.</p>
+        <div class="mt-4 flex gap-3">
+          <a class="btn-gradient" href="#health">Set Health Goals</a>
+          <a class="btn-ghost" href="#analytics">View analytics</a>
+        </div>
+      </div>
+      <div>
+        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=1081&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Nutrition tracking graphs" class="rect-img" />
+      </div>
+    </section>
+
+    <!-- Alternating 3: image left / text right -->
+    <section class="grid lg:grid-cols-2 gap-12 items-center mb-20">
+      <div>
+        <img src="https://plus.unsplash.com/premium_photo-1733779447917-13f750c1d8f4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Smart pantry" class=rect-img />
+      </div>
+      <div>
+        <span class="badge">📦 Pantry</span>
+        <h2 class="text-2xl font-bold mt-4">Smart pantry & family sharing</h2>
+        <p class="muted mt-3">Track pantry items, invite family members, and use pantry state to suggest meals automatically.</p>
+        <ul class="muted mt-4 space-y-2">
+          <li>• Track expiry & recently-used items</li>
+          <li>• Shared permissions for collaborators</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 6-card grid -->
+    <section class="mb-30">
+      <div class="text-center mb-8">
+        <h3 class="text-2xl font-bold">Quick features</h3>
+        <p class="muted">Everything you need in small, useful bites.</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <article class="stat-card">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">⚙️</div>
+            <div>
+              <div class="font-semibold">Advanced filters</div>
+              <div class="muted mt-1 text-sm">Filter by prep time, difficulty, diet & budget.</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="stat-card">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🔁</div>
+            <div>
+              <div class="font-semibold">Adjustable servings</div>
+              <div class="muted mt-1 text-sm">Scale recipes and auto-update shopping list quantities.</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 3 (gradient highlight) -->
+        <article class="rounded-2xl p-4" style="background:var(--gradient-green-teal); color:white;">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🤖</div>
+            <div>
+              <div class="font-semibold">AI suggestions</div>
+              <div class="text-white/90 mt-1 text-sm">Personalized meal suggestions using pantry & goals.</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="stat-card">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🧾</div>
+            <div>
+              <div class="font-semibold">Grocery sync</div>
+              <div class="muted mt-1 text-sm">Instantly push your list to delivery partners.</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 5 -->
+        <article class="stat-card">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">🥗</div>
+            <div>
+              <div class="font-semibold">Nutrition tracking</div>
+              <div class="muted mt-1 text-sm">Macro + micronutrients logged automatically.</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card 6 -->
+        <article class="stat-card">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl">👨‍👩‍👧</div>
+            <div>
+              <div class="font-semibold">Family plans</div>
+              <div class="muted mt-1 text-sm">Share meal plans, split grocery duties, and tag items.</div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Different style column A: full-bleed gradient feature -->
+    <section class="mb-16">
+      <section class="mb-16 mt-12">
+<div class="rounded-2xl p-8 shadow-soft" style="background: var(--gradient-primary); color: white;">
+          <div class="lg:flex lg:items-center lg:justify-between">
+            <div>
+              <h3 class="text-2xl font-bold">Learn & Share — Courses & community</h3>
+              
+              <p class="mt-2 text-white/90 max-w-xl">Unlock step-by-step lessons, ingredient lists synced to your kitchen, and chef tips that take you from beginner to confident home cook.</p>
+            </div>
+            <div class="mt-6 lg:mt-0">
+              <a href="#courses" class="btn-ghost" style="background: rgba(255,255,255,0.12); color:white; border: 1px solid rgba(255,255,255,0.12);">Explore Courses</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Different style column B: carded + border -->
+    <section class="mb-16">
+      <div class="grid lg:grid-cols-2 gap-8 items-center">
+        <div class="p-8 card-border rounded-2xl">
+          <h3 class="text-2xl font-bold">Analytics & Reports</h3>
+          <p class="muted mt-3">Exportable reports, historical charts, and coach-ready CSVs to analyze your eating and spending trends.</p>
+          <ul class="muted mt-4 space-y-2">
+            <li>• Export monthly spending & nutrition CSVs</li>
+            <li>• Compare periods and spot trends</li>
+          </ul>
+        </div>
+
+        <div class="p-8 card-border rounded-2xl shadow-sm">
+          <h3 class="text-2xl font-bold">Pantry Management</h3>
+          <p class="muted mt-3">Smart item suggestions, expiry alerts, and quick 're-add' functionality keep your pantry up-to-date.</p>
+          <div class="mt-4">
+            <a href="#pantry" class="btn-ghost">Manage Pantry</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-part column -->
+    <section class="mb-16">
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="stat-card text-center">
+          <div class="font-semibold">Saved This Month</div>
+          <div class="text-xl font-bold mt-2">$67.50</div>
+          <div class="muted text-sm mt-1">of $700 budget</div>
+        </div>
+
+        <div class="stat-card text-center">
+          <div class="font-semibold">Avg / trip</div>
+          <div class="text-xl font-bold mt-2">$18.80</div>
+          <div class="muted text-sm mt-1">Across 23 trips</div>
+        </div>
+
+        <div class="stat-card text-center">
+          <div class="font-semibold">Family Members</div>
+          <div class="text-xl font-bold mt-2">4</div>
+          <div class="muted text-sm mt-1">Active collaborators</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="text-center py-12">
+      <h3 class="text-3xl font-bold mb-3">Ready to simplify meal planning?</h3>
+      <p class="muted mb-6">Start saving time and money — try GoodPlates free for 14 days.</p>
+      <a href="/onboarding" class="btn-gradient">Start your free trial</a>
+    </section>
+
+  </main>
+
+  <footer class="border-t py-8 text-center muted" style="border-top:1px solid var(--border);">
+    © <span id="year"></span> GoodPlates · <a href="/privacy" class="underline">Privacy</a>
+  </footer>
+
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<div id="footer"></div>
+<script>
+  fetch("/footer/index.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("footer").innerHTML = data;
+    });
+</script>
+</body>
+</html>
+
+
