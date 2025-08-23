@@ -346,5 +346,13 @@
     // Year in footer — guarded in case footer is loaded separately
     document.getElementById('year')?.textContent = new Date().getFullYear();
   </script>
+  <div id="footer"></div>
+  <script>
+  fetch("/footer/index.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("footer").innerHTML = data;
+    });
+  </script>
 </body>
 </html>
