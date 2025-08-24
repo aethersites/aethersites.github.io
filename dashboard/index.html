@@ -299,75 +299,77 @@
      
 <!-- START MARK  -->
 <!-- Avatar dropdown: paste before </body> -->
-<style id="gp-avatar-dropdown">
-/* Global dropdown rules */
-#avatarMenu, #avatarMenuMobile,
-#avatarMenu.gp-portal, #avatarMenuMobile.gp-portal {
-  position: fixed !important;
-  z-index: 2147483647 !important;
-  visibility: hidden !important;
-  box-sizing: border-box !important;
-  width: auto !important;
-  min-width: 160px !important;
-  max-width: calc(100% - 16px) !important;
-  overflow-y: auto !important;
-  max-height: calc(100vh - 32px) !important;
-  transition: none !important; /* deterministic placement */
-  left: auto !important;
-  top: auto !important;
-}
-
-/* ensure avatar images don't steal clicks */
-.gp-topnav #avatarBtn img,
-.gp-topnav #avatarBtnMobile img {
-  pointer-events: none !important;
-}
-
-/* ensure header area accepts pointer events */
-.gp-topnav, .gp-topnav * { pointer-events: auto !important; }
-</style>
-
-<script>
+      <script>
 (function () {
   function $id(id) { return document.getElementById(id); }
 
-  function placeMenu(btn, menu) {
-    if (!btn || !menu) return;
+  function ensurePortal(menu) {
+    if (!menu) return;
     if (menu.parentElement !== document.body) document.body.appendChild(menu);
     menu.classList.add('gp-portal');
+  }
+
+  // NOTE: uses both menu.dataset.gpLockedWidth and btn.dataset.gpLockedWidth fallback
+  function placeMenu(btn, menu) {
+    if (!btn || !menu) return;
+    ensurePortal(menu);
 
     menu.style.visibility = 'hidden';
     menu.hidden = false;
     menu.style.display = 'block';
     menu.style.position = 'fixed';
+    menu.style.boxSizing = 'border-box';
 
     const prevTrans = menu.style.transition;
     menu.style.transition = 'none';
 
-    let locked = menu.dataset.gpLockedWidth ? parseInt(menu.dataset.gpLockedWidth, 10) : null;
-    if (!locked) {
+    // Try to reuse locked width from menu OR button (button persists across menu replacements)
+    let locked = null;
+    if (menu.dataset && menu.dataset.gpLockedWidth) {
+      locked = parseInt(menu.dataset.gpLockedWidth, 10);
+    } else if (btn.dataset && btn.dataset.gpLockedWidth) {
+      locked = parseInt(btn.dataset.gpLockedWidth, 10);
+    }
+
+    if (!locked || Number.isNaN(locked)) {
+      // Clear any inline width constraints for honest measurement
       menu.style.width = 'auto';
       menu.style.minWidth = '';
       menu.style.maxWidth = '';
+
+      // Measure intrinsic content width (scrollWidth is reliable)
       const intrinsic = Math.ceil(menu.scrollWidth || 180);
       const maxW = Math.max(0, window.innerWidth - 16);
       locked = Math.min(intrinsic, maxW);
-      menu.dataset.gpLockedWidth = String(locked);
+
+      // Persist to both menu and button so menu node swaps won't lose the value
+      try {
+        menu.dataset.gpLockedWidth = String(locked);
+      } catch (e) { /* ignore if can't set */ }
+      try {
+        btn.dataset.gpLockedWidth = String(locked);
+      } catch (e) { /* ignore if can't set */ }
     }
 
+    // Apply locked width and reasonable height
     menu.style.width = locked + 'px';
     menu.style.minWidth = locked + 'px';
     menu.style.maxWidth = locked + 'px';
     menu.style.overflowY = 'auto';
     menu.style.maxHeight = (window.innerHeight - 32) + 'px';
 
+    // Position: right-align to button, flip if needed
     const rect = btn.getBoundingClientRect();
     const gap = 8;
-    let left = rect.right - locked;
+    const menuW = locked;
+    let left = rect.right - menuW;
     let top = rect.bottom + gap;
-    left = Math.max(8, Math.min(left, window.innerWidth - locked - 8));
-    if (top + menu.offsetHeight > window.innerHeight - 8) {
-      top = Math.max(8, rect.top - menu.offsetHeight - gap);
+
+    left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
+
+    const contentH = menu.scrollHeight || menu.offsetHeight || 0;
+    if (top + contentH > window.innerHeight - 8) {
+      top = Math.max(8, rect.top - contentH - gap);
     }
 
     menu.style.left = left + 'px';
@@ -381,11 +383,11 @@
 
   function openMenu(btn, menu) {
     placeMenu(btn, menu);
-    menu.setAttribute('data-gp-open','true');
-    btn.setAttribute('aria-expanded','true');
-    const first = menu.querySelector('[role="menuitem"]');
-    if (first) first.focus();
-    setTimeout(function(){ placeMenu(btn, menu); }, 45); // safety reflow
+    menu.setAttribute('data-gp-open', 'true');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+    const firstItem = menu.querySelector('[role="menuitem"], a, button');
+    if (firstItem) firstItem.focus();
+    setTimeout(function () { placeMenu(btn, menu); }, 45);
   }
 
   function closeMenu(btn, menu) {
@@ -393,10 +395,19 @@
     menu.hidden = true;
     menu.style.visibility = 'hidden';
     menu.removeAttribute('data-gp-open');
-    if (btn) btn.setAttribute('aria-expanded','false');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    // KEEP persisted gpLockedWidth on btn/menu to ensure stable reopen sizing
   }
 
-  function initDropdown() {
+  function onceAdd(el, ev, fn) {
+    if (!el) return;
+    if (!el._gp_listened) el._gp_listened = {};
+    if (el._gp_listened[ev]) return;
+    el.addEventListener(ev, fn);
+    el._gp_listened[ev] = true;
+  }
+
+  function bindControls() {
     const btn = $id('avatarBtn');
     const menu = $id('avatarMenu');
     const btnMobile = $id('avatarBtnMobile');
@@ -404,27 +415,21 @@
 
     if (!btn && !btnMobile) return;
 
-    function onceAdd(el, ev, fn) {
-      if (!el) return;
-      if (!el._gp_listened) el._gp_listened = {};
-      if (el._gp_listened[ev]) return;
-      el.addEventListener(ev, fn);
-      el._gp_listened[ev] = true;
-    }
-
     if (btn && menu) {
       onceAdd(btn, 'click', function (e) {
         e.stopPropagation();
-        const open = menu.getAttribute('data-gp-open') === 'true';
-        if (open) closeMenu(btn, menu); else openMenu(btn, menu);
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        const opened = menu.getAttribute('data-gp-open') === 'true';
+        if (opened) closeMenu(btn, menu); else openMenu(btn, menu);
       });
     }
 
     if (btnMobile && menuMobile) {
       onceAdd(btnMobile, 'click', function (e) {
         e.stopPropagation();
-        const open = menuMobile.getAttribute('data-gp-open') === 'true';
-        if (open) closeMenu(btnMobile, menuMobile); else openMenu(btnMobile, menuMobile);
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        const opened = menuMobile.getAttribute('data-gp-open') === 'true';
+        if (opened) closeMenu(btnMobile, menuMobile); else openMenu(btnMobile, menuMobile);
       });
     }
 
@@ -452,21 +457,28 @@
       if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenu(btn, menu);
       if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenu(btnMobile, menuMobile);
     }, true);
+
+    const top = document.querySelector('.gp-topnav');
+    if (top) {
+      top.style.pointerEvents = 'auto';
+      Array.from(top.querySelectorAll('*')).forEach(el => el.style.pointerEvents = 'auto');
+    }
   }
 
-  try { initDropdown(); } catch (e) {}
+  function init() { bindControls(); }
+
+  try { init(); } catch (e) { /* silent fail */ }
 
   const mo = new MutationObserver(function () {
-    if ($id('avatarBtn') || $id('avatarBtnMobile')) {
-      initDropdown();
-    }
+    if ($id('avatarBtn') || $id('avatarBtnMobile')) init();
   });
   mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initDropdown);
-  else setTimeout(initDropdown, 0);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else setTimeout(init, 0);
 })();
 </script>
+
 
 <!-- END MARK  -->
       
