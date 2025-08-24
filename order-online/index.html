@@ -4,72 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GoodPlates</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Avenir', sans-serif;
-      background-color: white;
-    }
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      background-color: white;
-    }
-    .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: black;
-    }
-    ul {
-      list-style: none;
-      display: flex;
-      gap: 2rem;
-      margin: 0;
-      padding: 0;
-      align-items: center;
-    }
-    li a {
-      text-decoration: none;
-      color: black;
-      font-size: 1rem;
-      transition: color 0.2s ease;
-    }
-    li a:hover {
-      color: gray;
-    }
-    .cta {
-      background-color: #16a34a;
-      color: white !important;
-      padding: 0.5rem 1.5rem;
-      border-radius: 999px; /* pill shape */
-      font-weight: medium;
-      transition: background-color 0.2s ease;
-    }
-    .cta:hover {
-      background-color: #12893d;
-    }
-  </style>
-</head>
-<body>
-
-<nav>
-  <div class="logo">GoodPlates</div>
-  <ul>
-    <li><a href="/recipes/">Recipes</a></li>
-    <li><a href="/grocery-list/">Grocery List</a></li>
-    <li><a href="/order-online/">Order Online</a></li>
-    <li><a href="/statistics/">Statistics</a></li>
-    <li><a href="/courses/">Courses</a></li>
-    <li><a href="/contact/">Contact</a></li>
-    <li><a href="/onboarding/" class="cta">Onboarding</a></li>
-  </ul>
-</nav>
-
-
-
-
+   <div id="global-header"></div>
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-2"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => document.querySelector("#global-header").innerHTML = html);
+</script>
 
 <!doctype html>
 <html lang="en">
@@ -682,5 +624,14 @@
     }
     renderAll();
   </script>
+   <div id="footer"></div>
+<script>
+  fetch("/footer/index.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("footer").innerHTML = data;
+    });
+</script>
+
 </body>
 </html>
