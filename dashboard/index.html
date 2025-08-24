@@ -296,31 +296,287 @@
         </div>
 
       </div>
-      <style id="gp-header-override">
-/* Scoped overrides so host CSS cannot easily break us */
-.gp-topnav img { display: block !important; }
-.gp-topnav #avatarBtn img, .gp-topnav #avatarBtnMobile img { pointer-events: none !important; }
+     
+  <style>
+    /* ===== GoodPlates tokens (minimal replacements) ===== */
+    :root{
+      --bg: #ffffff;               /* page background */
+      --fg: #0f172a;               /* primary text (black-ish) */
+      --muted: #6b7280;            /* muted text */
+      --muted-2: #9ca3af;          /* secondary muted */
+      --border: #e5e7eb;           /* card border */
+      --surface: #ffffff;          /* card surface */
+      --surface-2: #f3f4f6;        /* subtle panel bg */
+      --primary: #16a34a;          /* green-600 */
+      --primary-700: #15803d;      /* green-700 */
+      --primary-100: #dcfce7;      /* green-100 */
+      --ring: rgba(16,185,129,.35);
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(2,6,23,.06);
+      --radius: 16px;
+      --accent: var(--primary);
+      --accent-soft: rgba(22,163,74,0.08);
+      --card: var(--surface);
+    }
 
-/* DO NOT force left/top here — JS will position. Constrain the width. */
-.gp-topnav #avatarMenu,
-.gp-topnav #avatarMenuMobile {
-  position: fixed !important;               /* keep fixed so it's on body */
-  z-index: 2147483647 !important;           /* stay on top */
-  visibility: hidden !important;            /* JS will set visible */
-  box-sizing: border-box !important;
-  width: auto !important;                   /* prefer intrinsic size */
-  min-width: 180px !important;              /* keep your menu readable */
-  max-width: calc(100% - 700px) !important;  /* never wider than viewport minus margin */
-  right: auto !important;
-  left: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-}
+    /* Base */
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
 
-/* Make sure header children accept pointer events (small safety) */
-.gp-topnav, .gp-topnav * { pointer-events: auto !important; }
-</style>
+    /* minimal tweaks to match GoodPlates card styles while preserving layout */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
 
+    /* override a few Tailwind utility colors used in markup so they match tokens (keeps utility classes) */
+    .text-slate-700 { color: var(--fg) !important; }
+    .text-slate-600 { color: var(--muted) !important; }
+    .text-slate-500 { color: var(--muted) !important; }
+    .text-slate-400 { color: var(--muted-2) !important; }
+    .text-slate-800 { color: var(--fg) !important; }
+
+    .bg-white { background: var(--surface) !important; }
+    .bg-green-50 { background: var(--primary-100) !important; }
+    .bg-slate-50 { background: var(--surface-2) !important; }
+
+    .border-slate-100 { border-color: var(--border) !important; }
+    .rounded-md { border-radius: 10px !important; }
+
+    /* make sure generic images elsewhere don't change our avatar behavior */
+    img { display:block; max-width:100%; height:auto; }
+  </style>
+
+  <!-- Header-scoped override (important: does NOT force left/top; constrains width) -->
+  <style id="gp-header-override">
+    /* Scoped overrides so host CSS cannot easily break us */
+    .gp-topnav img { display: block !important; }
+    .gp-topnav #avatarBtn img, .gp-topnav #avatarBtnMobile img { pointer-events: none !important; }
+
+    /* Constrain the dropdown; JS will set position and visibility inline */
+    .gp-topnav #avatarMenu,
+    .gp-topnav #avatarMenuMobile {
+      position: fixed !important;               /* keep fixed so it's on body */
+      z-index: 2147483647 !important;           /* stay on top */
+      visibility: hidden !important;            /* JS will set visible */
+      box-sizing: border-box !important;
+      width: auto !important;                   /* prefer intrinsic size */
+      min-width: 180px !important;              /* keep your menu readable */
+      max-width: calc(100% - 16px) !important;  /* never wider than viewport minus margin */
+      right: auto !important;
+      left: auto !important;
+      top: auto !important;
+      bottom: auto !important;
+    }
+
+    /* Small safety: ensure header children accept pointer events */
+    .gp-topnav, .gp-topnav * { pointer-events: auto !important; }
+  </style>
+</head>
+
+<body class="antialiased">
+
+  <!-- header will be injected here by fetch -->
+  <div id="global-header"></div>
+
+  <script>
+    // change the filename depending on the page/user state
+    const headerType = "header-2"; // "header-2" or "header-3"
+    fetch(`/header/${headerType}.html`)
+      .then(res => res.text())
+      .then(html => document.querySelector("#global-header").innerHTML = html)
+      .catch(err => console.error('failed to load header:', err));
+  </script>
+
+  <div class="flex min-h-screen">
+    <!-- Main content -->
+    <main class="flex-1 p-8">
+      <!-- (Your page content left intact — omitted here for brevity in this example, but in your page keep everything) -->
+
+      <!-- --- Insert the dashboard content you already had below --- -->
+      <!-- (I preserved your layout and components unchanged) -->
+
+      <!-- Example card to show layout (in your full file keep all the markup you posted) -->
+      <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-4 card p-6">
+          <div class="text-slate-600 font-semibold">Calorie Summary</div>
+          <div id="bigKcal" class="mt-4 text-3xl font-bold text-slate-800">-- kcal</div>
+        </div>
+        <!-- ... rest of your dashboard ... -->
+      </div>
+
+      <!-- ensure the header override style block isn't duplicated later -->
+    </main>
+  </div>
+
+  <script type="module" src="../dashboard/dashboard.js"></script>
+
+  <div id="footer"></div>
+  <script>
+    fetch("/footer/index.html")
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("footer").innerHTML = data;
+      })
+      .catch(err => console.error('failed to load footer:', err));
+  </script>
+
+  <!-- Robust avatar dropdown script (updated placeMenuFixed + MutationObserver) -->
+  <script>
+  (function () {
+    // Utility: safe query
+    function $id(id) { return document.getElementById(id); }
+
+    // Updated placeMenuFixed: set width constraints inline and position using JS (no CSS left/top !important fighting it)
+    function placeMenuFixed(btn, menu) {
+      if (!btn || !menu) return;
+      // Ensure menu is child of body to avoid clipping
+      if (menu.parentElement !== document.body) document.body.appendChild(menu);
+
+      // Make menu measurable without flashing
+      menu.style.visibility = 'hidden';
+      menu.hidden = false;
+      menu.style.display = 'block';
+      menu.style.position = 'fixed';
+      menu.style.boxSizing = 'border-box';
+
+      // ensure it uses intrinsic width but never exceeds viewport
+      menu.style.width = 'auto';
+      menu.style.minWidth = '180px';
+      menu.style.maxWidth = (Math.max(0, window.innerWidth - 16)) + 'px'; // 8px padding each side
+
+      // measure after width constraints
+      const rect = btn.getBoundingClientRect();
+      const menuW = menu.offsetWidth;
+      const menuH = menu.offsetHeight;
+
+      // prefer right-aligned with small offset
+      let left = rect.right - menuW;
+      let top = rect.bottom + 8; // 8px gap
+
+      // keep inside viewport horizontally
+      left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
+
+      // keep inside viewport vertically; flip above if needed
+      if (top + menuH > window.innerHeight - 8) {
+        top = Math.max(8, rect.top - menuH - 8);
+      }
+
+      menu.style.left = left + 'px';
+      menu.style.top = top + 'px';
+      menu.style.visibility = 'visible';
+    }
+
+    function openMenu(btn, menu) {
+      placeMenuFixed(btn, menu);
+      menu.setAttribute('data-gp-open', 'true');
+      btn.setAttribute('aria-expanded', 'true');
+      const first = menu.querySelector('[role="menuitem"]');
+      if (first) first.focus();
+      // small reflow safety: re-place after a tick in case host layout shifts
+      setTimeout(function () { placeMenuFixed(btn, menu); }, 30);
+    }
+
+    function closeMenu(btn, menu) {
+      if (!menu) return;
+      menu.hidden = true;
+      menu.style.visibility = 'hidden';
+      menu.removeAttribute('data-gp-open');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
+
+    function initAvatarDropdown() {
+      const btn = $id('avatarBtn');
+      const menu = $id('avatarMenu');
+      const btnMobile = $id('avatarBtnMobile');
+      const menuMobile = $id('avatarMenuMobile');
+
+      // nothing to bind yet
+      if (!btn && !btnMobile) return;
+
+      function onceAdd(el, ev, fn) {
+        if (!el) return;
+        if (!el._gp_listened) el._gp_listened = {};
+        if (el._gp_listened[ev]) return;
+        el.addEventListener(ev, fn);
+        el._gp_listened[ev] = true;
+      }
+
+      if (btn && menu) {
+        onceAdd(btn, 'click', function (e) {
+          e.stopPropagation();
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+          const isOpen = menu.getAttribute('data-gp-open') === 'true';
+          if (isOpen) closeMenu(btn, menu);
+          else openMenu(btn, menu);
+        });
+      }
+      if (btnMobile && menuMobile) {
+        onceAdd(btnMobile, 'click', function (e) {
+          e.stopPropagation();
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+          const isOpen = menuMobile.getAttribute('data-gp-open') === 'true';
+          if (isOpen) closeMenu(btnMobile, menuMobile);
+          else openMenu(btnMobile, menuMobile);
+        });
+      }
+
+      onceAdd(document, 'click', function (e) {
+        if (menu && menu.getAttribute('data-gp-open') === 'true') {
+          if (!menu.contains(e.target) && !(btn && btn.contains(e.target))) {
+            closeMenu(btn, menu);
+          }
+        }
+        if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') {
+          if (!menuMobile.contains(e.target) && !(btnMobile && btnMobile.contains(e.target))) {
+            closeMenu(btnMobile, menuMobile);
+          }
+        }
+      });
+
+      onceAdd(document, 'keydown', function (e) {
+        if (e.key === 'Escape') {
+          if (menu && menu.getAttribute('data-gp-open') === 'true') closeMenu(btn, menu);
+          if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') closeMenu(btnMobile, menuMobile);
+        }
+      });
+
+      onceAdd(window, 'resize', function () {
+        if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenuFixed(btn, menu);
+        if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenuFixed(btnMobile, menuMobile);
+      });
+      onceAdd(window, 'scroll', function () {
+        if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenuFixed(btn, menu);
+        if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenuFixed(btnMobile, menuMobile);
+      }, true);
+
+      // safety: ensure header area isn't pointer-blocked by host
+      const top = document.querySelector('.gp-topnav');
+      if (top) { top.style.pointerEvents = 'auto'; Array.from(top.querySelectorAll('*')).forEach(el => el.style.pointerEvents = 'auto'); }
+    }
+
+    // run now (if header already present) and also watch for header injection
+    try { initAvatarDropdown(); } catch (e) { /* silent */ }
+
+    const mo = new MutationObserver(function () {
+      const found = document.getElementById('avatarBtn') || document.getElementById('avatarBtnMobile');
+      if (found) initAvatarDropdown();
+    });
+    mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAvatarDropdown);
+    } else {
+      setTimeout(initAvatarDropdown, 0);
+    }
+  })();
+  </script>
 
     </main>
   </div>
