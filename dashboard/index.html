@@ -296,6 +296,182 @@
         </div>
 
       </div>
+<!-- Drop-in: header override + robust avatar dropdown -->
+<style id="gp-header-override">
+/* Scoped overrides so host CSS cannot easily break us */
+.gp-topnav img { display: block !important; }
+.gp-topnav #avatarBtn img, .gp-topnav #avatarBtnMobile img { pointer-events: none !important; }
+.gp-topnav #avatarMenu, .gp-topnav #avatarMenuMobile {
+  position: fixed !important; /* use fixed to avoid clipping/overflow */
+  z-index: 2147483647 !important; /* extremely high to stay on top */
+  visibility: hidden !important;  /* hidden by default; we'll show via JS */
+  left: 0 !important; top: 0 !important; /* init position */
+  transform-origin: top right;
+  box-sizing: border-box;
+}
+.gp-topnav, .gp-topnav * { pointer-events: auto !important; }
+</style>
+
+<script>
+(function () {
+  // Utility: safe query
+  function $id(id) { return document.getElementById(id); }
+
+  // Move menu to body and position it anchored to the button (right-aligned)
+  function placeMenuFixed(btn, menu) {
+    if (!btn || !menu) return;
+    // Ensure menu is child of body to avoid clipping
+    if (menu.parentElement !== document.body) document.body.appendChild(menu);
+
+    // Make menu measurable without flashing: make visible but invisible visually
+    menu.style.visibility = 'hidden';
+    menu.hidden = false;
+    menu.style.display = 'block';
+    menu.style.position = 'fixed';
+
+    // measure
+    const rect = btn.getBoundingClientRect();
+    const menuW = menu.offsetWidth;
+    const menuH = menu.offsetHeight;
+    // prefer right-aligned with small offset
+    let left = rect.right - menuW;
+    let top = rect.bottom + 8; // 8px gap
+
+    // keep it inside viewport
+    left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
+    if (top + menuH > window.innerHeight - 8) {
+      // if doesn't fit below, open upward
+      top = Math.max(8, rect.top - menuH - 8);
+    }
+
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+    menu.style.visibility = 'visible';
+  }
+
+  function openMenu(btn, menu) {
+    // prevent other click handlers on the same event from closing us immediately
+    // (we call this from our button click handler so we can stopImmediatePropagation there)
+    placeMenuFixed(btn, menu);
+    menu.setAttribute('data-gp-open', 'true');
+    btn.setAttribute('aria-expanded', 'true');
+    // focus first menuitem
+    const first = menu.querySelector('[role="menuitem"]');
+    if (first) first.focus();
+  }
+
+  function closeMenu(btn, menu) {
+    if (!menu) return;
+    menu.hidden = true;
+    menu.style.visibility = 'hidden';
+    menu.removeAttribute('data-gp-open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+
+  // Robust initializer that binds handlers; safe to call repeatedly.
+  function initAvatarDropdown() {
+    const btn = $id('avatarBtn');
+    const menu = $id('avatarMenu');
+    const btnMobile = $id('avatarBtnMobile');
+    const menuMobile = $id('avatarMenuMobile');
+
+    // If no header found yet, just bail (will be retried by MutationObserver)
+    if (!btn && !btnMobile) return;
+
+    // Helper to attach one handler once
+    function onceAdd(el, ev, fn) {
+      if (!el || el._gp_listened && el._gp_listened[ev]) return;
+      el.addEventListener(ev, fn);
+      el._gp_listened = el._gp_listened || {};
+      el._gp_listened[ev] = true;
+    }
+
+    if (btn && menu) {
+      onceAdd(btn, 'click', function (e) {
+        // ensure the image inside doesn't intercept; we already set pointer-events none in CSS,
+        // but defensively stop propagation to prevent host doc handlers from stealing the event.
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        const isOpen = menu.getAttribute('data-gp-open') === 'true';
+        if (isOpen) closeMenu(btn, menu);
+        else openMenu(btn, menu);
+      });
+    }
+
+    if (btnMobile && menuMobile) {
+      onceAdd(btnMobile, 'click', function (e) {
+        e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        const isOpen = menuMobile.getAttribute('data-gp-open') === 'true';
+        if (isOpen) closeMenu(btnMobile, menuMobile);
+        else openMenu(btnMobile, menuMobile);
+      });
+    }
+
+    // Close on any outside click. Use capture to ensure we run early, but we also check target.
+    onceAdd(document, 'click', function (e) {
+      // if either menu is open and click outside, close
+      if (menu && menu.getAttribute('data-gp-open') === 'true') {
+        if (!menu.contains(e.target) && !(btn && btn.contains(e.target))) {
+          closeMenu(btn, menu);
+        }
+      }
+      if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') {
+        if (!menuMobile.contains(e.target) && !(btnMobile && btnMobile.contains(e.target))) {
+          closeMenu(btnMobile, menuMobile);
+        }
+      }
+    });
+
+    // Close on Escape
+    onceAdd(document, 'keydown', function (e) {
+      if (e.key === 'Escape') {
+        if (menu && menu.getAttribute('data-gp-open') === 'true') closeMenu(btn, menu);
+        if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') closeMenu(btnMobile, menuMobile);
+      }
+    });
+
+    // Reposition on scroll/resize when open
+    onceAdd(window, 'resize', function () {
+      if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenuFixed(btn, menu);
+      if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenuFixed(btnMobile, menuMobile);
+    });
+    onceAdd(window, 'scroll', function () {
+      if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenuFixed(btn, menu);
+      if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenuFixed(btnMobile, menuMobile);
+    }, true);
+  }
+
+  // Try to init now; if header is injected later, a MutationObserver will retry.
+  try { initAvatarDropdown(); } catch (e) { /* silent */ }
+
+  // Watch for header insertion or if the host rewrites header markup dynamically.
+  const mo = new MutationObserver((mutations) => {
+    // Check presence of avatar button or menu
+    const found = document.getElementById('avatarBtn') || document.getElementById('avatarBtnMobile');
+    if (found) {
+      initAvatarDropdown();
+    }
+  });
+  mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+
+  // Also re-run init after DOMContentLoaded if it hasn't run yet.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAvatarDropdown);
+  } else {
+    // ensure re-init after a microtask to allow late-scripts to finish
+    setTimeout(initAvatarDropdown, 0);
+  }
+
+  // Small safety: if host page sets pointer-events none on header, undo it
+  (function clearHostPointerBlockers() {
+    const top = document.querySelector('.gp-topnav');
+    if (!top) return;
+    // make sure the topnav and its children can receive pointer events
+    top.style.pointerEvents = 'auto';
+    Array.from(top.querySelectorAll('*')).forEach(el => { el.style.pointerEvents = 'auto'; });
+  })();
+})();
+</script>
 
     </main>
   </div>
