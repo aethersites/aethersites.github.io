@@ -498,5 +498,204 @@
 #avatarMenu { z-index: 1201 !important; position: absolute; } /* keep absolute but higher z */
 </style>
 
+
+     // START MARK
+  <!-- Paste this right before </body> on pages that load header-2 -->
+<style id="gp-avatar-override">
+/* Header-scoped overrides only (safe & specific) */
+.gp-topnav img { display: block !important; }
+.gp-topnav #avatarBtn img,
+.gp-topnav #avatarBtnMobile img { pointer-events: none !important; }
+
+/* Constrain the dropdown: JS will set exact left/top/width inline */
+.gp-topnav #avatarMenu,
+.gp-topnav #avatarMenuMobile {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  visibility: hidden !important;
+  box-sizing: border-box !important;
+  width: auto !important;
+  min-width: 180px !important;
+  max-width: calc(100% - 16px) !important;
+  overflow-y: auto !important;
+  max-height: calc(100vh - 32px) !important;
+  transition: none !important; /* make sizing deterministic */
+}
+
+/* Safety: ensure header area accepts pointer events */
+.gp-topnav, .gp-topnav * { pointer-events: auto !important; }
+</style>
+
+<script>
+(function () {
+  // Small, resilient dropdown bootstrap you can drop into pages.
+  // Paste this at bottom of page (after header fetch); it will wait for elements if needed.
+
+  function $id(id) { return document.getElementById(id); }
+
+  // Deterministic placement: measure intrinsic width, lock it, position right-aligned.
+  function placeMenuFixed(btn, menu) {
+    if (!btn || !menu) return;
+    // ensure menu lives under body to avoid clipping
+    if (menu.parentElement !== document.body) document.body.appendChild(menu);
+
+    // Prepare menu for measurement
+    menu.style.visibility = 'hidden';
+    menu.hidden = false;
+    menu.style.display = 'block';
+    menu.style.position = 'fixed';
+    menu.style.boxSizing = 'border-box';
+
+    // Temporarily remove width constraints, measure intrinsic width
+    menu.style.width = 'auto';
+    menu.style.minWidth = '';
+    menu.style.maxWidth = '';
+
+    // Temporarily disable transitions (CSS may be loaded by host)
+    const prevTrans = menu.style.transition;
+    menu.style.transition = 'none';
+
+    const intrinsicW = Math.ceil(menu.scrollWidth || 180);
+    const maxW = Math.max(0, window.innerWidth - 16); // 8px margin both sides
+    const finalW = Math.min(intrinsicW, maxW);
+
+    // Lock width and sensible height
+    menu.style.width = finalW + 'px';
+    menu.style.minWidth = finalW + 'px';
+    menu.style.maxWidth = finalW + 'px';
+    menu.style.overflowY = 'auto';
+    menu.style.maxHeight = (window.innerHeight - 32) + 'px';
+
+    // Compute coordinates (right-aligned)
+    const rect = btn.getBoundingClientRect();
+    let left = rect.right - finalW;
+    let top = rect.bottom + 8;
+
+    left = Math.max(8, Math.min(left, window.innerWidth - finalW - 8));
+
+    // flip up if there's no room below
+    if (top + menu.offsetHeight > window.innerHeight - 8) {
+      top = Math.max(8, rect.top - menu.offsetHeight - 8);
+    }
+
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+
+    // restore transition after a paint
+    requestAnimationFrame(function () {
+      menu.style.transition = prevTrans || '';
+      menu.style.visibility = 'visible';
+    });
+  }
+
+  function openMenu(btn, menu) {
+    placeMenuFixed(btn, menu);
+    menu.setAttribute('data-gp-open', 'true');
+    btn.setAttribute('aria-expanded', 'true');
+    const first = menu.querySelector('[role="menuitem"]');
+    if (first) first.focus();
+    // safety reflow for hosts that mutate layout
+    setTimeout(function () { placeMenuFixed(btn, menu); }, 40);
+  }
+
+  function closeMenu(btn, menu) {
+    if (!menu) return;
+    menu.hidden = true;
+    menu.style.visibility = 'hidden';
+    menu.removeAttribute('data-gp-open');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+    // remove locked width so next open re-measures cleanly
+    menu.style.width = '';
+    menu.style.minWidth = '';
+    menu.style.maxWidth = '';
+  }
+
+  // Binds handlers; safe to call repeatedly.
+  function initAvatarDropdown() {
+    const btn = $id('avatarBtn');
+    const menu = $id('avatarMenu');
+    const btnMobile = $id('avatarBtnMobile');
+    const menuMobile = $id('avatarMenuMobile');
+
+    if (!btn && !btnMobile) return; // not present yet
+
+    function onceAdd(el, ev, fn) {
+      if (!el) return;
+      if (!el._gp_listened) el._gp_listened = {};
+      if (el._gp_listened[ev]) return;
+      el.addEventListener(ev, fn);
+      el._gp_listened[ev] = true;
+    }
+
+    if (btn && menu) {
+      onceAdd(btn, 'click', function (e) {
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        const isOpen = menu.getAttribute('data-gp-open') === 'true';
+        if (isOpen) closeMenu(btn, menu);
+        else openMenu(btn, menu);
+      });
+    }
+
+    if (btnMobile && menuMobile) {
+      onceAdd(btnMobile, 'click', function (e) {
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        const isOpen = menuMobile.getAttribute('data-gp-open') === 'true';
+        if (isOpen) closeMenu(btnMobile, menuMobile);
+        else openMenu(btnMobile, menuMobile);
+      });
+    }
+
+    onceAdd(document, 'click', function (e) {
+      if (menu && menu.getAttribute('data-gp-open') === 'true') {
+        if (!menu.contains(e.target) && !(btn && btn.contains(e.target))) closeMenu(btn, menu);
+      }
+      if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') {
+        if (!menuMobile.contains(e.target) && !(btnMobile && btnMobile.contains(e.target))) closeMenu(btnMobile, menuMobile);
+      }
+    });
+
+    onceAdd(document, 'keydown', function (e) {
+      if (e.key === 'Escape') {
+        if (menu && menu.getAttribute('data-gp-open') === 'true') closeMenu(btn, menu);
+        if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') closeMenu(btnMobile, menuMobile);
+      }
+    });
+
+    onceAdd(window, 'resize', function () {
+      if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenuFixed(btn, menu);
+      if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenuFixed(btnMobile, menuMobile);
+    });
+    onceAdd(window, 'scroll', function () {
+      if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenuFixed(btn, menu);
+      if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenuFixed(btnMobile, menuMobile);
+    }, true);
+
+    // Ensure header area isn't pointer-blocked by host
+    const top = document.querySelector('.gp-topnav');
+    if (top) {
+      top.style.pointerEvents = 'auto';
+      Array.from(top.querySelectorAll('*')).forEach(el => { el.style.pointerEvents = 'auto'; });
+    }
+  }
+
+  // Try init immediately; also observe DOM for asynchronous header injection.
+  try { initAvatarDropdown(); } catch (e) { /* ignore */ }
+
+  const mo = new MutationObserver(function () {
+    if (document.getElementById('avatarBtn') || document.getElementById('avatarBtnMobile')) {
+      initAvatarDropdown();
+    }
+  });
+  mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAvatarDropdown);
+  else setTimeout(initAvatarDropdown, 0);
+})();
+</script>
+
+
+ // FINISH MARK
 </body>
 </html>
