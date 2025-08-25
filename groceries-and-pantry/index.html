@@ -30,10 +30,16 @@
     .sitebar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; }
     .brand { font-weight:700; font-size:18px; color:#111827 }
     .auth-actions { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:13px }
+.lists {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
 
-.lists { display:grid; grid-template-columns: 1fr; gap:var(--gap); }
-    @media (max-width:920px) { .lists { grid-template-columns: 1fr; } }
-
+.lists > * {
+  width: 100%;      /* makes each child fill the width */
+  margin: 0;        /* remove any accidental margins */
+}
     .box { background:var(--panel-bg); border-radius:12px; padding:18px; border:1px solid var(--border); box-shadow: 0 6px 20px rgba(11,18,32,0.06), 0 1px 0 rgba(255,255,255,0.4) inset; transition: box-shadow 180ms ease, transform 180ms ease; }
     .box.drag-target { outline: 3px dashed var(--accent); outline-offset: 6px; background-color: rgba(31,138,61,0.03); }
     .box h2 { margin:0 0 8px; font-size:18px; text-align:left; }
