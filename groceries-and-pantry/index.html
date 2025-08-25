@@ -209,14 +209,6 @@
     </div>
   </div>
   <script type="module">
-    <div id="footer"></div>
-<script>
-  fetch("/footer/index.html")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById("footer").innerHTML = data;
-    });
-</script>
 
     // single, consolidated script: imports, helpers, DOM wiring, auth & firestore logic
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
