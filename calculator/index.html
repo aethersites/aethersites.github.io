@@ -121,8 +121,23 @@
 
     /* small highlight for recommended row */
     .recommended{background: linear-gradient(90deg, rgba(10,132,255,0.06), transparent); border-left:4px solid var(--accent); padding-left:8px}
+    /* Prevent injected header child margins from collapsing & force flow-root */
+#global-header,
+#global-header > * {
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flow-root;
+  box-sizing: border-box;
+}
+
+/* Make the fetched footer full width and not inherit container padding */
+#footer {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
   </style>
- </div>
 </head>
 <body>
   <div id="global-header"></div>
@@ -326,6 +341,7 @@
         <tbody id="zigzag"><tr><td colspan="3" class="muted" style="text-align:center">— calculate to generate week —</td></tr></tbody>
       </table>
     </section>
+      </div>
 
   <!-- --- MOVED: modal markup placed BEFORE the script so it's present when JS runs --- -->
   <div id="wg_modal" style="display:none;">
