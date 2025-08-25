@@ -241,71 +241,93 @@
         </div>
       </div>
 
-      <!-- Recent Transactions -->
-      <div class="border border-green-200 rounded-xl bg-white p-6 mb-12">
-        <h3 class="text-lg font-semibold mb-2">⏰ Recent Transactions</h3>
-        <p class="text-sm text-green-800/70 mb-4">Your latest grocery purchases and spending</p>
+      <!-- container/wrapper -->
+<div class="max-w-5xl mx-auto p-6 space-y-6">
 
-        <div id="recentTransactions" class="space-y-4">
-          <!-- JS will populate recent transaction rows here -->
-          <div class="text-sm muted">No transactions yet</div>
+  <!-- Recent Transactions -->
+  <div class="border border-green-200 rounded-xl bg-white p-6">
+    <h3 class="text-lg font-semibold mb-2">⏰ Recent Transactions</h3>
+    <p class="text-sm text-green-800/70 mb-4">Your latest grocery purchases and spending</p>
+
+    <div id="recentTransactions" class="space-y-4">
+      <!-- JS will populate recent transaction rows here -->
+      <div class="text-sm text-gray-500">No transactions yet</div>
+    </div>
+
+    <div class="text-center mt-6">
+      <button class="px-4 py-2 border border-green-300 rounded-lg text-green-700 hover:bg-green-100">
+        View All Transactions
+      </button>
+    </div>
+  </div>
+
+  <!-- Savings Tips -->
+  <div class="border-2 border-green-300 rounded-xl bg-white p-6 shadow">
+    <h3 class="text-lg font-semibold mb-2">🎯 Smart Savings Tips</h3>
+    <p class="text-sm text-green-800/70 mb-6">Personalized recommendations to optimize your grocery budget</p>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <!-- Tip 1 -->
+      <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
+        <div class="flex justify-between">
+          <h4 class="font-semibold">Switch to seasonal produce</h4>
+          <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Easy</span>
         </div>
-
-        <div class="text-center mt-6">
-          <button class="px-4 py-2 border border-green-300 rounded-lg text-green-700 hover:bg-green-100">View All Transactions</button>
-        </div>
-      </div>
-
-      <!-- Savings Tips -->
-      <div class="border-2 border-green-300 rounded-xl bg-white p-6 shadow">
-        <h3 class="text-lg font-semibold mb-2">🎯 Smart Savings Tips</h3>
-        <p class="text-sm text-green-800/70 mb-6">Personalized recommendations to optimize your grocery budget</p>
-
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
-            <div class="flex justify-between">
-              <h4 class="font-semibold">Switch to seasonal produce</h4>
-              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Easy</span>
-            </div>
-            <p class="text-sm text-green-800/80">Save 15-20% by choosing in-season vegetables and fruits</p>
-            <div class="flex justify-between items-center">
-              <span class="text-lg font-bold text-green-700">$12-15/week</span>
-              <button class="px-3 py-1 border border-green-300 rounded text-green-700 hover:bg-green-100 text-sm">Try This</button>
-            </div>
-          </div>
-
-          <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
-            <div class="flex justify-between">
-              <h4 class="font-semibold">Buy generic brands</h4>
-              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Easy</span>
-            </div>
-            <p class="text-sm text-green-800/80">Generic staples can save you up to 30% without compromising quality</p>
-            <div class="flex justify-between items-center">
-              <span class="text-lg font-bold text-green-700">$8-12/week</span>
-              <button class="px-3 py-1 border border-green-300 rounded text-green-700 hover:bg-green-100 text-sm">Try This</button>
-            </div>
-          </div>
-
-          <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
-            <div class="flex justify-between">
-              <h4 class="font-semibold">Meal prep on Sundays</h4>
-              <span class="text-xs bg
-              </div>
-            </div>
-          </div>
+        <p class="text-sm text-green-800/80">Save 15–20% by choosing in-season vegetables and fruits.</p>
+        <div class="flex justify-between items-center">
+          <span class="text-lg font-bold text-green-700">$12–15/week</span>
+          <button class="px-3 py-1 border border-green-300 rounded text-green-700 hover:bg-green-100 text-sm">
+            Try This
+          </button>
         </div>
       </div>
 
-   <script type="module">
-  <script src="../statistics/statistics.js"></script>
-<div id="footer"></div>
-<script>
-  fetch("/footer/index.html")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById("footer").innerHTML = data;
-    });
-</script>
+      <!-- Tip 2 -->
+      <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
+        <div class="flex justify-between">
+          <h4 class="font-semibold">Buy generic brands</h4>
+          <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Easy</span>
+        </div>
+        <p class="text-sm text-green-800/80">Generic staples can save you up to 30% without compromising quality.</p>
+        <div class="flex justify-between items-center">
+          <span class="text-lg font-bold text-green-700">$8–12/week</span>
+          <button class="px-3 py-1 border border-green-300 rounded text-green-700 hover:bg-green-100 text-sm">
+            Try This
+          </button>
+        </div>
+      </div>
+
+      <!-- Tip 3 (fixed) -->
+      <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
+        <div class="flex justify-between">
+          <h4 class="font-semibold">Meal prep on Sundays</h4>
+          <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Medium</span>
+        </div>
+        <p class="text-sm text-green-800/80">Batch cook staples to avoid takeout and reduce food waste — freeze portions for quick meals.</p>
+        <div class="flex justify-between items-center">
+          <span class="text-lg font-bold text-green-700">$5–10/week</span>
+          <button class="px-3 py-1 border border-green-300 rounded text-green-700 hover:bg-green-100 text-sm">
+            Try This
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- script(s) -->
+  <script type="module" src="../statistics/statistics.js"></script>
+
+  <!-- footer -->
+  <footer id="footer" class="mt-12"></footer>
+  <script>
+    fetch("/footer/index.html")
+      .then(res => res.text())
+      .then(data => { document.getElementById("footer").innerHTML = data; })
+      .catch(err => { console.error("Failed loading footer:", err); });
+  </script>
+
+</div>
+
 <!-- START MARK  -->
 <!-- Avatar dropdown: paste before </body> -->
       <script>
