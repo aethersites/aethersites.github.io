@@ -6,6 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Calorie & Macro Calculator — Apple-style</title>
 
+<div id="global-header"></div>
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-1"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => document.querySelector("#global-header").innerHTML = html);
+</script>
 
   <meta name="description" content="A clean, rounded calorie calculator that estimates BMR, TDEE, and goal calories for losing or gaining weight. Includes macros and zigzag plan." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -131,7 +139,8 @@
     <header>
       <div>
         <h1>Calorie & Macro Calculator</h1>
-        <div class="subtitle">Rounded, clean, Apple-style UI. Pick your units, activity, and goals; get calories for maintenance, losing, or gaining—plus macros and a zigzag week.</div>
+          <br>
+        <div class="subtitle">Pick your units, activity, and goals; get calories for maintenance, losing, or gaining—plus macros and a zigzag week.</div>
       </div>
     </header>
 
