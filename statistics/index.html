@@ -312,7 +312,6 @@
         </div>
       </div>
     </div>
-  </div>
 
   <!-- script(s) -->
   <script type="module" src="../statistics/statistics.js"></script>
@@ -502,14 +501,13 @@
 -->
 
 <!-- Footer moved here to be a separate section at the bottom-right -->
-<footer id="footer" class="mt-12 text-right pr-6"></footer>
-<script>
-  fetch("/footer/index.html")
-    .then(res => res.text())
-    .then(data => { document.getElementById("footer").innerHTML = data; })
-    .catch(err => { console.error("Failed loading footer:", err); });
-</script>
-
+ 
+ <footer id="footer" class="mt-12 text-right pr-6"></footer>
+    <script>
+      fetch("/footer/index.html")
+        .then(res => res.text())
+        .then(data => { document.getElementById("footer").innerHTML = data; })
+        .catch(err => { console.error("Failed loading footer:", err); });
+    </script>
 </body>
-
 </html>
