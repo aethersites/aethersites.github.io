@@ -1,190 +1,42 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Groceries & Pantry</title>
-  <style>
-    :root{
-      --page-bg: #ffffff;
-      --panel-bg: #ffffff;
-      --muted: #6b7280;
-      --border: #e6e6e6;
-      --accent: #1f8a3d;
-      --radius-lg: 18px;
-      --radius: 10px;
-      --input-h: 40px;
-      --gap: 18px;
-      --max-width: 1100px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%; margin:0; background:var(--page-bg); font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-    body{padding:28px; color:#0b1220; -webkit-font-smoothing:antialiased; display:flex; justify-content:center;}
-    .canvas { width:100%; max-width:var(--max-width); border-radius:var(--radius-lg); background:var(--panel-bg); padding:28px; }
-    .page-heading { text-align:center; margin:0 0 10px; }
-    .page-heading h1 { margin:0; font-size:28px; font-weight:800; }
-    .page-heading p { margin:8px 0 0; color:var(--muted); }
-    .settings-gear { position:relative; float:right; transform:translateY(-54px); opacity:.6; }
-    .sitebar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; }
-    .brand { font-weight:700; font-size:18px; color:#111827 }
-    .auth-actions { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:13px }
-    .lists { display:grid; grid-template-columns: 1fr 1fr; gap:var(--gap); margin-top:6px; }
-    @media (max-width:920px) { .lists { grid-template-columns: 1fr; } }
-    .box { background:var(--panel-bg); border-radius:12px; padding:18px; border:1px solid var(--border);
-      box-shadow: 0 6px 20px rgba(11,18,32,0.06), 0 1px 0 rgba(255,255,255,0.4) inset; transition: box-shadow 180ms ease, transform 180ms ease; }
-    .box.drag-target { outline: 3px dashed var(--accent); outline-offset: 6px; background-color: rgba(31,138,61,0.03); }
-    .box h2 { margin:0 0 8px; font-size:18px; text-align:left; }
-    .note { color:var(--muted); font-size:13px; margin-bottom:10px; }
-    table { width:100%; border-collapse:collapse; margin-bottom:10px; }
-    thead th { text-align:left; padding:8px 6px; color:var(--muted); font-weight:700; font-size:13px; border-bottom:1px solid #f4f4f4; }
-    td { padding:10px 6px; border-bottom:1px solid #fafafa; font-size:14px; vertical-align:middle; }
-    td.actions { width:200px; text-align:right; }
-    .inline { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; }
-    .inline input[type="text"], .inline input[type="number"], select.currency {
-      height:var(--input-h); padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:#fff; font-size:14px;
-    }
-    select.currency { width:70px; text-align:center; }
-    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:14px; }
-    .btn-add { background: linear-gradient(90deg, #17A34B 0%, #12B981 100%); color: #fff; border: none; border-radius: 10px; padding: 8px 12px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px rgba(18,185,129,0.12); transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease; }
-    .btn-ghost { background:transparent; border:1px solid var(--border); color:#111; }
-    .btn-muted { background:#f6f6f6; border:1px solid var(--border); color:#111; }
-    .groceries-footer { display:flex; justify-content:center; padding-top:8px; }
-    .ai-panel { margin:50px; text-align:center; }
-    .ai-actions { display:flex; flex-direction:column; gap:10px; margin-top:12px; align-items:center; }
-    .ai-btn { width:100%; max-width:620px; font-family: 'Roboto', sans-serif; text-align:left; padding:12px 16px; border-radius:10px; background:#f7f8fa; border:1px solid var(--border); cursor:pointer; font-weight:500; margin:6px; font-size: 16px; box-shadow: 0 8px 20px rgba(11,18,32,0.06); }
-    .modal-backdrop { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.28); z-index:40; }
-    .modal-backdrop.active { display:flex; }
-    .modal { width:480px; max-width:94%; border-radius:12px; padding:18px; background:#fff; border:1px solid var(--border); }
-    .modal h3 { margin:0 0 12px; }
-    .modal .row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
-    .modal label { min-width:62px; color:var(--muted); font-size:13px; }
-    .modal input[type="text"], .modal input[type="number"], .modal select { flex:1; height:40px; padding:8px 10px; border-radius:8px; border:1px solid var(--border); }
-    body.modal-open .canvas { filter: blur(4px) grayscale(.03); pointer-events:none; user-select:none; }
-    tr[draggable="true"] { cursor:grab; }
-  </style>
-</head>
-<body>
-  <div class="canvas" role="application" aria-label="Groceries and pantry app">
-    <div class="page-heading">
-      <h1>Groceries & Pantry Log</h1>
-      <p id="pageDate">Date: --</p>
-    </div>
-
-    <div class="settings-gear" aria-hidden="true">⚙️</div>
-
-    <div class="sitebar" role="banner" aria-label="Site header">
-      <div class="brand"> </div>
-      <div class="auth-actions">
-        <div id="signedState" class="user-info">Not signed in</div>
-        <button id="signinBtn" class="btn btn-muted" aria-label="Sign in" type="button">Sign in</button>
-      </div>
-    </div>
-
-    <div class="lists" role="main">
-      <section class="box" id="groceriesBox" aria-labelledby="groceriesHeading">
-        <h2 id="groceriesHeading">Groceries List</h2>
-        <div class="note">Add items to buy</div>
-
-        <table id="groceriesTable" aria-live="polite">
-          <thead>
-            <tr><th>Name</th><th style="width:80px">Qty</th><th style="width:160px">Price</th><th style="width:160px"></th></tr>
-          </thead>
-          <tbody id="groceriesBody"></tbody>
-        </table>
-
-        <form id="addGroceryForm" class="inline" aria-label="Add grocery item">
-          <input id="gName" type="text" placeholder="Name..." aria-label="Name (text)" required />
-          <input id="gQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
-          <input id="gPrice" type="number" step="0.01" placeholder="Price" aria-label="Price (number)" style="width:110px" />
-          <select id="gCurrency" class="currency" aria-label="Currency">
-            <option value="$">$</option><option value="€">€</option><option value="£">£</option><option value="¥">¥</option><option value="₹">₹</option>
-          </select>
-          <button id="addGroceryBtn" class="btn btn-add" aria-label="Add grocery" type="button">Add</button>
-        </form>
-
-        <div class="groceries-footer">
-          <button id="openCustomBtn" class="btn btn-ghost" aria-haspopup="dialog" type="button">+ Add Custom Ingredient</button>
-        </div>
-      </section>
-
-      <section class="box" id="pantryBox" aria-labelledby="pantryHeading">
-        <h2 id="pantryHeading">Pantry Items</h2>
-        <div class="note">Items in your pantry</div>
-
-        <table id="pantryTable" aria-live="polite">
-          <thead>
-            <tr><th>Name</th><th style="width:80px">Qty</th><th style="width:140px">Expiration</th><th style="width:160px"></th></tr>
-          </thead>
-          <tbody id="pantryBody"></tbody>
-        </table>
-
-        <form id="addPantryForm" class="inline" aria-label="Add pantry item">
-          <input id="pName" type="text" placeholder="Name..." aria-label="Name (text)" />
-          <input id="pQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
-          <input id="pExp" type="date" style="width:150px" aria-label="Expiration date" />
-          <button id="addPantryBtn" class="btn btn-add" aria-label="Add pantry item" type="button">Add to Pantry</button>
-        </form>
-      </section>
-    </div>
-
-    <div class="ai-panel" role="region" aria-label="AI recipes">
-      <h3>Generate AI Recipes</h3>
-      <p class="note">Suggestions and meal plans generated from your groceries & pantry</p>
-      <div class="ai-actions" role="group" aria-label="AI actions">
-        <button id="aiPantryBtn" class="ai-btn" type="button">✦ AI Suggestions based on your pantry...</button>
-        <button id="aiWeeklyBtn" class="ai-btn" type="button">✦ AI Suggestions based on your weekly groceries/pantry items...</button>
-        <button id="aiMealPlanBtn" class="ai-btn" type="button">✦ AI Meal plan for the week...</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal" role="document" aria-labelledby="modalTitle">
-      <h3 id="modalTitle">Add Custom Ingredient</h3>
-      <div class="row">
-        <label for="cName">Name</label><input id="cName" type="text" placeholder="e.g. Almond Butter" aria-label="Custom name" />
-      </div>
-      <div class="row">
-        <label for="cQty">Qty</label><input id="cQty" type="number" min="1" value="1" aria-label="Custom quantity" style="width:140px" />
-        <label for="cPrice" style="margin-left:6px;">Price</label><input id="cPrice" type="number" step="0.01" placeholder="Price" aria-label="Custom price" style="width:110px" />
-        <select id="cCurrency" class="currency" aria-label="Currency">
-          <option value="$">$</option><option value="€">€</option><option value="£">£</option><option value="¥">¥</option><option value="₹">₹</option>
-        </select>
-      </div>
-      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;">
-        <button id="modalSave" class="btn btn-add" type="button">Save</button>
-        <button id="modalCancel" class="btn btn-muted" type="button">Cancel</button>
-      </div>
-    </div>
-  </div>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
     import {
       getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut,
+      signInWithPopup,
+      GoogleAuthProvider,
+      setPersistence,
+      browserLocalPersistence
+    } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
     // ---------- CONFIG: drop your firebase config here ----------
     const firebaseConfig = {
-      apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-    authDomain: "goodplates-7ae36.firebaseapp.com",
-    projectId: "goodplates-7ae36",
-    storageBucket: "goodplates-7ae36.firebasestorage.app",
-    messagingSenderId: "541149626283",
-    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
+      apiKey: "  redacted"
+      // ... the rest of your config ...
     };
 
+    // Quick guard if config is missing (prevents obscure errors)
+    const hasConfig = firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey.trim().length > 0;
+    if (!hasConfig) {
+      // Show a friendly note in the UI
+      const signedState = document.getElementById('signedState');
+      if (signedState) signedState.textContent = 'Firebase config missing — auth disabled';
+      console.warn('Firebase config not provided. Add your firebaseConfig to enable auth/firestore.');
+    }
+
     const app = initializeApp(firebaseConfig);
-    try { getAnalytics(app); } catch (e) { /* optional */ }
+    try { getAnalytics(app); } catch (e) { /* optional analytics may fail in some contexts */ }
     const db = getFirestore(app);
     const auth = getAuth(app);
 
     // ---------- DOM refs ----------
     const signinBtn = document.getElementById('signinBtn');
-    let signoutBtn = document.getElementById('signoutBtn');
+    let signoutBtn = document.getElementById('signoutBtn'); // may be null initially
     const signedState = document.getElementById('signedState');
     const brandEl = document.querySelector('.brand');
 
@@ -342,6 +194,9 @@
       if (brandEl) brandEl.textContent = '';
       const pageHeadingDate = document.getElementById('pageDate');
       if (pageHeadingDate) pageHeadingDate.textContent = 'Date: ' + formatDate(new Date());
+      // ensure signin button is visible if config present
+      if (signinBtn) signinBtn.style.display = hasConfig ? '' : 'none';
+      if (signoutBtn) signoutBtn.style.display = 'none';
     }
 
     function renderAll() {
@@ -625,12 +480,46 @@
       pantryBox.addEventListener('drop', (e) => handleDropOnBox(e, 'pantry'));
     }
 
+    // ---------- SIGN-IN FLOW: Google provider ----------
+    async function initSignIn() {
+      if (!hasConfig) return;
+      const provider = new GoogleAuthProvider();
+
+      // set local persistence so sign in survives reloads
+      try {
+        await setPersistence(auth, browserLocalPersistence);
+      } catch (err) {
+        console.warn('Could not set persistence', err);
+      }
+
+      if (signinBtn) {
+        signinBtn.addEventListener('click', async () => {
+          try {
+            signinBtn.disabled = true;
+            signinBtn.textContent = 'Signing in...';
+            await signInWithPopup(auth, provider);
+            // on success, onAuthStateChanged will run and hide the button
+          } catch (err) {
+            console.error('Sign-in failed', err);
+            alert('Sign-in failed: ' + (err.message || String(err)));
+          } finally {
+            if (signinBtn) {
+              signinBtn.disabled = false;
+              signinBtn.textContent = 'Sign in';
+            }
+          }
+        });
+      }
+    }
+    // initialize the sign-in wiring (will be a no-op if config missing)
+    initSignIn();
+
     // ---------- auth observer ----------
     onAuthStateChanged(auth, async (user) => {
       currentUser = user;
       if (!user) {
         signedState && (signedState.textContent = 'Not signed in');
-        if (signinBtn) signinBtn.style.display = '';
+        if (signinBtn) signinBtn.style.display = hasConfig ? '' : 'none';
         if (signoutBtn) signoutBtn.style.display = 'none';
         profileDocRef = null; profileData = null; usersDoc = null;
         if (profileUnsub) { profileUnsub(); profileUnsub = null; }
@@ -638,7 +527,10 @@
         return;
       }
 
+      // hide sign-in button once we have a user
       if (signinBtn) signinBtn.style.display = 'none';
+
+      // create/show sign-out button if needed
       if (!signoutBtn) {
         const authActions = document.querySelector('.auth-actions');
         if (authActions) {
@@ -649,14 +541,14 @@
           signoutBtn.type = 'button';
           authActions.appendChild(signoutBtn);
           signoutBtn.addEventListener('click', async () => {
-            try { await signOut(auth); } catch (e) { console.error('Sign-out failed', e); }
+            try { await signOut(auth); } catch (e) { console.error('Sign-out failed', e); alert('Sign out failed'); }
           });
         }
       } else {
         signoutBtn.style.display = '';
       }
 
-      // ensure users/{uid}
+      // ensure users/{uid} exists
       try {
         const usersSnap = await getDoc(doc(db, 'users', user.uid));
         if (!usersSnap.exists()) {
@@ -715,5 +607,3 @@
     window._usersDoc = () => usersDoc;
     window._saveNow = () => saveNow();
   </script>
-</body>
-</html>
