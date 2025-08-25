@@ -41,6 +41,7 @@
   <!-- Hero -->
   <section class="hero py-16 px-6 lg:px-8">
     <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+      <!-- LEFT: Hero text / badges / stats -->
       <div>
         <span class="badge">💰 Smart Budget Tracking</span>
         <h1>Master Your <span style="color:var(--primary)">Grocery Budget</span></h1>
@@ -59,153 +60,155 @@
             <p id="savedSub" class="stat-sub">—</p>
           </div>
         </div>
-      </div>
-  </section>
-     <!--- DASHBOARD CARD START -->
-      <!-- REPLACE your <div><img ... /></div> with this block -->
-<div id="budget-chart-wrapper" style="width:100%;">
-  <style>
-    /* local styles so this block behaves like an image placeholder */
-    #budget-chart-card{
-      background: #fff;
-      border: 1px solid #e0e3e6;
-      border-radius: 12px;
-      padding: 18px;
-      box-shadow: 0 6px 20px rgba(15,23,42,0.04);
-      width: 100%;
-      box-sizing: border-box;
-    }
-    #budget-chart-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      margin-bottom:8px;
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      color:#1f2937;
-    }
-    #budget-chart-canvas-wrap{
-      height: 320px; /* matches visual height of your hero image area */
-      width: 100%;
-    }
-    /* make canvas fill the card */
-    #budgetChart { width:100% !important; height:100% !important; display:block; }
-  </style>
+      </div> <!-- end hero left -->
 
-  <!-- card that visually replaces the image -->
-  <div id="budget-chart-card" role="region" aria-label="Monthly chart">
-    <div id="budget-chart-header">
-      <div style="font-weight:600; font-size:15px;">Monthly values</div>
-      <div style="font-size:12px; color:#6b7280;">Bars = monthly • Line = trend</div>
-    </div>
-
-    <div id="budget-chart-canvas-wrap">
-      <canvas id="budgetChart"></canvas>
-    </div>
-  </div>
-
-  <!-- Chart.js CDN (only include once on the page) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <script>
-    (function(){
-      // If Chart already loaded on page, don't error out.
-      if (typeof Chart === 'undefined') {
-        console.warn('Chart.js not loaded.');
-      }
-
-      const labels = ['January', 'February', 'March', 'April', 'May', 'June'];
-      const barValues = [700, 1050, 1500, 1400, 1600, 2050];   // approximated
-      const lineValues = [1250, 1600, 2200, 1700, 1250, 1900]; // approximated
-
-      function hexToRgba(hex, a = 1){
-        const bigint = parseInt(hex.replace('#',''), 16);
-        const r = (bigint >> 16) & 255;
-        const g = (bigint >> 8) & 255;
-        const b = bigint & 255;
-        return `rgba(${r}, ${g}, ${b}, ${a})`;
-      }
-
-      const barColor = '#12B981';
-      const lineColor = '#d993a6';
-
-      const ctx = document.getElementById('budgetChart').getContext('2d');
-
-      // Destroy existing chart on same canvas (if re-rendering)
-      if (ctx.__chartInstance) {
-        try { ctx.__chartInstance.destroy(); } catch(e){/*ignore*/ }
-      }
-
-      ctx.__chartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              type: 'bar',
-              label: 'Monthly',
-              data: barValues,
-              backgroundColor: barColor,
-              borderRadius: 8,
-              borderSkipped: false,
-              barThickness: 'flex',
-              maxBarThickness: 56
-            },
-            {
-              type: 'line',
-              label: 'Trend',
-              data: lineValues,
-              tension: 0.25,
-              borderColor: lineColor,
-              backgroundColor: hexToRgba(lineColor, 0.06),
-              pointBackgroundColor: lineColor,
-              pointBorderColor: '#fff',
-              pointRadius: 4,
-              fill: false
+      <!-- RIGHT: Chart / dashboard card (was previously outside the grid) -->
+      <div>
+        <!--- DASHBOARD CARD START -->
+        <div id="budget-chart-wrapper" style="width:100%;">
+          <style>
+            /* local styles so this block behaves like an image placeholder */
+            #budget-chart-card{
+              background: #fff;
+              border: 1px solid #e0e3e6;
+              border-radius: 12px;
+              padding: 18px;
+              box-shadow: 0 6px 20px rgba(15,23,42,0.04);
+              width: 100%;
+              box-sizing: border-box;
             }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  const v = context.parsed.y ?? context.parsed;
-                  return (context.dataset.type === 'bar' ? ' $' : ' $') + v.toLocaleString();
-                }
+            #budget-chart-header{
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              margin-bottom:8px;
+              font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+              color:#1f2937;
+            }
+            #budget-chart-canvas-wrap{
+              height: 320px; /* matches visual height of your hero image area */
+              width: 100%;
+            }
+            /* make canvas fill the card */
+            #budgetChart { width:100% !important; height:100% !important; display:block; }
+          </style>
+
+          <!-- card that visually replaces the image -->
+          <div id="budget-chart-card" role="region" aria-label="Monthly chart">
+            <div id="budget-chart-header">
+              <div style="font-weight:600; font-size:15px;">Monthly values</div>
+              <div style="font-size:12px; color:#6b7280;">Bars = monthly • Line = trend</div>
+            </div>
+
+            <div id="budget-chart-canvas-wrap">
+              <canvas id="budgetChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart.js CDN (only include once on the page) -->
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+          <script>
+            (function(){
+              // If Chart already loaded on page, don't error out.
+              if (typeof Chart === 'undefined') {
+                console.warn('Chart.js not loaded.');
               }
-            }
-          },
-          scales: {
-            x: {
-              grid: { display: false },
-              ticks: { color: '#4b5563', padding: 6 }
-            },
-            y: {
-              beginAtZero: true,
-              suggestedMax: 2250,
-              ticks: {
-                stepSize: 250,
-                callback: function(value) { return '$' + value; },
-                color: '#4b5563',
-                padding: 6
-              },
-              grid: { color: '#e9ecef', borderDash: [3,3], drawBorder: false }
-            }
-          }
-        }
-      });
-    })();
-  </script>
-</div>
 
-      <!--- DASHBOARD END -->
-      </div>
+              const labels = ['January', 'February', 'March', 'April', 'May', 'June'];
+              const barValues = [700, 1050, 1500, 1400, 1600, 2050];   // approximated
+              const lineValues = [1250, 1600, 2200, 1700, 1250, 1900]; // approximated
 
-      
+              function hexToRgba(hex, a = 1){
+                const bigint = parseInt(hex.replace('#',''), 16);
+                const r = (bigint >> 16) & 255;
+                const g = (bigint >> 8) & 255;
+                const b = bigint & 255;
+                return `rgba(${r}, ${g}, ${b}, ${a})`;
+              }
+
+              const barColor = '#12B981';
+              const lineColor = '#d993a6';
+
+              const ctx = document.getElementById('budgetChart').getContext('2d');
+
+              // Destroy existing chart on same canvas (if re-rendering)
+              if (ctx.__chartInstance) {
+                try { ctx.__chartInstance.destroy(); } catch(e){/*ignore*/ }
+              }
+
+              ctx.__chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                  labels: labels,
+                  datasets: [
+                    {
+                      type: 'bar',
+                      label: 'Monthly',
+                      data: barValues,
+                      backgroundColor: barColor,
+                      borderRadius: 8,
+                      borderSkipped: false,
+                      barThickness: 'flex',
+                      maxBarThickness: 56
+                    },
+                    {
+                      type: 'line',
+                      label: 'Trend',
+                      data: lineValues,
+                      tension: 0.25,
+                      borderColor: lineColor,
+                      backgroundColor: hexToRgba(lineColor, 0.06),
+                      pointBackgroundColor: lineColor,
+                      pointBorderColor: '#fff',
+                      pointRadius: 4,
+                      fill: false
+                    }
+                  ]
+                },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  interaction: { mode: 'index', intersect: false },
+                  plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                      callbacks: {
+                        label: function(context) {
+                          const v = context.parsed.y ?? context.parsed;
+                          return (context.dataset.type === 'bar' ? ' $' : ' $') + v.toLocaleString();
+                        }
+                      }
+                    }
+                  },
+                  scales: {
+                    x: {
+                      grid: { display: false },
+                      ticks: { color: '#4b5563', padding: 6 }
+                    },
+                    y: {
+                      beginAtZero: true,
+                      suggestedMax: 2250,
+                      ticks: {
+                        stepSize: 250,
+                        callback: function(value) { return '$' + value; },
+                        color: '#4b5563',
+                        padding: 6
+                      },
+                      grid: { color: '#e9ecef', borderDash: [3,3], drawBorder: false }
+                    }
+                  }
+                }
+              });
+            })();
+          </script>
+        </div>
+        <!--- DASHBOARD CARD END -->
+      </div> <!-- end hero right -->
+
+    </div> <!-- end hero grid -->
+  </section>
+
   <!-- Overview Cards -->
   <section class="py-12 px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
@@ -269,6 +272,7 @@
           <p class="text-sm text-green-800/70 mb-4">Track your spending patterns throughout the month</p>
 
           <div class="space-y-4">
+            <!-- weeks... (kept unchanged) -->
             <div>
               <div class="flex justify-between text-sm">
                 <span class="font-medium">Week 1</span>
@@ -356,6 +360,7 @@
           <p class="text-sm text-green-800/70 mb-6">Personalized recommendations to optimize your grocery budget</p>
 
           <div class="grid md:grid-cols-3 gap-6">
+            <!-- tips cards... (kept unchanged) -->
             <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
               <div class="flex justify-between">
                 <h4 class="font-semibold">Switch to seasonal produce</h4>
@@ -394,19 +399,29 @@
           </div>
         </div>
       </div> <!-- end lower wrapper -->
+    </div> <!-- end max-w-7xl -->
   </section>
 
   <!-- Main client-side module (adjust path as needed) -->
   <script type="module" src="/statistics/statistics.js"></script>
-      
-  <!-- Footer (outside all wrappers so it can be full-width) -->
-<div id="footer"></div>
-<script>
-  fetch("/footer/index.html")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById("footer").innerHTML = data;
-    });
-</script>
+
+  <!-- Full-width footer (outside all centered wrappers) -->
+  <footer id="footer" class="w-full bg-gray-50 border-t border-green-200 mt-12 clear-both">
+    <div class="max-w-7xl mx-auto px-6 py-8 text-right">
+      <div id="footerContent">Loading footer…</div>
+    </div>
+  </footer>
+
+  <script>
+    fetch("/footer/index.html")
+      .then(res => res.text())
+      .then(html => {
+        // inject into the inner container so footer background remains full-width
+        document.getElementById("footerContent").innerHTML = html;
+      })
+      .catch(() => {
+        document.getElementById("footerContent").innerHTML = "© 2025 My App — All rights reserved";
+      });
+  </script>
 </body>
 </html>
