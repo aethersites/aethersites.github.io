@@ -45,7 +45,7 @@
     <!-- Right: CTA + hamburger -->
     <div class="gp-actions">
       <!-- Login CTA (replaces Onboarding) -->
-      <a href="/login-form/" class="gp-cta cta" title="Login">Login</a>
+      <a id="loginLink" href="/login-form/" class="gp-cta cta" title="Login">Login</a>
 
       <!-- mobile hamburger -->
       <button id="gpHamburger" class="gp-hamburger" aria-controls="gpMobileMenu" aria-expanded="false" aria-label="Open menu">
@@ -77,7 +77,7 @@
       </nav>
 
       <div class="gp-mobile-foot" style="margin-top:18px">
-        <a href="/login-form/" class="gp-cta cta" style="width:100%; display:inline-block; text-align:center">Login</a>
+        <a id="loginLinkMobile" href="/login-form/" class="gp-cta cta" style="width:100%; display:inline-block; text-align:center">Login</a>
       </div>
     </div>
 
@@ -256,6 +256,36 @@
           // ignore invalid hrefs
         }
       });
+    });
+  })();
+  </script>
+
+  <!-- ======= ADDED: minimal login-link behavior (add ?next=... and fallback sessionStorage) ======= -->
+  <script>
+  (function(){
+    document.addEventListener('DOMContentLoaded', function(){
+      try {
+        const current = location.pathname + location.search + location.hash;
+        const encoded = encodeURIComponent(current);
+
+        const desktop = document.getElementById('loginLink');
+        if (desktop) {
+          desktop.href = '/login-form/?next=' + encoded;
+          desktop.addEventListener('click', () => {
+            try { sessionStorage.setItem('login-next', current); } catch (_) {}
+          }, {capture:false});
+        }
+
+        const mobile = document.getElementById('loginLinkMobile');
+        if (mobile) {
+          mobile.href = '/login-form/?next=' + encoded;
+          mobile.addEventListener('click', () => {
+            try { sessionStorage.setItem('login-next', current); } catch (_) {}
+          }, {capture:false});
+        }
+      } catch (err) {
+        console.warn('login link setup failed', err);
+      }
     });
   })();
   </script>
