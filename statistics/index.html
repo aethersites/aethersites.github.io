@@ -404,24 +404,26 @@
 
   <!-- Main client-side module (adjust path as needed) -->
   <script type="module" src="/statistics/statistics.js"></script>
+      </div> <!-- end lower wrapper -->
+    </div> <!-- end max-w-7xl (outer container) -->
+  </section>
 
-  <!-- Full-width footer (outside all centered wrappers) -->
-  <footer id="footer" class="w-full bg-gray-50 border-t border-green-200 mt-12 clear-both">
-    <div class="max-w-7xl mx-auto px-6 py-8 text-right">
-      <div id="footerContent">Loading footer…</div>
-    </div>
-  </footer>
+  <!-- Main client-side module (adjust path as needed) -->
+  <script type="module" src="/statistics/statistics.js"></script>
 
+  <!-- Minimal footer: still full-width and outside all wrappers -->
+  <div id="footer" class="mt-12 w-full clear-both"></div>
   <script>
     fetch("/footer/index.html")
       .then(res => res.text())
-      .then(html => {
-        // inject into the inner container so footer background remains full-width
-        document.getElementById("footerContent").innerHTML = html;
+      .then(data => {
+        document.getElementById("footer").innerHTML = data;
       })
       .catch(() => {
-        document.getElementById("footerContent").innerHTML = "© 2025 My App — All rights reserved";
+        // optional fallback — keep empty if you prefer no fallback
+        // document.getElementById("footer").innerHTML = "© 2025 My App";
       });
   </script>
 </body>
 </html>
+
