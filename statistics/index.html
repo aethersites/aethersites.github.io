@@ -400,12 +400,13 @@
   <script type="module" src="/statistics/statistics.js"></script>
       
   <!-- Footer (outside all wrappers so it can be full-width) -->
-  <footer id="footer" class="mt-12 w-full text-right"></footer>
-  <script>
-    fetch("/footer/index.html")
-      .then(res => res.text())
-      .then(html => document.getElementById("footer").innerHTML = html)
-      .catch(() => {});
-  </script>
+<div id="footer"></div>
+<script>
+  fetch("/footer/index.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("footer").innerHTML = data;
+    });
+</script>
 </body>
 </html>
