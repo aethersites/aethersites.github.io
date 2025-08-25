@@ -60,57 +60,104 @@
           </div>
         </div>
       </div>
-      </div>
-      </section>
 
      <!--- DASHBOARD CARD START -->
-      <div class="w-full">
-  <div class="hero-img w-full overflow-hidden">
-    <!-- canvas sized to visually match hero image area -->
-    <canvas id="budgetChart" class="w-full block" style="height:320px;"></canvas>
+      <!-- REPLACE your <div><img ... /></div> with this block -->
+<div id="budget-chart-wrapper" style="width:100%;">
+  <style>
+    /* local styles so this block behaves like an image placeholder */
+    #budget-chart-card{
+      background: #fff;
+      border: 1px solid #e0e3e6;
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 6px 20px rgba(15,23,42,0.04);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    #budget-chart-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:8px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:#1f2937;
+    }
+    #budget-chart-canvas-wrap{
+      height: 320px; /* matches visual height of your hero image area */
+      width: 100%;
+    }
+    /* make canvas fill the card */
+    #budgetChart { width:100% !important; height:100% !important; display:block; }
+  </style>
+
+  <!-- card that visually replaces the image -->
+  <div id="budget-chart-card" role="region" aria-label="Monthly chart">
+    <div id="budget-chart-header">
+      <div style="font-weight:600; font-size:15px;">Monthly values</div>
+      <div style="font-size:12px; color:#6b7280;">Bars = monthly • Line = trend</div>
+    </div>
+
+    <div id="budget-chart-canvas-wrap">
+      <canvas id="budgetChart"></canvas>
+    </div>
   </div>
-</div>
 
-<script>
-  (function loadAndInitChart(){
-    const CDN = 'https://cdn.jsdelivr.net/npm/chart.js';
-    function initChart() {
-      const labels = ['January','February','March','April','May','June'];
-      const bars = [700,1050,1500,1400,1600,2050];
-      const trend = [1250,1600,2200,1700,1250,1900];
+  <!-- Chart.js CDN (only include once on the page) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-      function hexToRgba(hex,a=1){
-        const n = parseInt(hex.replace('#',''),16);
-        return `${(n>>16)&255},${(n>>8)&255},${n&255},${a}`;
+  <script>
+    (function(){
+      // If Chart already loaded on page, don't error out.
+      if (typeof Chart === 'undefined') {
+        console.warn('Chart.js not loaded.');
       }
+
+      const labels = ['January', 'February', 'March', 'April', 'May', 'June'];
+      const barValues = [700, 1050, 1500, 1400, 1600, 2050];   // approximated
+      const lineValues = [1250, 1600, 2200, 1700, 1250, 1900]; // approximated
+
+      function hexToRgba(hex, a = 1){
+        const bigint = parseInt(hex.replace('#',''), 16);
+        const r = (bigint >> 16) & 255;
+        const g = (bigint >> 8) & 255;
+        const b = bigint & 255;
+        return `rgba(${r}, ${g}, ${b}, ${a})`;
+      }
+
+      const barColor = '#12B981';
+      const lineColor = '#d993a6';
 
       const ctx = document.getElementById('budgetChart').getContext('2d');
 
-      // if there's already a chart instance on this canvas, destroy it
-      if (ctx.__chartInstance) try { ctx.__chartInstance.destroy(); } catch(e){}
+      // Destroy existing chart on same canvas (if re-rendering)
+      if (ctx.__chartInstance) {
+        try { ctx.__chartInstance.destroy(); } catch(e){/*ignore*/ }
+      }
 
       ctx.__chartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels,
+          labels: labels,
           datasets: [
             {
               type: 'bar',
               label: 'Monthly',
-              data: bars,
-              backgroundColor: '#12B981',
+              data: barValues,
+              backgroundColor: barColor,
               borderRadius: 8,
               borderSkipped: false,
+              barThickness: 'flex',
               maxBarThickness: 56
             },
             {
               type: 'line',
               label: 'Trend',
-              data: trend,
+              data: lineValues,
               tension: 0.25,
-              borderColor: '#d993a6',
-              backgroundColor: `rgba(${hexToRgba('#d993a6',0.06)})`,
-              pointBackgroundColor: '#d993a6',
+              borderColor: lineColor,
+              backgroundColor: hexToRgba(lineColor, 0.06),
+              pointBackgroundColor: lineColor,
               pointBorderColor: '#fff',
               pointRadius: 4,
               fill: false
@@ -121,15 +168,28 @@
           responsive: true,
           maintainAspectRatio: false,
           interaction: { mode: 'index', intersect: false },
-          plugins: { legend: { display: false } },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const v = context.parsed.y ?? context.parsed;
+                  return (context.dataset.type === 'bar' ? ' $' : ' $') + v.toLocaleString();
+                }
+              }
+            }
+          },
           scales: {
-            x: { grid: { display: false }, ticks: { color: '#4b5563', padding: 6 } },
+            x: {
+              grid: { display: false },
+              ticks: { color: '#4b5563', padding: 6 }
+            },
             y: {
               beginAtZero: true,
               suggestedMax: 2250,
               ticks: {
                 stepSize: 250,
-                callback: v => '$' + v,
+                callback: function(value) { return '$' + value; },
                 color: '#4b5563',
                 padding: 6
               },
@@ -138,35 +198,14 @@
           }
         }
       });
-
-      // force canvas redraw to respect CSS height (fix for certain browsers)
-      ctx.canvas.style.height = ctx.canvas.style.height || '320px';
-      ctx.__chartInstance.resize();
-    }
-
-    // if Chart exists, just init
-    if (window.Chart) return initChart();
-
-    // otherwise load Chart.js then init
-    if (!document.querySelector('script[data-chartjs-cdn]')) {
-      const s = document.createElement('script');
-      s.src = CDN;
-      s.async = true;
-      s.setAttribute('data-chartjs-cdn', '1');
-      s.onload = initChart;
-      s.onerror = function(){ console.error('Failed to load Chart.js'); };
-      document.head.appendChild(s);
-    } else {
-      // another loader is present but not yet loaded — wait for it
-      const existing = document.querySelector('script[data-chartjs-cdn]');
-      existing.addEventListener('load', initChart);
-      if (existing.readyState === 'complete') initChart();
-    }
-  })();
-</script>
-      
+    })();
+  </script>
+</div>
 
       <!--- DASHBOARD END -->
+      </div>
+
+      
   <!-- Overview Cards -->
   <section class="py-12 px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
