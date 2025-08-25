@@ -1,31 +1,39 @@
-// grocery/grocery.js (updated)
-// Module for Groceries & Pantry UI — wired to Firestore using your schema.
-// NOTE: fill firebaseConfig below if not provided in your app shell.
+// grocery/grocery.js
+// Replace the firebaseConfig placeholder with your real config object.
 
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-    authDomain: "goodplates-7ae36.firebaseapp.com",
-    projectId: "goodplates-7ae36",
-    storageBucket: "goodplates-7ae36.firebasestorage.app",
-    messagingSenderId: "541149626283",
-    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
-  };
+/* --------- FIREBASE: fill your config here --------- */
+const firebaseConfig = {
+  // apiKey: "YOUR_API_KEY",
+  // authDomain: "YOUR_AUTH_DOMAIN",
+  // projectId: "YOUR_PROJECT_ID",
+  // storageBucket: "YOUR_STORAGE_BUCKET",
+  // messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  // appId: "YOUR_APP_ID",
+  // measurementId: "YOUR_MEASUREMENT_ID"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
+const app = initializeApp(firebaseConfig);
+try { getAnalytics(app); } catch (e) { /* analytics optional */ }
 
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 /* ---------- DOM refs (guards) ---------- */
 const signinBtn = document.getElementById('signinBtn');
@@ -35,6 +43,9 @@ const brandEl = document.querySelector('.brand');
 
 const groceriesBody = document.getElementById('groceriesBody');
 const pantryBody = document.getElementById('pantryBody');
+
+const groceriesBox = document.getElementById('groceriesBox');
+const pantryBox = document.getElementById('pantryBox');
 
 const addGroceryBtn = document.getElementById('addGroceryBtn');
 const gName = document.getElementById('gName');
@@ -108,7 +119,7 @@ function setModalVisible(visible) {
 /* ---------- Persistence helpers ---------- */
 let pendingSave = null;
 function scheduleSave() {
-  if (!profileDocRef || !profileData) return;
+  if (!profileDocRef || profileData == null) return;
   if (pendingSave) clearTimeout(pendingSave);
   pendingSave = setTimeout(async () => {
     pendingSave = null;
@@ -120,7 +131,6 @@ function scheduleSave() {
         aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
       });
     } catch (e) {
-      // fallback to set (merge)
       try {
         await setDoc(profileDocRef, {
           groceryLists: profileData.groceryLists || [],
@@ -135,7 +145,7 @@ function scheduleSave() {
   }, 350);
 }
 async function saveNow() {
-  if (!profileDocRef || !profileData) return;
+  if (!profileDocRef || profileData == null) return;
   try {
     await updateDoc(profileDocRef, {
       groceryLists: profileData.groceryLists || [],
@@ -155,6 +165,36 @@ async function saveNow() {
       console.error('Immediate save failed', e2);
     }
   }
+}
+
+/* ---------- Drag state & helpers ---------- */
+function makeDraggableRow(tr, kind, idx) {
+  // add attributes used for drag/drop
+  tr.setAttribute('draggable', 'true');
+  tr.dataset.kind = kind; // 'grocery' or 'pantry'
+  tr.dataset.idx = String(idx);
+
+  tr.addEventListener('dragstart', (ev) => {
+    // disallow drag if not signed in
+    if (!currentUser) {
+      ev.preventDefault();
+      return alert('Sign in to move items between lists');
+    }
+    const payload = JSON.stringify({ kind, idx });
+    ev.dataTransfer.setData('application/json', payload);
+    // allow move effect
+    ev.dataTransfer.effectAllowed = 'move';
+    // small visual (some browsers need text)
+    ev.dataTransfer.setData('text/plain', escapeHTML((tr.textContent || '').trim().slice(0, 200)));
+    // highlight target boxes
+    if (groceriesBox) groceriesBox.classList.add('drag-target');
+    if (pantryBox) pantryBox.classList.add('drag-target');
+  });
+
+  tr.addEventListener('dragend', (ev) => {
+    if (groceriesBox) groceriesBox.classList.remove('drag-target');
+    if (pantryBox) pantryBox.classList.remove('drag-target');
+  });
 }
 
 /* ---------- Render / Clear UI ---------- */
@@ -190,8 +230,8 @@ function renderGroceries(items = []) {
     const purchasedClass = it.purchased ? 'style="text-decoration:line-through; opacity:.7;"' : '';
     const currency = it.currency || '$';
     const priceDisplay = (it.price != null) ? formatCurrency(it.price, currency) : '-';
-    // Put a checkbox in front so users can mark bought
     const tr = document.createElement('tr');
+
     tr.innerHTML = `
       <td ${purchasedClass}>
         <label style="display:flex;align-items:center;gap:10px;">
@@ -207,6 +247,9 @@ function renderGroceries(items = []) {
         <button data-idx="${idx}" class="btn btn-danger btn-delete">Delete</button>
       </td>
     `;
+    // make the table row draggable
+    makeDraggableRow(tr, 'grocery', idx);
+
     groceriesBody.appendChild(tr);
   });
 
@@ -232,6 +275,9 @@ function renderPantry(items = []) {
         <button data-idx="${idx}" class="btn btn-danger btn-delete-pantry">Delete</button>
       </td>
     `;
+    // make the row draggable
+    makeDraggableRow(tr, 'pantry', idx);
+
     pantryBody.appendChild(tr);
   });
   pantryBody.querySelectorAll('.btn-edit-pantry').forEach(btn => btn.addEventListener('click', onEditPantry));
@@ -246,7 +292,7 @@ if (addPantryBtn) addPantryBtn.type = 'button';
 if (modalSave) modalSave.type = 'button';
 if (modalCancel) modalCancel.type = 'button';
 
-// Add grocery: supports clicking the button OR pressing Enter in the form
+// Add grocery
 async function handleAddGrocery(e) {
   if (!currentUser) return alert('Sign in to add items');
   e && e.preventDefault && e.preventDefault();
@@ -263,7 +309,6 @@ async function handleAddGrocery(e) {
   list.items.push(item);
 
   scheduleSave();
-  // also attempt to persist immediately for better UX
   await saveNow().catch(() => { /* already scheduled */ });
 
   renderAll();
@@ -312,11 +357,9 @@ if (openCustomBtn) openCustomBtn.addEventListener('click', () => {
 });
 
 // modal save
-// inside modalSave handler — unify to use the modal's c* fields for both edit & custom:
 if (modalSave) modalSave.addEventListener('click', async () => {
   if (!editingContext) { setModalVisible(false); return; }
   const t = editingContext;
-  // UNIFIED: always read from the modal's visible fields (cName/cQty/cPrice)
   const name = (cName?.value?.trim() || '');
   if (!name) return alert('Enter a name');
   const qty = Number(cQty?.value || 1);
@@ -408,6 +451,70 @@ function onTogglePurchased(e) {
   renderAll();
 }
 
+/* ---------- Drag drop on boxes ---------- */
+// add handlers to accept drops on the two boxes
+function parseDragData(ev) {
+  try {
+    const raw = ev.dataTransfer.getData('application/json') || ev.dataTransfer.getData('text/plain');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function handleDropOnBox(ev, targetKind) {
+  ev.preventDefault();
+  if (!currentUser) return alert('Sign in to move items');
+  const payload = parseDragData(ev);
+  if (!payload || typeof payload.kind !== 'string' || payload.idx == null) {
+    return;
+  }
+  const srcKind = payload.kind;
+  const srcIdx = Number(payload.idx);
+
+  // no-op if same list
+  if (srcKind === targetKind) {
+    if (groceriesBox) groceriesBox.classList.remove('drag-target');
+    if (pantryBox) pantryBox.classList.remove('drag-target');
+    return;
+  }
+
+  // move from groceries -> pantry
+  if (srcKind === 'grocery' && targetKind === 'pantry') {
+    const list = profileData.groceryLists[activeGroceryListIndex];
+    if (!list || !list.items || !list.items[srcIdx]) return;
+    const item = list.items.splice(srcIdx,1)[0];
+    const p = { name: item.name, quantity: item.quantity || 1, createdAt: serverTimestamp() };
+    profileData.pantryItems = profileData.pantryItems || [];
+    profileData.pantryItems.push(p);
+    scheduleSave(); await saveNow().catch(()=>{});
+    renderAll();
+  }
+
+  // move from pantry -> groceries
+  if (srcKind === 'pantry' && targetKind === 'grocery') {
+    if (!profileData.pantryItems || !profileData.pantryItems[srcIdx]) return;
+    const pitem = profileData.pantryItems.splice(srcIdx,1)[0];
+    const gItem = { name: pitem.name, quantity: pitem.quantity || 1, price: pitem.price ?? null, createdAt: serverTimestamp() };
+    profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
+    profileData.groceryLists[activeGroceryListIndex].items.push(gItem);
+    scheduleSave(); await saveNow().catch(()=>{});
+    renderAll();
+  }
+
+  if (groceriesBox) groceriesBox.classList.remove('drag-target');
+  if (pantryBox) pantryBox.classList.remove('drag-target');
+}
+
+if (groceriesBox) {
+  groceriesBox.addEventListener('dragover', (e) => e.preventDefault());
+  groceriesBox.addEventListener('drop', (e) => handleDropOnBox(e, 'grocery'));
+}
+if (pantryBox) {
+  pantryBox.addEventListener('dragover', (e) => e.preventDefault());
+  pantryBox.addEventListener('drop', (e) => handleDropOnBox(e, 'pantry'));
+}
+
 /* ---------- Auth observer: fetch users + profile (realtime) ---------- */
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
@@ -482,7 +589,6 @@ onAuthStateChanged(auth, async (user) => {
     console.error('Could not ensure profile doc', e);
   }
 
-  // unsubscribe previous listener if present
   if (profileUnsub) { profileUnsub(); profileUnsub = null; }
   profileUnsub = onSnapshot(profileDocRef, (snap) => {
     if (!snap.exists()) {
@@ -491,7 +597,7 @@ onAuthStateChanged(auth, async (user) => {
       return;
     }
     profileData = snap.data();
-    // normalize arrays to avoid crashes
+    // normalize arrays
     profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
     profileData.pantryItems = profileData.pantryItems || [];
     profileData.customIngredients = profileData.customIngredients || [];
