@@ -5,77 +5,54 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>GoodPlates — Onboarding</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-    /* Button gradient / card classes kept visually similar to Tailwind */
-    .btn-gradient {
-      color: #fff;
-      background: linear-gradient(90deg,#17A34B,#12B981);
-    }
-    .pill-gradient {
-      color: #fff;
-      background: linear-gradient(90deg,#10B981,#047857);
-    }
-    .soft-gradient {
-      background: linear-gradient(135deg,#F3F4F6,#FFFFFF 40%,#F3F4F6);
-    }
-    .card {
-      background: #fff;
-      border: 1px solid #E5E7EB;
-      border-radius: 1rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    .card-hover {
-      transition: transform .12s ease, box-shadow .12s ease;
-    }
-    .card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+    /* visuals */
+    .btn-gradient { color:#fff; background: linear-gradient(90deg,#17A34B,#12B981); }
+    .soft-gradient { background: linear-gradient(135deg,#F3F4F6,#FFFFFF 40%,#F3F4F6); }
+    .card { background:#fff; border:1px solid #E5E7EB; border-radius:1rem; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+    .card-hover { transition: transform .12s, box-shadow .12s; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.06); }
 
-    /* Chip / pill base using plain CSS (works in browser) */
+    /* chips */
     .chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border-radius: 9999px;
-      border: 1px solid #E5E7EB;
-      font-size: 0.875rem;
-      cursor: pointer;
-      user-select: none;
-      background: #ffffff;
-      color: #111827;
-      transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease, color .12s ease;
-      outline: none;
+      display:inline-flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem; border-radius:9999px;
+      border:1px solid #E5E7EB; font-size:0.875rem; cursor:pointer; user-select:none; background:#fff; color:#111827;
+      transition: transform .12s, box-shadow .12s, background-color .12s, color .12s;
+      outline:none;
     }
-    .chip:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow: 0 6px 18px rgba(2,6,23,0.08);
-      background: #21cc93; /* faint green */
+    .chip:hover { transform: translateY(-3px) scale(1.02); box-shadow:0 6px 18px rgba(2,6,23,0.08); background:#21cc93; }
+    .chip:focus { box-shadow:0 0 0 4px rgba(16,185,129,0.12); }
+    .chip-selected { background:#12B981; color:#fff; border-color:transparent; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.06); }
+
+    /* allergies grid */
+    #allergiesContainer { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    @media (min-width:640px){ #allergiesContainer { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (min-width:768px){ #allergiesContainer { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+
+    /* Progress bar gradient animation */
+    .progress-track { width:100%; height:0.5rem; background:#E5E7EB; border-radius:9999px; overflow:hidden; }
+    .progress-fill {
+      height:100%;
+      width:0%;
+      border-radius:9999px;
+      /* animated gradient background */
+      background: linear-gradient(90deg, rgba(23,163,75,0.95) 0%, rgba(18,185,129,0.95) 25%, rgba(16,185,129,0.95) 50%, rgba(18,185,129,0.95) 75%, rgba(23,163,75,0.95) 100%);
+      background-size: 200% 100%;
+      animation: moveGradient 3s linear infinite;
+      transition: width 360ms cubic-bezier(.2,.9,.2,1);
     }
-    .chip:focus {
-      box-shadow: 0 0 0 4px rgba(16,185,129,0.12);
-    }
-    .chip-selected {
-      background: #12B981; /* green-600 */
-      color: #fff;
-      border-color: transparent;
-      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.06);
+    @keyframes moveGradient {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
     }
 
-    /* Grid spacing tweaks for neat layout */
-    #allergiesContainer {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0,1fr));
-      gap: 12px;
-    }
-    @media (min-width: 640px) {
-      #allergiesContainer { grid-template-columns: repeat(3, minmax(0,1fr)); }
-    }
-    @media (min-width: 768px) {
-      #allergiesContainer { grid-template-columns: repeat(4, minmax(0,1fr)); }
-    }
+    /* small helper disabled style */
+    button:disabled { opacity:0.55; cursor:not-allowed; }
   </style>
 </head>
-<body>
-  <main class="soft-gradient">
+<body class="antialiased">
+  <main class="soft-gradient min-h-screen">
     <div class="max-w-4xl mx-auto px-6 py-12">
       <!-- Header -->
       <div class="text-center mb-8">
@@ -84,17 +61,16 @@
       </div>
 
       <!-- Progress -->
-      <div class="mb-10">
+      <div class="mb-6">
         <div class="flex justify-between text-sm text-gray-500 mb-2">
           <span id="progressLabel">Step 1 of 3</span>
           <span id="progressPct">33% Complete</span>
         </div>
-        <div class="w-full h-2 rounded-full bg-gray-200 overflow-hidden">
-          <div id="progressBar" style="height:100%" class="h-2 w-1/3 rounded-full" />
-            <div id="progressBar" class="h-2 w-13 rounded-full" style="background:#10B981;"></div>
+        <div class="progress-track mb-2">
+          <!-- single progress fill element -->
+          <div id="progressBar" class="progress-fill" style="width:33%"></div>
         </div>
       </div>
-            <br>
 
       <!-- Step Containers -->
       <section id="step-1" class="card p-8 mb-8">
@@ -102,44 +78,37 @@
         <p class="text-gray-600 text-center mb-8">Choose one or more goals to help us customize your experience</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <!-- Goal cards (multi-select toggles) -->
-          <button data-goal="grocery-list"
-                  class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+          <button data-goal="grocery-list" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
             <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">🛒</div>
             <h3 class="font-semibold mb-1">Make Grocery List</h3>
             <p class="text-sm text-gray-600">Create organized shopping lists</p>
           </button>
 
-          <button data-goal="family-plan"
-                  class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+          <button data-goal="family-plan" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
             <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">👥</div>
             <h3 class="font-semibold mb-1">Grocery Family Plan</h3>
             <p class="text-sm text-gray-600">Plan meals for the whole family</p>
           </button>
 
-          <button data-goal="in-app-order"
-                  class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+          <button data-goal="in-app-order" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
             <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">📱</div>
             <h3 class="font-semibold mb-1">Order Using In-App Capabilities</h3>
             <p class="text-sm text-gray-600">Shop directly through the app</p>
           </button>
 
-          <button data-goal="budget-track"
-                  class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+          <button data-goal="budget-track" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
             <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">💵</div>
             <h3 class="font-semibold mb-1">Track Grocery Budget</h3>
             <p class="text-sm text-gray-600">Monitor spending and save money</p>
           </button>
 
-          <button data-goal="calorie-goals"
-                  class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+          <button data-goal="calorie-goals" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
             <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">🎯</div>
             <h3 class="font-semibold mb-1">Set Calories Goals</h3>
             <p class="text-sm text-gray-600">Reach your nutrition targets</p>
           </button>
 
-          <button data-goal="health-calc"
-                  class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+          <button data-goal="health-calc" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
             <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">📈</div>
             <h3 class="font-semibold mb-1">Calculate Health</h3>
             <p class="text-sm text-gray-600">Track nutrients and wellness</p>
@@ -147,43 +116,37 @@
         </div>
       </section>
 
-      <!-- NEW Step 2: Nutrition dropdowns & allergy chips -->
+      <!-- Step 2 -->
       <section id="step-2" class="card p-8 mb-8 hidden">
         <h2 class="text-2xl font-semibold text-center mb-2">Nutrition & Preferences</h2>
         <p class="text-gray-600 text-center mb-6">Quick selects — pick the items that apply</p>
 
         <div class="max-w-3xl mx-auto space-y-4">
-          <!-- Allergies (chip-style multiselect) -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Food allergies (tap to select)</label>
-
-            <!-- Neater grid layout and larger gaps -->
             <div id="allergiesContainer" style="gap:12px;">
-              <button type="button" class="chip" data-value="peanuts">Peanuts</button>
-              <button type="button" class="chip" data-value="tree_nuts">Tree nuts</button>
-              <button type="button" class="chip" data-value="dairy">Dairy / Milk</button>
-              <button type="button" class="chip" data-value="eggs">Eggs</button>
-              <button type="button" class="chip" data-value="shellfish">Shellfish</button>
-              <button type="button" class="chip" data-value="fish">Fish</button>
-              <button type="button" class="chip" data-value="soy">Soy</button>
-              <button type="button" class="chip" data-value="wheat_gluten">Wheat / Gluten</button>
-              <button type="button" class="chip" data-value="sesame">Sesame</button>
-              <button type="button" class="chip" data-value="mustard">Mustard</button>
-              <button type="button" class="chip" data-value="sulfites">Sulfites</button>
-              <button type="button" class="chip" data-value="celery">Celery</button>
-              <button type="button" class="chip" data-value="lupin">Lupin</button>
-              <button type="button" class="chip" data-value="mollusks">Mollusks</button>
-              <button type="button" class="chip" data-value="none">No allergies</button>
+              <button class="chip" data-value="peanuts" type="button">Peanuts</button>
+              <button class="chip" data-value="tree_nuts" type="button">Tree nuts</button>
+              <button class="chip" data-value="dairy" type="button">Dairy / Milk</button>
+              <button class="chip" data-value="eggs" type="button">Eggs</button>
+              <button class="chip" data-value="shellfish" type="button">Shellfish</button>
+              <button class="chip" data-value="fish" type="button">Fish</button>
+              <button class="chip" data-value="soy" type="button">Soy</button>
+              <button class="chip" data-value="wheat_gluten" type="button">Wheat / Gluten</button>
+              <button class="chip" data-value="sesame" type="button">Sesame</button>
+              <button class="chip" data-value="mustard" type="button">Mustard</button>
+              <button class="chip" data-value="sulfites" type="button">Sulfites</button>
+              <button class="chip" data-value="celery" type="button">Celery</button>
+              <button class="chip" data-value="lupin" type="button">Lupin</button>
+              <button class="chip" data-value="mollusks" type="button">Mollusks</button>
+              <button class="chip" data-value="none" type="button">No allergies</button>
             </div>
-
             <p class="text-xs text-gray-500 mt-1">Tap chips to toggle. Selected chips will be saved to your profile.</p>
           </div>
 
-          <!-- Diet -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Diet</label>
-            <select id="dietSelect"
-                    class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
+            <select id="dietSelect" class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900">
               <option value="">Choose a diet...</option>
               <option value="none">None / No specific diet</option>
               <option value="vegetarian">Vegetarian</option>
@@ -200,11 +163,9 @@
             </select>
           </div>
 
-          <!-- Nutrition goals (calorie presets) -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">Calorie target (pick a preset)</label>
-            <select id="caloriesSelect"
-                    class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
+            <select id="caloriesSelect" class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900">
               <option value="">Choose calorie target...</option>
               <option value="1200">1200 kcal — Weight loss (low)</option>
               <option value="1400">1400 kcal — Weight loss</option>
@@ -218,11 +179,9 @@
             <p class="text-xs text-gray-500 mt-1">Set a calorie goal with our <a href="/calculator/" class="underline">Calorie Calculator</a>. Advanced users can set macros later in settings.</p>
           </div>
 
-          <!-- Currency -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">What currency do you usually buy groceries in?</label>
-            <select id="currencySelect"
-                    class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
+            <select id="currencySelect" class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900">
               <option value="">Choose currency...</option>
               <option value="USD">USD — US Dollar</option>
               <option value="EUR">EUR — Euro</option>
@@ -250,29 +209,209 @@
         </div>
       </section>
 
-      <!-- Step 3 (country select) -->
+      <!-- Step 3 -->
       <section id="step-3" class="card p-8 mb-8 hidden">
         <h2 class="text-2xl font-semibold text-center mb-2">Select your country of residence</h2>
         <p class="text-gray-600 text-center mb-8">This helps us customize your experience with local stores and currency</p>
 
         <div class="max-w-md mx-auto">
           <div class="relative">
-            <select id="countrySelect"
-                    class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500">
+            <select id="countrySelect" class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900">
               <option value="">Choose your country...</option>
-              <option value="US">United States</option>
-              <option value="GB">United Kingdom</option>
-              <option value="CA">Canada</option>
-              <option value="AU">Australia</option>
-              <option value="DE">Germany</option>
-              <option value="FR">France</option>
-              <option value="NL">Netherlands</option>
-              <option value="IN">India</option>
-              <option value="JP">Japan</option>
-              <option value="CN">China</option>
-              <option value="BR">Brazil</option>
-              <option value="MX">Mexico</option>
-              <option value="ZA">South Africa</option>
+<option>Afghanistan</option>
+<option>Albania</option>
+<option>Algeria</option>
+<option>Andorra</option>
+<option>Angola</option>
+<option>Antigua and Barbuda</option>
+<option>Argentina</option>
+<option>Armenia</option>
+<option>Australia</option>
+<option>Austria</option>
+<option>Azerbaijan</option>
+<option>Bahamas</option>
+<option>Bahrain</option>
+<option>Bangladesh</option>
+<option>Barbados</option>
+<option>Belarus</option>
+<option>Belgium</option>
+<option>Belize</option>
+<option>Benin</option>
+<option>Bhutan</option>
+<option>Bolivia</option>
+<option>Bosnia and Herzegovina</option>
+<option>Botswana</option>
+<option>Brazil</option>
+<option>Brunei</option>
+<option>Bulgaria</option>
+<option>Burkina Faso</option>
+<option>Burundi</option>
+<option>Cabo Verde</option>
+<option>Cambodia</option>
+<option>Cameroon</option>
+<option>Canada</option>
+<option>Central African Republic</option>
+<option>Chad</option>
+<option>Chile</option>
+<option>China</option>
+<option>Colombia</option>
+<option>Comoros</option>
+<option>Congo (Congo-Brazzaville)</option>
+<option>Costa Rica</option>
+<option>Croatia</option>
+<option>Cuba</option>
+<option>Cyprus</option>
+<option>Czechia (Czech Republic)</option>
+<option>Democratic Republic of the Congo</option>
+<option>Denmark</option>
+<option>Djibouti</option>
+<option>Dominica</option>
+<option>Dominican Republic</option>
+<option>Ecuador</option>
+<option>Egypt</option>
+<option>El Salvador</option>
+<option>Equatorial Guinea</option>
+<option>Eritrea</option>
+<option>Estonia</option>
+<option>Eswatini (fmr. "Swaziland")</option>
+<option>Ethiopia</option>
+<option>Fiji</option>
+<option>Finland</option>
+<option>France</option>
+<option>Gabon</option>
+<option>Gambia</option>
+<option>Georgia</option>
+<option>Germany</option>
+<option>Ghana</option>
+<option>Greece</option>
+<option>Grenada</option>
+<option>Guatemala</option>
+<option>Guinea</option>
+<option>Guinea-Bissau</option>
+<option>Guyana</option>
+<option>Haiti</option>
+<option>Holy See</option>
+<option>Honduras</option>
+<option>Hungary</option>
+<option>Iceland</option>
+<option>India</option>
+<option>Indonesia</option>
+<option>Iran</option>
+<option>Iraq</option>
+<option>Ireland</option>
+<option>Israel</option>
+<option>Italy</option>
+<option>Jamaica</option>
+<option>Japan</option>
+<option>Jordan</option>
+<option>Kazakhstan</option>
+<option>Kenya</option>
+<option>Kiribati</option>
+<option>Kuwait</option>
+<option>Kyrgyzstan</option>
+<option>Laos</option>
+<option>Latvia</option>
+<option>Lebanon</option>
+<option>Lesotho</option>
+<option>Liberia</option>
+<option>Libya</option>
+<option>Liechtenstein</option>
+<option>Lithuania</option>
+<option>Luxembourg</option>
+<option>Madagascar</option>
+<option>Malawi</option>
+<option>Malaysia</option>
+<option>Maldives</option>
+<option>Mali</option>
+<option>Malta</option>
+<option>Marshall Islands</option>
+<option>Mauritania</option>
+<option>Mauritius</option>
+<option>Mexico</option>
+<option>Micronesia</option>
+<option>Moldova</option>
+<option>Monaco</option>
+<option>Mongolia</option>
+<option>Montenegro</option>
+<option>Morocco</option>
+<option>Mozambique</option>
+<option>Myanmar (formerly Burma)</option>
+<option>Namibia</option>
+<option>Nauru</option>
+<option>Nepal</option>
+<option>Netherlands</option>
+<option>New Zealand</option>
+<option>Nicaragua</option>
+<option>Niger</option>
+<option>Nigeria</option>
+<option>North Korea</option>
+<option>North Macedonia</option>
+<option>Norway</option>
+<option>Oman</option>
+<option>Pakistan</option>
+<option>Palau</option>
+<option>Palestine State</option>
+<option>Panama</option>
+<option>Papua New Guinea</option>
+<option>Paraguay</option>
+<option>Peru</option>
+<option>Philippines</option>
+<option>Poland</option>
+<option>Portugal</option>
+<option>Qatar</option>
+<option>Romania</option>
+<option>Russia</option>
+<option>Rwanda</option>
+<option>Saint Kitts and Nevis</option>
+<option>Saint Lucia</option>
+<option>Saint Vincent and the Grenadines</option>
+<option>Samoa</option>
+<option>San Marino</option>
+<option>Sao Tome and Principe</option>
+<option>Saudi Arabia</option>
+<option>Senegal</option>
+<option>Serbia</option>
+<option>Seychelles</option>
+<option>Sierra Leone</option>
+<option>Singapore</option>
+<option>Slovakia</option>
+<option>Slovenia</option>
+<option>Solomon Islands</option>
+<option>Somalia</option>
+<option>South Africa</option>
+<option>South Korea</option>
+<option>South Sudan</option>
+<option>Spain</option>
+<option>Sri Lanka</option>
+<option>Sudan</option>
+<option>Suriname</option>
+<option>Sweden</option>
+<option>Switzerland</option>
+<option>Syria</option>
+<option>Tajikistan</option>
+<option>Tanzania</option>
+<option>Thailand</option>
+<option>Timor-Leste</option>
+<option>Togo</option>
+<option>Tonga</option>
+<option>Trinidad and Tobago</option>
+<option>Tunisia</option>
+<option>Turkey</option>
+<option>Turkmenistan</option>
+<option>Tuvalu</option>
+<option>Uganda</option>
+<option>Ukraine</option>
+<option>United Arab Emirates</option>
+<option>United Kingdom</option>
+<option>United States of America</option>
+<option>Uruguay</option>
+<option>Uzbekistan</option>
+<option>Vanuatu</option>
+<option>Venezuela</option>
+<option>Vietnam</option>
+<option>Yemen</option>
+<option>Zambia</option>
+<option>Zimbabwe</option>
               <option value="other">Other...</option>
             </select>
             <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">▾</span>
@@ -282,10 +421,7 @@
 
       <!-- Navigation -->
       <div class="flex justify-between items-center">
-        <button id="backBtn"
-                class="px-5 h-11 rounded-xl border border-gray-300 bg-white text-gray-800 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed" type="button">
-          Back
-        </button>
+        <button id="backBtn" class="px-5 h-11 rounded-xl border border-gray-300 bg-white text-gray-800 hover:bg-gray-50" type="button">Back</button>
 
         <div class="flex gap-2" aria-hidden="true">
           <div id="dot1" class="w-3 h-3 rounded-full" style="background:#12B981;"></div>
@@ -293,87 +429,85 @@
           <div id="dot3" class="w-3 h-3 rounded-full bg-gray-200"></div>
         </div>
 
-        <button id="nextBtn"
-                class="px-6 h-11 rounded-xl btn-gradient disabled:opacity-50 disabled:cursor-not-allowed" type="button">
-          Next
-        </button>
+        <button id="nextBtn" class="px-6 h-11 rounded-xl btn-gradient" type="button">Next</button>
         <a id="finishLink" href="#" class="hidden">
-          <button id="finishBtn" class="px-6 h-11 rounded-xl btn-gradient disabled:opacity-50 disabled:cursor-not-allowed" type="button">
-            Finish
-          </button>
+          <button id="finishBtn" class="px-6 h-11 rounded-xl btn-gradient" type="button">Finish</button>
         </a>
       </div>
     </div>
   </main>
 
   <footer class="bg-white border-t border-gray-200 py-6">
-    <div class="max-w-5xl mx-auto px-6 text-center text-sm text-gray-500">
-      © 2025 GoodPlates. All rights reserved.
-    </div>
+    <div class="max-w-5xl mx-auto px-6 text-center text-sm text-gray-500">© 2025 GoodPlates. All rights reserved.</div>
   </footer>
 
-  <!-- Logic (unchanged) -->
-  <script>
-    // State
+  <!-- Firebase + App logic (type=module) -->
+  <script type="module">
+    // ---------- REPLACE WITH YOUR FIREBASE CONFIG ----------
+    const firebaseConfig = {
+      apiKey: "REPLACE_API_KEY",
+      authDomain: "REPLACE_AUTH_DOMAIN",
+      projectId: "REPLACE_PROJECT_ID",
+      // ...other config
+    };
+    // ------------------------------------------------------
+
+    // import modular SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // State (UI)
     let currentStep = 1;
-    let selectedGoals = []; // multiple
+    let selectedGoals = [];
     let selectedCountry = "";
-    let selectedAllergies = []; // array
+    let selectedAllergies = [];
     let selectedDiet = "";
     let selectedCalories = "";
     let selectedCurrency = "";
 
-    const steps = [1, 2, 3];
+    const steps = [1,2,3];
 
     // Elements
-    const stepEls = {
-      1: document.getElementById('step-1'),
-      2: document.getElementById('step-2'),
-      3: document.getElementById('step-3')
-    };
+    const stepEls = {1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3')};
     const backBtn = document.getElementById('backBtn');
     const nextBtn = document.getElementById('nextBtn');
     const finishBtn = document.getElementById('finishBtn');
     const finishLink = document.getElementById('finishLink');
-
     const progressBar = document.getElementById('progressBar');
     const progressLabel = document.getElementById('progressLabel');
     const progressPct = document.getElementById('progressPct');
     const dots = [document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3')];
-
     const countrySelect = document.getElementById('countrySelect');
     const allergiesContainer = document.getElementById('allergiesContainer');
     const dietSelect = document.getElementById('dietSelect');
     const caloriesSelect = document.getElementById('caloriesSelect');
     const currencySelect = document.getElementById('currencySelect');
 
-    function updateProgress() {
-      const pct = Math.round((currentStep / 3) * 100);
+    // Helpers
+    function updateProgress(){
+      const totalSteps = steps.length;
+      const pct = Math.round((currentStep / totalSteps) * 100);
       progressBar.style.width = pct + '%';
-      progressLabel.textContent = `Step ${currentStep} of 3`;
+      progressLabel.textContent = `Step ${currentStep} of ${totalSteps}`;
       progressPct.textContent = `${pct}% Complete`;
-      dots.forEach((d, i) => {
-        d.style.background = (i < currentStep) ? '#12B981' : '#E5E7EB';
-      });
+      dots.forEach((d,i) => { d.style.background = (i < currentStep) ? '#12B981' : '#E5E7EB'; });
     }
 
-    function showStep(step) {
+    function showStep(step){
       steps.forEach(s => stepEls[s].classList.toggle('hidden', s !== step));
       backBtn.disabled = step === 1;
       const canGo = canProceed();
-      if (step < 3) {
-        nextBtn.classList.remove('hidden');
-        finishLink.classList.add('hidden');
-        nextBtn.disabled = !canGo;
-      } else {
-        nextBtn.classList.add('hidden');
-        finishLink.classList.remove('hidden');
-        finishBtn.disabled = !canGo;
-      }
+      if (step < 3) { nextBtn.classList.remove('hidden'); finishLink.classList.add('hidden'); nextBtn.disabled = !canGo; }
+      else { nextBtn.classList.add('hidden'); finishLink.classList.remove('hidden'); finishBtn.disabled = !canGo; }
       updateProgress();
     }
 
-    function canProceed() {
+    function canProceed(){
       if (currentStep === 1) return selectedGoals.length > 0;
       if (currentStep === 2) return selectedDiet !== "" && selectedCalories !== "" && selectedCurrency !== "";
       if (currentStep === 3) return selectedCountry !== "";
@@ -385,39 +519,28 @@
       card.addEventListener('click', () => {
         const goal = card.dataset.goal;
         const idx = selectedGoals.indexOf(goal);
-        if (idx === -1) {
-          selectedGoals.push(goal);
-          card.setAttribute('data-selected', 'true');
-          card.classList.add('ring-2', 'ring-green-600', 'bg-green-50');
-          card.setAttribute('aria-pressed', 'true');
-        } else {
-          selectedGoals.splice(idx, 1);
-          card.removeAttribute('data-selected');
-          card.classList.remove('ring-2', 'ring-green-600', 'bg-green-50');
-          card.setAttribute('aria-pressed', 'false');
-        }
+        if (idx === -1) { selectedGoals.push(goal); card.setAttribute('data-selected','true'); card.classList.add('ring-2','ring-green-600','bg-green-50'); card.setAttribute('aria-pressed','true'); }
+        else { selectedGoals.splice(idx,1); card.removeAttribute('data-selected'); card.classList.remove('ring-2','ring-green-600','bg-green-50'); card.setAttribute('aria-pressed','false'); }
         nextBtn.disabled = !canProceed();
       });
     });
 
-    // Allergies chips handlers (toggle)
+    // Allergies chips handlers
     allergiesContainer.querySelectorAll('button[data-value]').forEach(btn => {
       btn.addEventListener('click', () => {
         const val = btn.dataset.value;
         if (val === 'none') {
           selectedAllergies = ['none'];
-          allergiesContainer.querySelectorAll('button').forEach(b => {
-            b.classList.toggle('chip-selected', b.dataset.value === 'none');
-          });
+          allergiesContainer.querySelectorAll('button').forEach(b => b.classList.toggle('chip-selected', b.dataset.value === 'none'));
         } else {
           const i = selectedAllergies.indexOf(val);
           if (i === -1) {
             const noneIdx = selectedAllergies.indexOf('none');
-            if (noneIdx !== -1) selectedAllergies.splice(noneIdx, 1);
+            if (noneIdx !== -1) selectedAllergies.splice(noneIdx,1);
             selectedAllergies.push(val);
             btn.classList.add('chip-selected');
           } else {
-            selectedAllergies.splice(i, 1);
+            selectedAllergies.splice(i,1);
             btn.classList.remove('chip-selected');
           }
           allergiesContainer.querySelectorAll('button[data-value="none"]').forEach(b => {
@@ -427,56 +550,92 @@
       });
     });
 
-    // diet, calories, currency handlers
-    dietSelect.addEventListener('change', (e) => {
-      selectedDiet = e.target.value;
-      nextBtn.disabled = !canProceed();
-      finishBtn.disabled = !canProceed();
-    });
+    // diet/calories/currency/country handlers
+    dietSelect.addEventListener('change', e => { selectedDiet = e.target.value; updateNextFinishState(); });
+    caloriesSelect.addEventListener('change', e => { selectedCalories = e.target.value; updateNextFinishState(); });
+    currencySelect.addEventListener('change', e => { selectedCurrency = e.target.value; updateNextFinishState(); });
+    countrySelect.addEventListener('change', e => { selectedCountry = e.target.value; updateNextFinishState(); });
 
-    caloriesSelect.addEventListener('change', (e) => {
-      selectedCalories = e.target.value;
-      nextBtn.disabled = !canProceed();
-      finishBtn.disabled = !canProceed();
-    });
+    function updateNextFinishState(){ nextBtn.disabled = !canProceed(); finishBtn.disabled = !canProceed(); }
 
-    currencySelect.addEventListener('change', (e) => {
-      selectedCurrency = e.target.value;
-      nextBtn.disabled = !canProceed();
-      finishBtn.disabled = !canProceed();
-    });
+    // navigation
+    backBtn.addEventListener('click', () => { currentStep = Math.max(1, currentStep - 1); showStep(currentStep); });
+    nextBtn.addEventListener('click', () => { if (!canProceed()) return; currentStep = Math.min(3, currentStep + 1); showStep(currentStep); });
 
-    // country
-    countrySelect.addEventListener('change', (e) => {
-      selectedCountry = e.target.value;
-      finishBtn.disabled = !canProceed();
-      nextBtn.disabled = !canProceed();
-    });
+    // ---------- FIRESTORE SAVE & REDIRECT ----------
+    async function ensureAuth() {
+      return new Promise((resolve, reject) => {
+        let resolved = false;
+        onAuthStateChanged(auth, (user) => {
+          if (user) { resolved = true; resolve(user); }
+          else {
+            // sign in anonymously so we have an auth.uid to write under rules
+            signInAnonymously(auth).then(uCred => { resolved = true; resolve(uCred.user); }).catch(err => { if(!resolved) reject(err); });
+          }
+        }, (err) => { reject(err); });
+      });
+    }
 
-    // Navigation
-    backBtn.addEventListener('click', () => {
-      currentStep = Math.max(1, currentStep - 1);
-      showStep(currentStep);
-    });
+    async function saveProfileAndRedirect() {
+      finishBtn.disabled = true;
+      finishBtn.textContent = 'Saving...';
 
-    nextBtn.addEventListener('click', () => {
-      if (!canProceed()) return;
-      currentStep = Math.min(3, currentStep + 1);
-      showStep(currentStep);
-    });
+      try {
+        const user = await ensureAuth();
+        if (!user) throw new Error('Authentication failed');
 
+        const uid = user.uid;
+        const profileRef = doc(db, 'profiles', uid);
+        const userRef = doc(db, 'users', uid);
+
+        // Build profile payload
+        // Convert calories to number when possible
+        const caloriesNumber = selectedCalories && selectedCalories !== 'custom' ? parseInt(selectedCalories, 10) : null;
+
+        const profilePatch = {
+          'nutritionInfo': { allergies: selectedAllergies.filter(Boolean), dietaryType: selectedDiet || '' },
+          'nutritionGoals': { calories: caloriesNumber },
+          defaultCurrency: selectedCurrency || '',
+          dietTags: selectedGoals || [],
+          updatedAt: serverTimestamp()
+        };
+
+        // If country available add it
+        if (selectedCountry) profilePatch.location = selectedCountry;
+
+        // Write: check if profile exists and set createdAt only if not
+        const existing = await getDoc(profileRef);
+        if (existing.exists()) {
+          await setDoc(profileRef, profilePatch, { merge: true });
+        } else {
+          await setDoc(profileRef, { ...profilePatch, createdAt: serverTimestamp() }, { merge: true });
+        }
+
+        // Optional: update users/{uid} small fields (merge)
+        const userPatch = {};
+        if (selectedGoals.length) userPatch.dietTags = selectedGoals;
+        if (selectedCountry) userPatch.location = selectedCountry;
+        if (Object.keys(userPatch).length) {
+          await setDoc(userRef, userPatch, { merge: true });
+        }
+
+        // Redirect to dashboard on success
+        window.location.href = '/dashboard/';
+      } catch (err) {
+        console.error('Save failed', err);
+        alert('There was an error saving your profile. Please check the console and try again.');
+        finishBtn.disabled = false;
+        finishBtn.textContent = 'Finish';
+      }
+    }
+
+    // wire finish button to save flow
     finishBtn.addEventListener('click', (e) => {
       if (!canProceed()) { e.preventDefault(); return; }
-      alert(`🎉 Onboarding complete!
-Goals: ${selectedGoals.length ? selectedGoals.join(', ') : 'None'}
-Diet: ${selectedDiet}
-Allergies: ${selectedAllergies.length ? selectedAllergies.join(', ') : 'None'}
-Calories target: ${selectedCalories}
-Currency: ${selectedCurrency}
-Country: ${selectedCountry}`);
+      saveProfileAndRedirect();
     });
 
-    // Init
+    // Init UI
     showStep(currentStep);
   </script>
 </body>
