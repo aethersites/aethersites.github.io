@@ -1,590 +1,716 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Budget Page</title>
-   <div id="global-header"></div>
-<script>
-  // change the filename depending on the page/user state
-  const headerType = "header-2"; // "header-2" or "header-3"
-  fetch(`/header/${headerType}.html`)
-    .then(res => res.text())
-    .then(html => document.querySelector("#global-header").innerHTML = html);
-</script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Groceries & Pantry</title>
+  <style>
+    :root{
+      --page-bg: #ffffff;
+      --panel-bg: #ffffff;
+      --muted: #6b7280;
+      --border: #e6e6e6;
+      --accent: #1f8a3d;
+      --radius-lg: 18px;
+      --radius: 10px;
+      --input-h: 40px;
+      --gap: 18px;
+      --max-width: 1100px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; background:var(--page-bg); font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{padding:28px; color:#0b1220; -webkit-font-smoothing:antialiased; display:flex; justify-content:center;}
+    .canvas { width:100%; max-width:var(--max-width); border-radius:var(--radius-lg); background:var(--panel-bg); padding:28px; }
+    .page-heading { text-align:center; margin:0 0 10px; }
+    .page-heading h1 { margin:0; font-size:28px; font-weight:800; }
+    .page-heading p { margin:8px 0 0; color:var(--muted); }
+    .settings-gear { position:relative; float:right; transform:translateY(-54px); opacity:.6; }
+    .sitebar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; }
+    .brand { font-weight:700; font-size:18px; color:#111827 }
+    .auth-actions { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:13px }
+    .lists { display:grid; grid-template-columns: 1fr 1fr; gap:var(--gap); margin-top:6px; }
+    @media (max-width:920px) { .lists { grid-template-columns: 1fr; } }
+    .box { background:var(--panel-bg); border-radius:12px; padding:18px; border:1px solid var(--border);
+      box-shadow: 0 6px 20px rgba(11,18,32,0.06), 0 1px 0 rgba(255,255,255,0.4) inset; transition: box-shadow 180ms ease, transform 180ms ease; }
+    .box.drag-target { outline: 3px dashed var(--accent); outline-offset: 6px; background-color: rgba(31,138,61,0.03); }
+    .box h2 { margin:0 0 8px; font-size:18px; text-align:left; }
+    .note { color:var(--muted); font-size:13px; margin-bottom:10px; }
+    table { width:100%; border-collapse:collapse; margin-bottom:10px; }
+    thead th { text-align:left; padding:8px 6px; color:var(--muted); font-weight:700; font-size:13px; border-bottom:1px solid #f4f4f4; }
+    td { padding:10px 6px; border-bottom:1px solid #fafafa; font-size:14px; vertical-align:middle; }
+    td.actions { width:200px; text-align:right; }
+    .inline { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+    .inline input[type="text"], .inline input[type="number"], select.currency {
+      height:var(--input-h); padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:#fff; font-size:14px;
+    }
+    select.currency { width:70px; text-align:center; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:14px; }
+    .btn-add { background: linear-gradient(90deg, #17A34B 0%, #12B981 100%); color: #fff; border: none; border-radius: 10px; padding: 8px 12px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px rgba(18,185,129,0.12); transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease; }
+    .btn-ghost { background:transparent; border:1px solid var(--border); color:#111; }
+    .btn-muted { background:#f6f6f6; border:1px solid var(--border); color:#111; }
+    .groceries-footer { display:flex; justify-content:center; padding-top:8px; }
+    .ai-panel { margin:50px; text-align:center; }
+    .ai-actions { display:flex; flex-direction:column; gap:10px; margin-top:12px; align-items:center; }
+    .ai-btn { width:100%; max-width:620px; font-family: 'Roboto', sans-serif; text-align:left; padding:12px 16px; border-radius:10px; background:#f7f8fa; border:1px solid var(--border); cursor:pointer; font-weight:500; margin:6px; font-size: 16px; box-shadow: 0 8px 20px rgba(11,18,32,0.06); }
+    .modal-backdrop { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.28); z-index:40; }
+    .modal-backdrop.active { display:flex; }
+    .modal { width:480px; max-width:94%; border-radius:12px; padding:18px; background:#fff; border:1px solid var(--border); }
+    .modal h3 { margin:0 0 12px; }
+    .modal .row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
+    .modal label { min-width:62px; color:var(--muted); font-size:13px; }
+    .modal input[type="text"], .modal input[type="number"], .modal select { flex:1; height:40px; padding:8px 10px; border-radius:8px; border:1px solid var(--border); }
+    body.modal-open .canvas { filter: blur(4px) grayscale(.03); pointer-events:none; user-select:none; }
+    tr[draggable="true"] { cursor:grab; }
+  </style>
 </head>
-<body class="min-h-screen bg-white-50 font-sans text-gray-900">
+<body>
+  <div class="canvas" role="application" aria-label="Groceries and pantry app">
+    <div class="page-heading">
+      <h1>Groceries & Pantry Log</h1>
+      <p id="pageDate">Date: --</p>
+    </div>
 
- 
-<!-- Hero Section -->
-<style>
-  /* paste in your existing <style> section */
-.drag-target {
-  outline: 3px dashed rgba(31,138,61,0.28);
-  background: rgba(31,138,61,0.03);
-}
+    <div class="settings-gear" aria-hidden="true">⚙️</div>
 
-/* Make rows show "move" cursor */
-tr[draggable="true"] { cursor: grab; }
-tr[draggable="true"]:active { cursor: grabbing; }
-  /* Pulling key variables & classes from the desired hero design */
-  :root {
-    --fg: #0f172a; /* slate-900 */
-    --muted: #6b7280; /* gray-500 */
-    --muted-2: #9ca3af; /* gray-400 */
-    --border: #e5e7eb; /* gray-200 */
-    --surface: #ffffff;
-    --primary: #16a34a; /* green-600 */
-    --primary-700: #15803d; /* green-700 */
-    --primary-100: #dcfce7; /* green-100 */
-    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(2,6,23,.06);
-    --radius: 16px;
-  }
-  .hero {
-    background: linear-gradient(180deg,#f0fdf4,#f7fff8);
-    font-family: 'Helvetica Neue', sans-serif;
-    
-  }
-  .hero h1 {
-    font-size: 40px;
-    line-height: 1.2;
-    font-weight: 800;
-    margin-top: 12px;
-    color: var(--fg);
-  }
-  .hero p {
-    color: var(--muted);
-    font-size: 1rem;
-  }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    font-size: 14px;
-    border: 1px solid rgba(22, 163, 74, .25);
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: var(--primary-100);
-    color: var(--primary);
-    font-weight: 500;
-  }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    box-shadow: var(--shadow);
-  }
-  .stat-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--primary);
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 4px;
-  }
-  .stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0;
-    color: var(--fg);
-  }
-  .stat-sub {
-    font-size: 12px;
-    color: var(--muted-2);
-    margin: 0;
-  }
-  .hero-img {
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-  }
-
-</style>
-
-<section class="hero py-16 px-6 lg:px-8">
-  <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
-    
-    <!-- Left Column -->
-    <div>
-      <span class="badge">💰 Smart Budget Tracking</span>
-      <h1>Master Your <span style="color: var(--primary)">Grocery Budget</span></h1>
-      <p class="mb-6">
-        Track every dollar, analyze spending patterns, and discover smart ways to save while maintaining a healthy and delicious meal plan.
-      </p>
-
-      <!-- Stats -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="stat-card">
-          <div class="stat-title">💵 <span>This Month</span></div>
-          <p class="stat-value">$432.50</p>
-          <p class="stat-sub">of $500 budget</p>
-        </div>
-        <div class="stat-card">
-          <div class="stat-title">🎯 <span>Saved</span></div>
-          <p class="stat-value">$67.50</p>
-          <p class="stat-sub">vs last month</p>
-        </div>
+    <div class="sitebar" role="banner" aria-label="Site header">
+      <div class="brand"> </div>
+      <div class="auth-actions">
+        <div id="signedState" class="user-info">Not signed in</div>
+        <button id="signinBtn" class="btn btn-muted" aria-label="Sign in" type="button">Sign in</button>
       </div>
     </div>
 
-    <!-- Right Column -->
-    <div>
-      <img src="budget-hero.jpg" alt="Budget tracking dashboard" class="hero-img w-full" />
+    <div class="lists" role="main">
+      <section class="box" id="groceriesBox" aria-labelledby="groceriesHeading">
+        <h2 id="groceriesHeading">Groceries List</h2>
+        <div class="note">Add items to buy</div>
+
+        <table id="groceriesTable" aria-live="polite">
+          <thead>
+            <tr><th>Name</th><th style="width:80px">Qty</th><th style="width:160px">Price</th><th style="width:160px"></th></tr>
+          </thead>
+          <tbody id="groceriesBody"></tbody>
+        </table>
+
+        <form id="addGroceryForm" class="inline" aria-label="Add grocery item">
+          <input id="gName" type="text" placeholder="Name..." aria-label="Name (text)" required />
+          <input id="gQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
+          <input id="gPrice" type="number" step="0.01" placeholder="Price" aria-label="Price (number)" style="width:110px" />
+          <select id="gCurrency" class="currency" aria-label="Currency">
+            <option value="$">$</option><option value="€">€</option><option value="£">£</option><option value="¥">¥</option><option value="₹">₹</option>
+          </select>
+          <button id="addGroceryBtn" class="btn btn-add" aria-label="Add grocery" type="button">Add</button>
+        </form>
+
+        <div class="groceries-footer">
+          <button id="openCustomBtn" class="btn btn-ghost" aria-haspopup="dialog" type="button">+ Add Custom Ingredient</button>
+        </div>
+      </section>
+
+      <section class="box" id="pantryBox" aria-labelledby="pantryHeading">
+        <h2 id="pantryHeading">Pantry Items</h2>
+        <div class="note">Items in your pantry</div>
+
+        <table id="pantryTable" aria-live="polite">
+          <thead>
+            <tr><th>Name</th><th style="width:80px">Qty</th><th style="width:140px">Expiration</th><th style="width:160px"></th></tr>
+          </thead>
+          <tbody id="pantryBody"></tbody>
+        </table>
+
+        <form id="addPantryForm" class="inline" aria-label="Add pantry item">
+          <input id="pName" type="text" placeholder="Name..." aria-label="Name (text)" />
+          <input id="pQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
+          <input id="pExp" type="date" style="width:150px" aria-label="Expiration date" />
+          <button id="addPantryBtn" class="btn btn-add" aria-label="Add pantry item" type="button">Add to Pantry</button>
+        </form>
+      </section>
     </div>
 
+    <div class="ai-panel" role="region" aria-label="AI recipes">
+      <h3>Generate AI Recipes</h3>
+      <p class="note">Suggestions and meal plans generated from your groceries & pantry</p>
+      <div class="ai-actions" role="group" aria-label="AI actions">
+        <button id="aiPantryBtn" class="ai-btn" type="button">✦ AI Suggestions based on your pantry...</button>
+        <button id="aiWeeklyBtn" class="ai-btn" type="button">✦ AI Suggestions based on your weekly groceries/pantry items...</button>
+        <button id="aiMealPlanBtn" class="ai-btn" type="button">✦ AI Meal plan for the week...</button>
+      </div>
+    </div>
   </div>
-</section>
 
-  <!-- Overview Cards -->
-  <section class="py-12 px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <!-- Card 1 -->
-        <div class="border border-green-200 rounded-xl bg-white p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">💵</div>
-            <span class="bg-green-100 text-green-700 border border-green-300 px-2 py-1 rounded-full text-xs">-12%</span>
-          </div>
-          <h3 class="text-2xl font-bold">$432.50</h3>
-          <p class="text-sm text-green-800/80">Total Spent This Month</p>
-          <div class="w-full bg-green-200 h-2 rounded mt-3">
-            <div class="bg-green-600 h-2 rounded" style="width:86.5%"></div>
-          </div>
-          <p class="text-xs text-green-700 mt-1">86.5% of budget used</p>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="border border-green-200 rounded-xl bg-white p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">🎯</div>
-            <span class="bg-green-100 text-green-700 border border-green-300 px-2 py-1 rounded-full text-xs">On Track</span>
-          </div>
-          <h3 class="text-2xl font-bold">$108.13</h3>
-          <p class="text-sm text-green-800/80">Average Per Week</p>
-          <div class="mt-3 text-xs text-green-800/70 flex justify-between">
-            <span>Weekly Budget: $125</span>
-            <span class="text-green-700">Under budget</span>
-          </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="border border-green-200 rounded-xl bg-white p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">📈</div>
-            <span class="bg-green-100 text-green-700 border border-green-300 px-2 py-1 rounded-full text-xs">Saved</span>
-          </div>
-          <h3 class="text-2xl font-bold">$67.50</h3>
-          <p class="text-sm text-green-800/80">Money Saved</p>
-          <p class="text-xs text-green-700 mt-3">13.5% under budget this month</p>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="border border-green-200 rounded-xl bg-white p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">🛒</div>
-            <span class="bg-green-100 text-green-700 border border-green-300 px-2 py-1 rounded-full text-xs">23 trips</span>
-          </div>
-          <h3 class="text-2xl font-bold">$18.80</h3>
-          <p class="text-sm text-green-800/80">Avg Per Shopping Trip</p>
-          <p class="text-xs text-green-800/70 mt-3">2.3 trips per week on average</p>
-        </div>
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Add Custom Ingredient</h3>
+      <div class="row">
+        <label for="cName">Name</label><input id="cName" type="text" placeholder="e.g. Almond Butter" aria-label="Custom name" />
       </div>
-
-      <!-- Weekly Breakdown & Category Breakdown -->
-      <div class="grid lg:grid-cols-2 gap-8 mb-12">
-        <!-- Weekly Spending -->
-        <div class="border border-green-200 rounded-xl bg-white p-6">
-          <h3 class="text-lg font-semibold mb-2">📊 Weekly Spending Breakdown</h3>
-          <p class="text-sm text-green-800/70 mb-4">Track your spending patterns throughout the month</p>
-
-          <div class="space-y-4">
-            <div>
-              <div class="flex justify-between text-sm">
-                <span class="font-medium">Week 1</span>
-                <span class="text-green-800">$95.25 <span class="bg-green-100 text-green-700 px-1 rounded text-xs">76.2%</span></span>
-              </div>
-              <div class="w-full bg-green-200 h-2 rounded mt-1">
-                <div class="bg-green-600 h-2 rounded" style="width:76.2%"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm">
-                <span class="font-medium">Week 2</span>
-                <span class="text-green-800">$118.40 <span class="bg-red-100 text-red-700 px-1 rounded text-xs">94.7%</span></span>
-              </div>
-              <div class="w-full bg-green-200 h-2 rounded mt-1">
-                <div class="bg-red-500 h-2 rounded" style="width:94.7%"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm">
-                <span class="font-medium">Week 3</span>
-                <span class="text-green-800">$102.85 <span class="bg-green-100 text-green-700 px-1 rounded text-xs">82.3%</span></span>
-              </div>
-              <div class="w-full bg-green-200 h-2 rounded mt-1">
-                <div class="bg-green-600 h-2 rounded" style="width:82.3%"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm">
-                <span class="font-medium">Week 4</span>
-                <span class="text-green-800">$116.00 <span class="bg-red-100 text-red-700 px-1 rounded text-xs">92.8%</span></span>
-              </div>
-              <div class="w-full bg-green-200 h-2 rounded mt-1">
-                <div class="bg-red-500 h-2 rounded" style="width:92.8%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Spending by Category -->
-        <div class="border border-green-200 rounded-xl bg-white p-6">
-          <h3 class="text-lg font-semibold mb-2">🥗 Spending by Category</h3>
-          <p class="text-sm text-green-800/70 mb-4">See where your grocery budget goes</p>
-
-          <div class="space-y-3">
-            <div>
-              <div class="flex justify-between text-sm">
-                <span>🍖 Proteins</span>
-                <span>$156.80 (36.3%)</span>
-              </div>
-              <div class="w-full bg-green-200 h-1 rounded mt-1">
-                <div class="bg-green-700 h-1 rounded" style="width:36.3%"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm">
-                <span>🥦 Vegetables</span>
-                <span>$89.20 (20.6%)</span>
-              </div>
-              <div class="w-full bg-green-200 h-1 rounded mt-1">
-                <div class="bg-green-700 h-1 rounded" style="width:20.6%"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm">
-                <span>🍞 Grains & Carbs</span>
-                <span>$78.40 (18.1%)</span>
-              </div>
-              <div class="w-full bg-green-200 h-1 rounded mt-1">
-                <div class="bg-green-700 h-1 rounded" style="width:18.1%"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm">
-                <span>🧀 Dairy</span>
-                <span>$54.30 (12.6%)</span>
-              </div>
-              <div class="w-full bg-green-200 h-1 rounded mt-1">
-                <div class="bg-green-700 h-1 rounded" style="width:12.6%"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm">
-                <span>🍪 Snacks</span>
-                <span>$32.60 (7.5%)</span>
-              </div>
-              <div class="w-full bg-green-200 h-1 rounded mt-1">
-                <div class="bg-green-700 h-1 rounded" style="width:7.5%"></div>
-              </div>
-            </div>
-            <div>
-              <div class="flex justify-between text-sm">
-                <span>🥤 Beverages</span>
-                <span>$21.20 (4.9%)</span>
-              </div>
-              <div class="w-full bg-green-200 h-1 rounded mt-1">
-                <div class="bg-green-700 h-1 rounded" style="width:4.9%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="row">
+        <label for="cQty">Qty</label><input id="cQty" type="number" min="1" value="1" aria-label="Custom quantity" style="width:140px" />
+        <label for="cPrice" style="margin-left:6px;">Price</label><input id="cPrice" type="number" step="0.01" placeholder="Price" aria-label="Custom price" style="width:110px" />
+        <select id="cCurrency" class="currency" aria-label="Currency">
+          <option value="$">$</option><option value="€">€</option><option value="£">£</option><option value="¥">¥</option><option value="₹">₹</option>
+        </select>
       </div>
-
-      <!-- Recent Transactions -->
-      <div class="border border-green-200 rounded-xl bg-white p-6 mb-12">
-        <h3 class="text-lg font-semibold mb-2">⏰ Recent Transactions</h3>
-        <p class="text-sm text-green-800/70 mb-4">Your latest grocery purchases and spending</p>
-
-        <div class="space-y-4">
-          <div class="flex justify-between items-center p-4 bg-green-50 rounded-2xl">
-            <div>
-              <h4 class="font-medium">Whole Foods Market</h4>
-              <p class="text-sm text-green-800/80">Organic Salmon, Mixed Greens, Greek Yogurt</p>
-              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Proteins & Dairy</span>
-              <span class="text-xs text-green-800/60 ml-2">Today</span>
-            </div>
-            <p class="text-lg font-semibold">$67.45</p>
-          </div>
-
-          <div class="flex justify-between items-center p-4 bg-green-50 rounded-2xl">
-            <div>
-              <h4 class="font-medium">Local Farmers Market</h4>
-              <p class="text-sm text-green-800/80">Seasonal Vegetables, Fresh Herbs</p>
-              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Vegetables</span>
-              <span class="text-xs text-green-800/60 ml-2">Yesterday</span>
-            </div>
-            <p class="text-lg font-semibold">$28.80</p>
-          </div>
-
-          <div class="flex justify-between items-center p-4 bg-green-50 rounded-2xl">
-            <div>
-              <h4 class="font-medium">Target</h4>
-              <p class="text-sm text-green-800/80">Pasta, Rice, Canned Goods</p>
-              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Grains & Pantry</span>
-              <span class="text-xs text-green-800/60 ml-2">3 days ago</span>
-            </div>
-            <p class="text-lg font-semibold">$45.20</p>
-          </div>
-
-          <div class="flex justify-between items-center p-4 bg-green-50 rounded-2xl">
-            <div>
-              <h4 class="font-medium">Amazon Fresh</h4>
-              <p class="text-sm text-green-800/80">Weekly Produce Box, Organic Snacks</p>
-              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Mixed</span>
-              <span class="text-xs text-green-800/60 ml-2">5 days ago</span>
-            </div>
-            <p class="text-lg font-semibold">$83.15</p>
-          </div>
-        </div>
-
-        <div class="text-center mt-6">
-          <button class="px-4 py-2 border border-green-300 rounded-lg text-green-700 hover:bg-green-100">View All Transactions</button>
-        </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;">
+        <button id="modalSave" class="btn btn-add" type="button">Save</button>
+        <button id="modalCancel" class="btn btn-muted" type="button">Cancel</button>
       </div>
-
-      <!-- Savings Tips -->
-      <div class="border-2 border-green-300 rounded-xl bg-white p-6 shadow">
-        <h3 class="text-lg font-semibold mb-2">🎯 Smart Savings Tips</h3>
-        <p class="text-sm text-green-800/70 mb-6">Personalized recommendations to optimize your grocery budget</p>
-
-        <div class="grid md:grid-cols-3 gap-6">
-          <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
-            <div class="flex justify-between">
-              <h4 class="font-semibold">Switch to seasonal produce</h4>
-              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Easy</span>
-            </div>
-            <p class="text-sm text-green-800/80">Save 15-20% by choosing in-season vegetables and fruits</p>
-            <div class="flex justify-between items-center">
-              <span class="text-lg font-bold text-green-700">$12-15/week</span>
-              <button class="px-3 py-1 border border-green-300 rounded text-green-700 hover:bg-green-100 text-sm">Try This</button>
-            </div>
-          </div>
-
-          <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
-            <div class="flex justify-between">
-              <h4 class="font-semibold">Buy generic brands</h4>
-              <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Easy</span>
-            </div>
-            <p class="text-sm text-green-800/80">Generic staples can save you up to 30% without compromising quality</p>
-            <div class="flex justify-between items-center">
-              <span class="text-lg font-bold text-green-700">$8-12/week</span>
-              <button class="px-3 py-1 border border-green-300 rounded text-green-700 hover:bg-green-100 text-sm">Try This</button>
-            </div>
-          </div>
-
-          <div class="space-y-3 p-4 bg-green-50 rounded-2xl">
-            <div class="flex justify-between">
-              <h4 class="font-semibold">Meal prep on Sundays</h4>
-              <span class="text-xs bg
-              
-    </main>
+    </div>
   </div>
-    <script type="module" src="../dashboard/dashboard.js"></script>
-  <div id="footer"></div>
-<script>
-  fetch("/footer/index.html")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById("footer").innerHTML = data;
-    });
-</script>
-                <!-- START MARK  -->
-<!-- Avatar dropdown: paste before </body> -->
-      <script>
-(function () {
-  function $id(id) { return document.getElementById(id); }
 
-  function ensurePortal(menu) {
-    if (!menu) return;
-    if (menu.parentElement !== document.body) document.body.appendChild(menu);
-    menu.classList.add('gp-portal');
-  }
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import {
+      getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-  // NOTE: uses both menu.dataset.gpLockedWidth and btn.dataset.gpLockedWidth fallback
-  function placeMenu(btn, menu) {
-    if (!btn || !menu) return;
-    ensurePortal(menu);
+    // ---------- CONFIG: drop your firebase config here ----------
+    const firebaseConfig = {
+      apiKey: "REPLACE_ME",
+      authDomain: "REPLACE_ME",
+      projectId: "REPLACE_ME",
+      // ... rest of config
+    };
 
-    menu.style.visibility = 'hidden';
-    menu.hidden = false;
-    menu.style.display = 'block';
-    menu.style.position = 'fixed';
-    menu.style.boxSizing = 'border-box';
+    const app = initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch (e) { /* optional */ }
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    const prevTrans = menu.style.transition;
-    menu.style.transition = 'none';
+    // ---------- DOM refs ----------
+    const signinBtn = document.getElementById('signinBtn');
+    let signoutBtn = document.getElementById('signoutBtn');
+    const signedState = document.getElementById('signedState');
+    const brandEl = document.querySelector('.brand');
 
-    // Try to reuse locked width from menu OR button (button persists across menu replacements)
-    let locked = null;
-    if (menu.dataset && menu.dataset.gpLockedWidth) {
-      locked = parseInt(menu.dataset.gpLockedWidth, 10);
-    } else if (btn.dataset && btn.dataset.gpLockedWidth) {
-      locked = parseInt(btn.dataset.gpLockedWidth, 10);
+    const groceriesBody = document.getElementById('groceriesBody');
+    const pantryBody = document.getElementById('pantryBody');
+
+    const groceriesBox = document.getElementById('groceriesBox');
+    const pantryBox = document.getElementById('pantryBox');
+
+    const addGroceryBtn = document.getElementById('addGroceryBtn');
+    const gName = document.getElementById('gName');
+    const gQty = document.getElementById('gQty');
+    const gPrice = document.getElementById('gPrice');
+    const gCurrency = document.getElementById('gCurrency');
+    const addGroceryForm = document.getElementById('addGroceryForm');
+
+    const addPantryBtn = document.getElementById('addPantryBtn');
+    const pName = document.getElementById('pName');
+    const pQty = document.getElementById('pQty');
+    const pExp = document.getElementById('pExp');
+    const addPantryForm = document.getElementById('addPantryForm');
+
+    const openCustomBtn = document.getElementById('openCustomBtn');
+    const cName = document.getElementById('cName');
+    const cQty = document.getElementById('cQty');
+    const cPrice = document.getElementById('cPrice');
+    const cCurrency = document.getElementById('cCurrency');
+
+    const modalBackdrop = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSave = document.getElementById('modalSave');
+    const modalCancel = document.getElementById('modalCancel');
+
+    // ---------- app state ----------
+    let currentUser = null;
+    let usersDoc = null;
+    let profileDocRef = null;
+    let profileUnsub = null;
+    let profileData = null;
+    let activeGroceryListIndex = 0;
+    let editingContext = null;
+
+    // ---------- helpers ----------
+    function escapeHTML(s = '') {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function formatCurrency(n, symbol = '$') {
+      if (n == null || n === '') return '-';
+      const num = Number(n);
+      if (!isFinite(num)) return '-';
+      return symbol + num.toFixed(2);
+    }
+    function convertMaybeTimestamp(v) {
+      if (!v) return null;
+      if (typeof v.toDate === 'function') return v.toDate();
+      if (typeof v === 'string' || typeof v === 'number') {
+        const d = new Date(v);
+        return isNaN(d.getTime()) ? null : d;
+      }
+      if (v instanceof Date) return v;
+      return null;
+    }
+    function formatDate(d) {
+      if (!d) return '-';
+      const dt = (d instanceof Date) ? d : new Date(d);
+      const y = dt.getFullYear(); const m = String(dt.getMonth()+1).padStart(2,'0'); const day = String(dt.getDate()).padStart(2,'0');
+      return `${m}-${day}-${String(y).slice(-2)}`;
+    }
+    function safeSetText(el, txt) {
+      if (!el) return;
+      el.textContent = (txt === null || txt === undefined) ? '' : String(txt);
+    }
+    function setModalVisible(visible) {
+      if (!modalBackdrop) return;
+      modalBackdrop.classList.toggle('active', visible);
+      if (visible) document.body.classList.add('modal-open'); else document.body.classList.remove('modal-open');
     }
 
-    if (!locked || Number.isNaN(locked)) {
-      // Clear any inline width constraints for honest measurement
-      menu.style.width = 'auto';
-      menu.style.minWidth = '';
-      menu.style.maxWidth = '';
-
-      // Measure intrinsic content width (scrollWidth is reliable)
-      const intrinsic = Math.ceil(menu.scrollWidth || 180);
-      const maxW = Math.max(0, window.innerWidth - 16);
-      locked = Math.min(intrinsic, maxW);
-
-      // Persist to both menu and button so menu node swaps won't lose the value
+    // ---------- persistence helpers ----------
+    let pendingSave = null;
+    function scheduleSave() {
+      if (!profileDocRef || profileData == null) return;
+      if (pendingSave) clearTimeout(pendingSave);
+      pendingSave = setTimeout(async () => {
+        pendingSave = null;
+        try {
+          await updateDoc(profileDocRef, {
+            groceryLists: profileData.groceryLists || [],
+            pantryItems: profileData.pantryItems || [],
+            customIngredients: profileData.customIngredients || [],
+            aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+          });
+        } catch (e) {
+          try {
+            await setDoc(profileDocRef, {
+              groceryLists: profileData.groceryLists || [],
+              pantryItems: profileData.pantryItems || [],
+              customIngredients: profileData.customIngredients || [],
+              aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+            }, { merge: true });
+          } catch (e2) {
+            console.error('Save failed', e2);
+          }
+        }
+      }, 350);
+    }
+    async function saveNow() {
+      if (!profileDocRef || profileData == null) return;
       try {
-        menu.dataset.gpLockedWidth = String(locked);
-      } catch (e) { /* ignore if can't set */ }
-      try {
-        btn.dataset.gpLockedWidth = String(locked);
-      } catch (e) { /* ignore if can't set */ }
+        await updateDoc(profileDocRef, {
+          groceryLists: profileData.groceryLists || [],
+          pantryItems: profileData.pantryItems || [],
+          customIngredients: profileData.customIngredients || [],
+          aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+        });
+      } catch (e) {
+        try {
+          await setDoc(profileDocRef, {
+            groceryLists: profileData.groceryLists || [],
+            pantryItems: profileData.pantryItems || [],
+            customIngredients: profileData.customIngredients || [],
+            aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+          }, { merge: true });
+        } catch (e2) {
+          console.error('Immediate save failed', e2);
+        }
+      }
     }
 
-    // Apply locked width and reasonable height
-    menu.style.width = locked + 'px';
-    menu.style.minWidth = locked + 'px';
-    menu.style.maxWidth = locked + 'px';
-    menu.style.overflowY = 'auto';
-    menu.style.maxHeight = (window.innerHeight - 32) + 'px';
-
-    // Position: right-align to button, flip if needed
-    const rect = btn.getBoundingClientRect();
-    const gap = 8;
-    const menuW = locked;
-    let left = rect.right - menuW;
-    let top = rect.bottom + gap;
-
-    left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
-
-    const contentH = menu.scrollHeight || menu.offsetHeight || 0;
-    if (top + contentH > window.innerHeight - 8) {
-      top = Math.max(8, rect.top - contentH - gap);
-    }
-
-    menu.style.left = left + 'px';
-    menu.style.top = top + 'px';
-
-    requestAnimationFrame(function () {
-      menu.style.transition = prevTrans || '';
-      menu.style.visibility = 'visible';
-    });
-  }
-
-  function openMenu(btn, menu) {
-    placeMenu(btn, menu);
-    menu.setAttribute('data-gp-open', 'true');
-    if (btn) btn.setAttribute('aria-expanded', 'true');
-    const firstItem = menu.querySelector('[role="menuitem"], a, button');
-    if (firstItem) firstItem.focus();
-    setTimeout(function () { placeMenu(btn, menu); }, 45);
-  }
-
-  function closeMenu(btn, menu) {
-    if (!menu) return;
-    menu.hidden = true;
-    menu.style.visibility = 'hidden';
-    menu.removeAttribute('data-gp-open');
-    if (btn) btn.setAttribute('aria-expanded', 'false');
-    // KEEP persisted gpLockedWidth on btn/menu to ensure stable reopen sizing
-  }
-
-  function onceAdd(el, ev, fn) {
-    if (!el) return;
-    if (!el._gp_listened) el._gp_listened = {};
-    if (el._gp_listened[ev]) return;
-    el.addEventListener(ev, fn);
-    el._gp_listened[ev] = true;
-  }
-
-  function bindControls() {
-    const btn = $id('avatarBtn');
-    const menu = $id('avatarMenu');
-    const btnMobile = $id('avatarBtnMobile');
-    const menuMobile = $id('avatarMenuMobile');
-
-    if (!btn && !btnMobile) return;
-
-    if (btn && menu) {
-      onceAdd(btn, 'click', function (e) {
-        e.stopPropagation();
-        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-        const opened = menu.getAttribute('data-gp-open') === 'true';
-        if (opened) closeMenu(btn, menu); else openMenu(btn, menu);
+    // ---------- drag helpers ----------
+    function makeDraggableRow(tr, kind, idx) {
+      tr.setAttribute('draggable', 'true');
+      tr.dataset.kind = kind;
+      tr.dataset.idx = String(idx);
+      tr.addEventListener('dragstart', (ev) => {
+        if (!currentUser) { ev.preventDefault(); return alert('Sign in to move items between lists'); }
+        const payload = JSON.stringify({ kind, idx });
+        try { ev.dataTransfer.setData('application/json', payload); } catch(e) { }
+        ev.dataTransfer.effectAllowed = 'move';
+        try { ev.dataTransfer.setData('text/plain', escapeHTML((tr.textContent || '').trim().slice(0, 200))); } catch(e){}
+        if (groceriesBox) groceriesBox.classList.add('drag-target');
+        if (pantryBox) pantryBox.classList.add('drag-target');
+      });
+      tr.addEventListener('dragend', (ev) => {
+        if (groceriesBox) groceriesBox.classList.remove('drag-target');
+        if (pantryBox) pantryBox.classList.remove('drag-target');
       });
     }
 
-    if (btnMobile && menuMobile) {
-      onceAdd(btnMobile, 'click', function (e) {
-        e.stopPropagation();
-        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-        const opened = menuMobile.getAttribute('data-gp-open') === 'true';
-        if (opened) closeMenu(btnMobile, menuMobile); else openMenu(btnMobile, menuMobile);
+    // ---------- render ----------
+    function clearUI() {
+      if (groceriesBody) groceriesBody.innerHTML = '<tr><td colspan="4" class="small">Sign in to see your lists</td></tr>';
+      if (pantryBody) pantryBody.innerHTML = '<tr><td colspan="4" class="small">Sign in to see your pantry</td></tr>';
+      safeSetText(signedState, 'Not signed in');
+      if (brandEl) brandEl.textContent = '';
+      const pageHeadingDate = document.getElementById('pageDate');
+      if (pageHeadingDate) pageHeadingDate.textContent = 'Date: ' + formatDate(new Date());
+    }
+
+    function renderAll() {
+      const list = (profileData && profileData.groceryLists && profileData.groceryLists[activeGroceryListIndex]) || { name:'Default', items:[] };
+      renderGroceries(list.items || []);
+      renderPantry(profileData ? (profileData.pantryItems || []) : []);
+      let display = '';
+      if (usersDoc && usersDoc.name) {
+        const n = usersDoc.name;
+        display = (n.first || '') + (n.last ? (' ' + n.last) : '');
+      }
+      if (!display && currentUser) display = currentUser.displayName || currentUser.email || currentUser.uid;
+      safeSetText(signedState, display || 'Not signed in');
+      if (brandEl) brandEl.textContent = display ? display : 'GoodPlates';
+    }
+
+    function renderGroceries(items = []) {
+      if (!groceriesBody) return;
+      groceriesBody.innerHTML = '';
+      if (!items.length) return groceriesBody.innerHTML = '<tr><td colspan="4" class="small">No grocery items</td></tr>';
+      items.forEach((it, idx) => {
+        const purchasedClass = it.purchased ? 'style="text-decoration:line-through; opacity:.7;"' : '';
+        const currency = it.currency || '$';
+        const priceDisplay = (it.price != null) ? formatCurrency(it.price, currency) : '-';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td ${purchasedClass}>
+            <label style="display:flex;align-items:center;gap:10px;">
+              <input type="checkbox" data-idx="${idx}" class="chk-bought" ${it.purchased ? 'checked' : ''} />
+              <span>${escapeHTML(it.name)}</span>
+            </label>
+          </td>
+          <td ${purchasedClass}>${it.quantity ?? 1}</td>
+          <td ${purchasedClass}>${priceDisplay}</td>
+          <td class="actions">
+            <button data-idx="${idx}" class="btn btn-edit btn-edit-row" type="button">Edit</button>
+            <button data-idx="${idx}" class="btn btn-muted btn-move" type="button">Move → Pantry</button>
+            <button data-idx="${idx}" class="btn btn-muted btn-delete" type="button">Delete</button>
+          </td>
+        `;
+        makeDraggableRow(tr, 'grocery', idx);
+        groceriesBody.appendChild(tr);
       });
+
+      groceriesBody.querySelectorAll('.chk-bought').forEach(cb => cb.addEventListener('change', onTogglePurchased));
+      groceriesBody.querySelectorAll('.btn-edit-row').forEach(btn => btn.addEventListener('click', onEditGrocery));
+      groceriesBody.querySelectorAll('.btn-delete').forEach(btn => btn.addEventListener('click', onDeleteGrocery));
+      groceriesBody.querySelectorAll('.btn-move').forEach(btn => btn.addEventListener('click', onMoveToPantry));
     }
 
-    onceAdd(document, 'click', function (e) {
-      if (menu && menu.getAttribute('data-gp-open') === 'true') {
-        if (!menu.contains(e.target) && !(btn && btn.contains(e.target))) closeMenu(btn, menu);
-      }
-      if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') {
-        if (!menuMobile.contains(e.target) && !(btnMobile && btnMobile.contains(e.target))) closeMenu(btnMobile, menuMobile);
-      }
-    });
-
-    onceAdd(document, 'keydown', function (e) {
-      if (e.key === 'Escape') {
-        if (menu && menu.getAttribute('data-gp-open') === 'true') closeMenu(btn, menu);
-        if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') closeMenu(btnMobile, menuMobile);
-      }
-    });
-
-    onceAdd(window, 'resize', function () {
-      if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenu(btn, menu);
-      if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenu(btnMobile, menuMobile);
-    });
-    onceAdd(window, 'scroll', function () {
-      if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenu(btn, menu);
-      if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenu(btnMobile, menuMobile);
-    }, true);
-
-    const top = document.querySelector('.gp-topnav');
-    if (top) {
-      top.style.pointerEvents = 'auto';
-      Array.from(top.querySelectorAll('*')).forEach(el => el.style.pointerEvents = 'auto');
+    function renderPantry(items = []) {
+      if (!pantryBody) return;
+      pantryBody.innerHTML = '';
+      if (!items.length) return pantryBody.innerHTML = '<tr><td colspan="4" class="small">No pantry items</td></tr>';
+      items.forEach((it, idx) => {
+        const exp = it.expirationDate ? formatDate(convertMaybeTimestamp(it.expirationDate)) : '-';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${escapeHTML(it.name)}</td>
+          <td>${it.quantity ?? 1}</td>
+          <td>${exp}</td>
+          <td class="actions">
+            <button data-idx="${idx}" class="btn btn-edit btn-edit-pantry" type="button">Edit</button>
+            <button data-idx="${idx}" class="btn btn-muted btn-delete-pantry" type="button">Delete</button>
+          </td>
+        `;
+        makeDraggableRow(tr, 'pantry', idx);
+        pantryBody.appendChild(tr);
+      });
+      pantryBody.querySelectorAll('.btn-edit-pantry').forEach(btn => btn.addEventListener('click', onEditPantry));
+      pantryBody.querySelectorAll('.btn-delete-pantry').forEach(btn => btn.addEventListener('click', onDeletePantry));
     }
-  }
 
-  function init() { bindControls(); }
+    // ---------- handlers ----------
+    if (addGroceryBtn) addGroceryBtn.type = 'button';
+    if (addPantryBtn) addPantryBtn.type = 'button';
+    if (modalSave) modalSave.type = 'button';
+    if (modalCancel) modalCancel.type = 'button';
 
-  try { init(); } catch (e) { /* silent fail */ }
+    async function handleAddGrocery(e) {
+      if (!currentUser) return alert('Sign in to add items');
+      e && e.preventDefault && e.preventDefault();
+      const name = gName?.value?.trim();
+      if (!name) return alert('Enter a name');
+      const qty = Number(gQty?.value) || 1;
+      const price = (gPrice && gPrice.value !== '') ? Number(gPrice.value) : null;
+      const currency = (gCurrency && gCurrency.value) || '$';
+      const item = { name, quantity: qty, price, currency, createdAt: serverTimestamp(), purchased: false };
+      profileData = profileData || {};
+      profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
+      const list = profileData.groceryLists[activeGroceryListIndex] || profileData.groceryLists[0];
+      list.items = list.items || [];
+      list.items.push(item);
 
-  const mo = new MutationObserver(function () {
-    if ($id('avatarBtn') || $id('avatarBtnMobile')) init();
-  });
-  mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+      scheduleSave();
+      await saveNow().catch(() => {});
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else setTimeout(init, 0);
-})();
-</script>
+      renderAll();
+      if (gName) gName.value = '';
+      if (gQty) gQty.value = 1;
+      if (gPrice) gPrice.value = '';
+    }
+    if (addGroceryBtn) addGroceryBtn.addEventListener('click', handleAddGrocery);
+    if (addGroceryForm) addGroceryForm.addEventListener('submit', handleAddGrocery);
 
+    async function handleAddPantry(e) {
+      if (!currentUser) return alert('Sign in to add pantry items');
+      e && e.preventDefault && e.preventDefault();
+      const name = pName?.value?.trim();
+      if (!name) return alert('Enter a name');
+      const qty = Number(pQty?.value) || 1;
+      const expirationDate = pExp && pExp.value ? new Date(pExp.value) : null;
+      const item = { name, quantity: qty, createdAt: serverTimestamp() };
+      if (expirationDate) item.expirationDate = expirationDate;
+      profileData = profileData || {};
+      profileData.pantryItems = profileData.pantryItems || [];
+      profileData.pantryItems.push(item);
 
-<!-- END MARK  -->
-      
+      scheduleSave();
+      await saveNow().catch(()=>{});
+
+      renderAll();
+      if (pName) pName.value='';
+      if (pQty) pQty.value=1;
+      if (pExp) pExp.value='';
+    }
+    if (addPantryBtn) addPantryBtn.addEventListener('click', handleAddPantry);
+    if (addPantryForm) addPantryForm.addEventListener('submit', handleAddPantry);
+
+    if (openCustomBtn) openCustomBtn.addEventListener('click', () => {
+      if (!currentUser) return alert('Sign in to add custom ingredients');
+      editingContext = { type: 'custom' };
+      if (modalTitle) modalTitle.textContent = 'Add Custom Ingredient';
+      if (cName) cName.value = '';
+      if (cQty) cQty.value = 1;
+      if (cPrice) cPrice.value = '';
+      setModalVisible(true);
+      if (cName) cName.focus();
+    });
+
+    if (modalSave) modalSave.addEventListener('click', async () => {
+      if (!editingContext) { setModalVisible(false); return; }
+      const t = editingContext;
+      const name = (cName?.value?.trim() || '');
+      if (!name) return alert('Enter a name');
+      const qty = Number(cQty?.value || 1);
+      const price = (cPrice && cPrice.value !== '') ? Number(cPrice.value) : null;
+
+      if (t.type === 'grocery' && Number.isFinite(t.idx)) {
+        const list = profileData.groceryLists[activeGroceryListIndex];
+        const it = list.items[t.idx];
+        it.name = name; it.quantity = qty; it.price = price;
+      } else if (t.type === 'pantry' && Number.isFinite(t.idx)) {
+        const it = profileData.pantryItems[t.idx];
+        it.name = name; it.quantity = qty;
+        if (price != null) it.price = price; else delete it.price;
+      } else if (t.type === 'custom') {
+        const currency = (cCurrency && cCurrency.value) || '$';
+        const item = { name, quantity: qty, price: price, currency, createdAt: serverTimestamp() };
+        profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
+        profileData.groceryLists[activeGroceryListIndex].items.push(item);
+        profileData.customIngredients = profileData.customIngredients || [];
+        profileData.customIngredients.push({ name, quantity: qty, price: price, currency, createdAt: serverTimestamp() });
+      }
+      scheduleSave();
+      await saveNow().catch(()=>{});
+      setModalVisible(false);
+      editingContext = null;
+      renderAll();
+    });
+
+    if (modalCancel) modalCancel.addEventListener('click', () => { setModalVisible(false); editingContext = null; });
+
+    function onEditGrocery(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      const item = (profileData?.groceryLists?.[activeGroceryListIndex]?.items || [])[idx];
+      if (!item) return;
+      editingContext = { type:'grocery', idx };
+      if (modalTitle) modalTitle.textContent = 'Edit Grocery Item';
+      if (cName) cName.value = item.name || '';
+      if (cQty) cQty.value = item.quantity ?? 1;
+      if (cPrice) cPrice.value = item.price != null ? String(item.price) : '';
+      setModalVisible(true);
+    }
+    function onDeleteGrocery(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      if (!confirm('Delete this grocery item?')) return;
+      profileData.groceryLists[activeGroceryListIndex].items.splice(idx,1);
+      scheduleSave(); saveNow();
+      renderAll();
+    }
+    function onMoveToPantry(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      const list = profileData.groceryLists[activeGroceryListIndex];
+      const item = list.items.splice(idx,1)[0];
+      if (!item) return;
+      const p = { name: item.name, quantity: item.quantity || 1, createdAt: serverTimestamp() };
+      profileData.pantryItems = profileData.pantryItems || [];
+      profileData.pantryItems.push(p);
+      scheduleSave(); saveNow();
+      renderAll();
+    }
+    function onEditPantry(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      const item = profileData.pantryItems[idx];
+      if (!item) return;
+      editingContext = { type:'pantry', idx };
+      if (modalTitle) modalTitle.textContent = 'Edit Pantry Item';
+      if (cName) cName.value = item.name || '';
+      if (cQty) cQty.value = item.quantity ?? 1;
+      if (cPrice) cPrice.value = item.price != null ? String(item.price) : '';
+      setModalVisible(true);
+    }
+    function onDeletePantry(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      if (!confirm('Delete this pantry item?')) return;
+      profileData.pantryItems.splice(idx,1);
+      scheduleSave(); saveNow();
+      renderAll();
+    }
+    function onTogglePurchased(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      const list = profileData.groceryLists[activeGroceryListIndex];
+      if (!list || !list.items || !list.items[idx]) return;
+      const it = list.items[idx];
+      it.purchased = !!e.currentTarget.checked;
+      if (it.purchased) it.purchasedAt = new Date();
+      else delete it.purchasedAt;
+      scheduleSave(); saveNow();
+      renderAll();
+    }
+
+    // ---------- drag/drop on boxes ----------
+    function parseDragData(ev) {
+      try {
+        const raw = ev.dataTransfer.getData('application/json') || ev.dataTransfer.getData('text/plain');
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+    async function handleDropOnBox(ev, targetKind) {
+      ev.preventDefault();
+      if (!currentUser) return alert('Sign in to move items');
+      const payload = parseDragData(ev);
+      if (!payload || typeof payload.kind !== 'string' || payload.idx == null) { return; }
+      const srcKind = payload.kind;
+      const srcIdx = Number(payload.idx);
+      if (srcKind === targetKind) {
+        if (groceriesBox) groceriesBox.classList.remove('drag-target');
+        if (pantryBox) pantryBox.classList.remove('drag-target');
+        return;
+      }
+      if (srcKind === 'grocery' && targetKind === 'pantry') {
+        const list = profileData.groceryLists[activeGroceryListIndex];
+        if (!list || !list.items || !list.items[srcIdx]) return;
+        const item = list.items.splice(srcIdx,1)[0];
+        const p = { name: item.name, quantity: item.quantity || 1, createdAt: serverTimestamp() };
+        profileData.pantryItems = profileData.pantryItems || [];
+        profileData.pantryItems.push(p);
+        scheduleSave(); await saveNow().catch(()=>{});
+        renderAll();
+      }
+      if (srcKind === 'pantry' && targetKind === 'grocery') {
+        if (!profileData.pantryItems || !profileData.pantryItems[srcIdx]) return;
+        const pitem = profileData.pantryItems.splice(srcIdx,1)[0];
+        const gItem = { name: pitem.name, quantity: pitem.quantity || 1, price: pitem.price ?? null, createdAt: serverTimestamp() };
+        profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
+        profileData.groceryLists[activeGroceryListIndex].items.push(gItem);
+        scheduleSave(); await saveNow().catch(()=>{});
+        renderAll();
+      }
+      if (groceriesBox) groceriesBox.classList.remove('drag-target');
+      if (pantryBox) pantryBox.classList.remove('drag-target');
+    }
+
+    if (groceriesBox) {
+      groceriesBox.addEventListener('dragover', (e) => e.preventDefault());
+      groceriesBox.addEventListener('drop', (e) => handleDropOnBox(e, 'grocery'));
+    }
+    if (pantryBox) {
+      pantryBox.addEventListener('dragover', (e) => e.preventDefault());
+      pantryBox.addEventListener('drop', (e) => handleDropOnBox(e, 'pantry'));
+    }
+
+    // ---------- auth observer ----------
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (!user) {
+        signedState && (signedState.textContent = 'Not signed in');
+        if (signinBtn) signinBtn.style.display = '';
+        if (signoutBtn) signoutBtn.style.display = 'none';
+        profileDocRef = null; profileData = null; usersDoc = null;
+        if (profileUnsub) { profileUnsub(); profileUnsub = null; }
+        clearUI();
+        return;
+      }
+
+      if (signinBtn) signinBtn.style.display = 'none';
+      if (!signoutBtn) {
+        const authActions = document.querySelector('.auth-actions');
+        if (authActions) {
+          signoutBtn = document.createElement('button');
+          signoutBtn.id = 'signoutBtn';
+          signoutBtn.className = 'btn btn-muted';
+          signoutBtn.textContent = 'Sign out';
+          signoutBtn.type = 'button';
+          authActions.appendChild(signoutBtn);
+          signoutBtn.addEventListener('click', async () => {
+            try { await signOut(auth); } catch (e) { console.error('Sign-out failed', e); }
+          });
+        }
+      } else {
+        signoutBtn.style.display = '';
+      }
+
+      // ensure users/{uid}
+      try {
+        const usersSnap = await getDoc(doc(db, 'users', user.uid));
+        if (!usersSnap.exists()) {
+          const userRecord = {
+            email: user.email || '',
+            name: { first: user.displayName ? user.displayName.split(' ')[0] : '', last: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '' },
+            profilePicture: user.photoURL || '',
+            createdAt: serverTimestamp()
+          };
+          await setDoc(doc(db, 'users', user.uid), userRecord, { merge: true });
+          usersDoc = userRecord;
+        } else {
+          usersDoc = usersSnap.data();
+        }
+      } catch (e) {
+        console.warn('Could not read/create users/{uid}', e);
+        usersDoc = null;
+      }
+
+      // ensure profile doc & subscribe realtime
+      profileDocRef = doc(db, 'profiles', user.uid);
+      try {
+        const snap = await getDoc(profileDocRef);
+        if (!snap.exists()) {
+          const initial = {
+            groceryLists: [{ name: 'Default', items: [], createdAt: serverTimestamp() }],
+            pantryItems: [],
+            customIngredients: [],
+            aiSuggestionsEnabled: true,
+            spendingHistory: [],
+            createdAt: serverTimestamp()
+          };
+          await setDoc(profileDocRef, initial);
+        }
+      } catch (e) {
+        console.error('Could not ensure profile doc', e);
+      }
+
+      if (profileUnsub) { profileUnsub(); profileUnsub = null; }
+      profileUnsub = onSnapshot(profileDocRef, (snap) => {
+        if (!snap.exists()) { profileData = null; clearUI(); return; }
+        profileData = snap.data();
+        profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
+        profileData.pantryItems = profileData.pantryItems || [];
+        profileData.customIngredients = profileData.customIngredients || [];
+        profileData.spendingHistory = profileData.spendingHistory || [];
+        renderAll();
+      }, (err) => {
+        console.error('Profile realtime error', err);
+      });
+    });
+
+    // initial UI
+    clearUI();
+    window._profile = () => profileData;
+    window._usersDoc = () => usersDoc;
+    window._saveNow = () => saveNow();
+  </script>
 </body>
 </html>
