@@ -52,6 +52,8 @@
     .btn-add { background: linear-gradient(90deg, #17A34B 0%, #12B981 100%); color: #fff; border: none; border-radius: 10px; padding: 8px 12px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px rgba(18,185,129,0.12); transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease; }
     .btn-ghost { background:transparent; border:1px solid var(--border); color:#111; }
     .btn-muted { background:#f6f6f6; border:1px solid var(--border); color:#111; }
+    .btn-delete { background:#111; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-weight:700; cursor:pointer; }
+    .btn-move { background:transparent; border:1px solid var(--border); padding:6px 10px; border-radius:8px; font-weight:700; }
 
     .groceries-footer { display:flex; justify-content:center; padding-top:8px; }
     .ai-panel { margin:50px; text-align:center; }
@@ -104,7 +106,7 @@
 
         <table id="groceriesTable" aria-live="polite">
           <thead>
-            <tr><th>Name</th><th style="width:80px">Qty</th><th style="width:160px">Price</th><th style="width:160px"></th></tr>
+            <tr><th>Name</th><th style="width:80px">Qty</th><th style="width:80px">Currency</th><th style="width:160px">Price</th><th style="width:160px">Actions</th></tr>
           </thead>
           <tbody id="groceriesBody"></tbody>
         </table>
@@ -208,13 +210,10 @@
     // ---------- CONFIG: drop your firebase config here ----------
     // keep this a valid JS object. replace the placeholders with your real config.
     const firebaseConfig = {
-      apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-    authDomain: "goodplates-7ae36.firebaseapp.com",
-    projectId: "goodplates-7ae36",
-    storageBucket: "goodplates-7ae36.firebasestorage.app",
-    messagingSenderId: "541149626283",
-    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
+      apiKey: "<YOUR_API_KEY>",
+      authDomain: "<YOUR_AUTH_DOMAIN>",
+      projectId: "<YOUR_PROJECT_ID>",
+      // ...other config keys...
     };
 
     const hasConfig = firebaseConfig && firebaseConfig.apiKey && String(firebaseConfig.apiKey).trim().length > 0;
@@ -425,7 +424,7 @@
     function renderGroceries(items = []) {
       if (!groceriesBody) return;
       groceriesBody.innerHTML = '';
-      if (!items.length) return groceriesBody.innerHTML = '<tr><td colspan="4" class="small">No grocery items</td></tr>';
+      if (!items.length) return groceriesBody.innerHTML = '<tr><td colspan="5" class="small">No grocery items</td></tr>';
       items.forEach((it, idx) => {
         const purchasedClass = it.purchased ? 'style="text-decoration:line-through; opacity:.7;"' : '';
         const currency = it.currency || '$';
@@ -439,11 +438,12 @@
             </label>
           </td>
           <td ${purchasedClass}>${it.quantity ?? 1}</td>
+          <td ${purchasedClass}>${escapeHTML(currency)}</td>
           <td ${purchasedClass}>${priceDisplay}</td>
           <td class="actions">
             <button data-idx="${idx}" class="btn btn-edit btn-edit-row" type="button">Edit</button>
-            <button data-idx="${idx}" class="btn btn-muted btn-move" type="button">Move → Pantry</button>
-            <button data-idx="${idx}" class="btn btn-muted btn-delete" type="button">Delete</button>
+            <button data-idx="${idx}" class="btn btn-move" type="button">&gt;</button>
+            <button data-idx="${idx}" class="btn btn-delete" type="button">X</button>
           </td>
         `;
         makeDraggableRow(tr, 'grocery', idx);
