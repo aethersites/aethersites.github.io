@@ -1,17 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+    
+<meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Calorie & Macro Calculator — Apple-style</title>
-  <div id="global-header"></div>
-<script>
-  // change the filename depending on the page/user state
-  const headerType = "header-1"; // "header-2" or "header-3"
-  fetch(`/header/${headerType}.html`)
-    .then(res => res.text())
-    .then(html => document.querySelector("#global-header").innerHTML = html);
-</script>
 
 
   <meta name="description" content="A clean, rounded calorie calculator that estimates BMR, TDEE, and goal calories for losing or gaining weight. Includes macros and zigzag plan." />
@@ -325,12 +318,6 @@
         <tbody id="zigzag"><tr><td colspan="3" class="muted" style="text-align:center">— calculate to generate week —</td></tr></tbody>
       </table>
     </section>
-
-    <footer>
-      <div>Formulas: Mifflin-St Jeor, Revised Harris-Benedict, and Katch-McArdle (if body fat% provided). 1 kg ≈ 7,700 kcal. Suggested macro ranges: protein 1.6–2.2 g/kg (cut towards higher), fat 0.6–1.0 g/kg, remainder carbs.</div>
-      <div style="margin-top:6px">This tool gives estimates—individual needs vary. For medical questions, consult a clinician or registered dietitian.</div>
-    </footer>
-  </div>
 
   <!-- --- MOVED: modal markup placed BEFORE the script so it's present when JS runs --- -->
   <div id="wg_modal" style="display:none;">
