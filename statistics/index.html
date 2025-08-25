@@ -395,9 +395,10 @@
         </div>
       </div> <!-- end lower wrapper -->
 
-    </div> <!-- end max-w-7xl -->
-  </section>
 
+  <!-- Main client-side module (adjust path as needed) -->
+  <script type="module" src="/statistics/statistics.js"></script>
+      
   <!-- Footer (outside all wrappers so it can be full-width) -->
   <footer id="footer" class="mt-12 w-full text-right"></footer>
   <script>
@@ -406,8 +407,5 @@
       .then(html => document.getElementById("footer").innerHTML = html)
       .catch(() => {});
   </script>
-
-  <!-- Main client-side module (adjust path as needed) -->
-  <script type="module" src="/statistics/statistics.js"></script>
 </body>
 </html>
