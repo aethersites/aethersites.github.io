@@ -21,7 +21,14 @@
 <!-- Hero Section -->
 <style>
   /* paste in your existing <style> section */
-.drag-target { outline: 3px dashed rgba(31,138,61,0.28); background: rgba(31,138,61,0.02); }
+.drag-target {
+  outline: 3px dashed rgba(31,138,61,0.28);
+  background: rgba(31,138,61,0.03);
+}
+
+/* Make rows show "move" cursor */
+tr[draggable="true"] { cursor: grab; }
+tr[draggable="true"]:active { cursor: grabbing; }
   /* Pulling key variables & classes from the desired hero design */
   :root {
     --fg: #0f172a; /* slate-900 */
