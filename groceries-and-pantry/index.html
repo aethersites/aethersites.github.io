@@ -81,6 +81,15 @@
   </style>
 </head>
 <body>
+  <div id="global-header"></div>
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-1"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => document.querySelector("#global-header").innerHTML = html);
+</script>
+
   <div class="canvas" role="application" aria-label="Groceries and pantry app">
 
     <div class="page-heading">
@@ -201,6 +210,15 @@
   </div>
 
   <script type="module">
+    <div id="footer"></div>
+<script>
+  fetch("/footer/index.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("footer").innerHTML = data;
+    });
+</script>
+
     // single, consolidated script: imports, helpers, DOM wiring, auth & firestore logic
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
