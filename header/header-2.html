@@ -431,36 +431,53 @@
   #avatarBtn { position: relative; z-index: 1200; }
 #avatarMenu { z-index: 1201 !important; position: absolute; } /* keep absolute but higher z */
 
-
-</style>
-
-
-  <!-- START MARK -->
-  <!-- Paste this right before </body> on pages that load header-2 -->
-<style id="gp-avatar-override">
-/* Header-scoped overrides only (safe & specific) */
-.gp-topnav img { display: block !important; }
-.gp-topnav #avatarBtn img,
-.gp-topnav #avatarBtnMobile img { pointer-events: none !important; }
-
-/* Constrain the dropdown: JS will set exact left/top/width inline */
-.gp-topnav #avatarMenu,
-.gp-topnav #avatarMenuMobile {
-  position: fixed !important;
-  z-index: 2147483647 !important;
-  /* allow JS to control visibility */
-  visibility: hidden;               /* no !important */
-  box-sizing: border-box;
-  width: auto !important;
-  min-width: 180px !important;
-  max-width: calc(100% - 16px) !important;
-  overflow-y: auto !important;
-  max-height: calc(100vh - 32px) !important;
-  transition: none !important;
+one !important;
 }
 
 /* Safety: ensure header area accepts pointer events */
 .gp-topnav, .gp-topnav * { pointer-events: auto !important; }
+
+  /* Global dropdown baseline — applies when menu is moved to body */
+#avatarMenu, #avatarMenuMobile {
+  position: fixed !important;
+  z-index: 2147483647 !important; /* high but safe */
+  box-sizing: border-box;
+  pointer-events: auto !important;
+  display: block;                 /* keep measurable */
+  visibility: hidden;             /* JS toggles visible/hidden */
+  opacity: 0;
+  transform-origin: top right;
+  transition: opacity 120ms ease, transform 120ms ease;
+  min-width: 180px;
+  max-width: calc(100% - 16px);
+  overflow-y: auto;
+  max-height: calc(100vh - 32px);
+}
+
+/* Class-based visibility toggles (preferred vs hidden attribute) */
+.gp-hidden {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(-6px) scale(0.99);
+}
+.gp-visible {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) scale(1);
+}
+
+/* Make sure menu items are keyboard-focusable */
+#avatarMenu [role="menuitem"],
+#avatarMenuMobile [role="menuitem"] {
+  outline: none;
+}
+#avatarMenu [role="menuitem"]:focus,
+#avatarMenuMobile [role="menuitem"]:focus {
+  background: rgba(0,0,0,0.04);
+}
+
 </style>
 
 <script>
@@ -472,80 +489,68 @@
 
   // Deterministic placement: measure intrinsic width, lock it, position right-aligned.
   function placeMenuFixed(btn, menu) {
-    if (!btn || !menu) return;
-    // ensure menu lives under body to avoid clipping
-    if (menu.parentElement !== document.body) document.body.appendChild(menu);
+  if (!btn || !menu) return;
+  if (menu.parentElement !== document.body) document.body.appendChild(menu);
 
-    // Prepare menu for measurement
-    menu.style.visibility = 'hidden';
-    menu.hidden = false;
-    menu.style.display = 'block';
-    menu.style.position = 'fixed';
-    menu.style.boxSizing = 'border-box';
+  // Prepare for measurement
+  menu.classList.remove('gp-visible');
+  menu.classList.add('gp-hidden');
+  // Ensure it's in the flow so scrollWidth/height work
+  menu.style.position = 'fixed';
+  menu.style.left = '0';
+  menu.style.top = '0';
+  menu.style.width = 'auto';
+  menu.style.maxWidth = 'none';
+  menu.style.display = 'block';
 
-    // Temporarily remove width constraints, measure intrinsic width
-    menu.style.width = 'auto';
-    menu.style.minWidth = '';
-    menu.style.maxWidth = '';
+  // measure
+  const intrinsicW = Math.ceil(menu.scrollWidth || 180);
+  const maxW = Math.max(0, window.innerWidth - 16);
+  const finalW = Math.min(intrinsicW, maxW);
 
-    // Temporarily disable transitions (CSS may be loaded by host)
-    const prevTrans = menu.style.transition;
-    menu.style.transition = 'none';
+  menu.style.width = finalW + 'px';
+  menu.style.maxHeight = (window.innerHeight - 32) + 'px';
+  menu.style.overflowY = 'auto';
 
-    const intrinsicW = Math.ceil(menu.scrollWidth || 180);
-    const maxW = Math.max(0, window.innerWidth - 16); // 8px margin both sides
-    const finalW = Math.min(intrinsicW, maxW);
+  const rect = btn.getBoundingClientRect();
+  let left = rect.right - finalW;
+  let top = rect.bottom + 8;
+  left = Math.max(8, Math.min(left, window.innerWidth - finalW - 8));
 
-    // Lock width and sensible height
-    menu.style.width = finalW + 'px';
-    menu.style.minWidth = finalW + 'px';
-    menu.style.maxWidth = finalW + 'px';
-    menu.style.overflowY = 'auto';
-    menu.style.maxHeight = (window.innerHeight - 32) + 'px';
-
-    // Compute coordinates (right-aligned)
-    const rect = btn.getBoundingClientRect();
-    let left = rect.right - finalW;
-    let top = rect.bottom + 8;
-
-    left = Math.max(8, Math.min(left, window.innerWidth - finalW - 8));
-
-    // flip up if there's no room below
-    if (top + menu.offsetHeight > window.innerHeight - 8) {
-      top = Math.max(8, rect.top - menu.offsetHeight - 8);
-    }
-
-    menu.style.left = left + 'px';
-    menu.style.top = top + 'px';
-
-    // restore transition after a paint
-    requestAnimationFrame(function () {
-      menu.style.transition = prevTrans || '';
-      menu.style.visibility = 'visible';
-    });
+  // flip up if no room below
+  const willBeBottom = top + menu.offsetHeight <= window.innerHeight - 8;
+  if (!willBeBottom) {
+    top = Math.max(8, rect.top - menu.offsetHeight - 8);
   }
 
-  function openMenu(btn, menu) {
-    placeMenuFixed(btn, menu);
-    menu.setAttribute('data-gp-open', 'true');
-    btn.setAttribute('aria-expanded', 'true');
-    const first = menu.querySelector('[role="menuitem"]');
-    if (first) first.focus();
-    // safety reflow for hosts that mutate layout
-    setTimeout(function () { placeMenuFixed(btn, menu); }, 40);
-  }
+  menu.style.left = left + 'px';
+  menu.style.top = top + 'px';
 
-  function closeMenu(btn, menu) {
-    if (!menu) return;
-    menu.hidden = true;
-    menu.style.visibility = 'hidden';
-    menu.removeAttribute('data-gp-open');
-    if (btn) btn.setAttribute('aria-expanded', 'false');
-    // remove locked width so next open re-measures cleanly
-    menu.style.width = '';
-    menu.style.minWidth = '';
-    menu.style.maxWidth = '';
-  }
+  // show
+  requestAnimationFrame(function () {
+    menu.classList.remove('gp-hidden');
+    menu.classList.add('gp-visible');
+  });
+}
+
+function openMenu(btn, menu) {
+  placeMenuFixed(btn, menu);
+  menu.setAttribute('data-gp-open', 'true');
+  btn.setAttribute('aria-expanded', 'true');
+  const first = menu.querySelector('[role="menuitem"], a, button');
+  if (first && typeof first.focus === 'function') first.focus();
+}
+
+function closeMenu(btn, menu) {
+  if (!menu) return;
+  menu.removeAttribute('data-gp-open');
+  btn && btn.setAttribute('aria-expanded', 'false');
+  menu.classList.remove('gp-visible');
+  menu.classList.add('gp-hidden');
+  // clear inline width so next open measures cleanly
+  menu.style.width = '';
+  menu.style.maxHeight = '';
+}
 
   // Binds handlers; safe to call repeatedly.
   function initAvatarDropdown() {
@@ -607,7 +612,7 @@
     onceAdd(window, 'scroll', function () {
       if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenuFixed(btn, menu);
       if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenuFixed(btnMobile, menuMobile);
-    }, true);
+    });
 
     // Ensure header area isn't pointer-blocked by host
     const top = document.querySelector('.gp-topnav');
@@ -632,7 +637,54 @@
 })();
 </script>
 
+<script>
+(function () {
+  const btn = document.getElementById('avatarBtn');
+  const menu = document.getElementById('avatarMenu');
+  if (!btn || !menu) return;
 
- <!-- FINISH MARK -->
+  // Ensure we can measure if needed and let JS control visibility
+  if (menu.hasAttribute('hidden')) menu.removeAttribute('hidden');
+  menu.classList.add('gp-hidden');
+
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    const open = menu.classList.contains('gp-visible');
+    if (open) {
+      menu.classList.remove('gp-visible');
+      menu.classList.add('gp-hidden');
+      btn.setAttribute('aria-expanded', 'false');
+    } else {
+      menu.classList.remove('gp-hidden');
+      menu.classList.add('gp-visible');
+      btn.setAttribute('aria-expanded', 'true');
+      // focus first item for a11y
+      const first = menu.querySelector('[role="menuitem"], a, button');
+      if (first && typeof first.focus === 'function') first.focus();
+    }
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', function (e) {
+    if (menu.classList.contains('gp-visible') && !menu.contains(e.target) && !btn.contains(e.target)) {
+      menu.classList.remove('gp-visible');
+      menu.classList.add('gp-hidden');
+      btn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Escape to close
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && menu.classList.contains('gp-visible')) {
+      menu.classList.remove('gp-visible');
+      menu.classList.add('gp-hidden');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.focus();
+    }
+  });
+})();
+</script>
+
+  <!-- FINISH MARK -->
 </body>
 </html>
