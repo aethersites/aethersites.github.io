@@ -140,7 +140,7 @@
             </button>
 
             <div id="avatarMenuMobile" role="menu" aria-labelledby="avatarBtnMobile" hidden
-                 style="position:absolute; right:0; top:calc(100% + 8px); background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; z-index:300;">
+                 style="position:absolute; right:0; top:calc(100% + 8px); background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; z-index:999999999;">
               <a role="menuitem" href="/overview/"    style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Overview</a>
               <a role="menuitem" href="/profile/"     style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
               <a role="menuitem" href="/wallet/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
@@ -175,7 +175,7 @@
     .gp-topnav {
       position: sticky;
       top: 0;
-      z-index: 80;
+      z-index: 999999999;
       backdrop-filter: blur(6px);
       background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.82));
       border-bottom: 1px solid rgba(15,23,42,0.03);
@@ -205,7 +205,7 @@
   text-decoration: none;
   box-shadow: 0 8px 20px rgba(18,185,129,0.12);
   overflow: hidden; /* ensure pseudo stays inside */
-  z-index: 0;
+  z-index: 999999999;
 }
 
 /* Base gradient */
@@ -240,7 +240,7 @@
     .gp-hamburger .bar{ display:block; width:18px; height:2px; background:var(--fg); margin:3px 0; transition:all .18s ease }
 
     /* mobile menu */
-    .gp-mobile{ display:none; position:fixed; inset:0; z-index:100; }
+    .gp-mobile{ display:none; position:fixed; inset:0; z-index:999999999; }
     .gp-mobile-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px }
     .gp-mobile-links ul{ list-style:none; padding:6px 0; margin:0; display:flex; flex-direction:column; gap:6px }
     .gp-mobile-links a{ display:block; padding:12px 10px; border-radius:8px; font-weight:600; color:var(--fg) }
@@ -347,7 +347,7 @@
     padding:12px 20px; gap:12px;
     background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.82));
     border-bottom:1px solid rgba(15,23,42,0.03);
-    position:sticky; top:0; z-index:60; backdrop-filter: blur(6px);
+    position:sticky; top:0; z-index:999999999; backdrop-filter: blur(6px);
   }
   .gp-brand{ display:flex; gap:12px; align-items:center; text-decoration:none }
   .gp-logo-sq{ width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:white; font-weight:600; }
@@ -410,7 +410,7 @@
   {
     .layout{ grid-template-columns:1fr }
     .sidebar{ display:none }
-    .open-sidebar{ display:block; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.35) }
+    .open-sidebar{ display:block; position:fixed; inset:0; z-index:999999999; background:rgba(0,0,0,0.35) }
     .sidebar.panel{ position:fixed; left:0; top:0; bottom:0; height:100%; transform:translateX(0); box-shadow: var(--shadow-2); }
   }
    /* ===== ADDED (minimal): Make the topnav fixed to the viewport and reserve page space ===== */
@@ -420,7 +420,7 @@
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1000; /* keep above most UI */
+    z-index: 9999999999999; /* keep above most UI */
   }
 
   /* Reserve vertical space so content doesn't sit under the fixed nav.
@@ -436,7 +436,7 @@
   /* Global dropdown baseline — applies when menu is moved to body */
 #avatarMenu, #avatarMenuMobile {
   position: fixed !important;
-  z-index: 2147483647 !important; /* high but safe */
+  z-index: 999999999 !important; /* high but safe */
   box-sizing: border-box;
   pointer-events: auto !important;
   display: block;                 /* keep measurable */
