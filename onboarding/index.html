@@ -725,12 +725,30 @@
       try { sessionStorage.removeItem('gp-login-next'); } catch (_) {}
 
       // show inline success then navigate
-      statusEl.style.color = '#065f46';
-      statusEl.textContent = 'Saved — redirecting…';
-      finishBtn.textContent = 'Saved';
-      setTimeout(() => {
-        window.location.href = safeNext || '/dashboard/';
-      }, 600);
+      // show inline success then navigate / notify parent if embedded
+statusEl.style.color = '#065f46';
+statusEl.textContent = 'Saved — redirecting…';
+finishBtn.textContent = 'Saved';
+
+// detect embedded mode (iframe) via query param ?embedded=1
+const embedded = new URLSearchParams(location.search).get('embedded') === '1';
+
+// notify parent frame (same-origin) that onboarding completed
+if (embedded && window.parent && window.parent !== window) {
+  try {
+    window.parent.postMessage({ type: 'onboardingComplete' }, location.origin);
+  } catch (e) {
+    console.warn('postMessage to parent failed', e);
+  }
+  // If embedded, let the parent handle closing/reload — stop here
+  return;
+}
+
+// not embedded: do the normal redirect on the standalone onboarding page
+setTimeout(() => {
+  window.location.href = safeNext || '/dashboard/';
+}, 600);
+
 
     } catch (err) {
       console.error('Save failed', err);
