@@ -58,9 +58,9 @@
       </a>
 
      <!-- ====== Desktop avatar (button + dropdown) - minimal change ====== -->
-<div style="position:relative; display:inline-block; z-index:99999999999;">
+<div style="position:fixed; display:inline-block; z-index:99999999999;">
   <button id="avatarBtn" aria-haspopup="true" aria-expanded="false" aria-controls="avatarMenu" title="Account"
-          style="background:transparent;border:0;padding:0;cursor:pointer;position:relative;z-index:999999999;">
+          style="background:transparent;border:0;padding:0;cursor:pointer;position:fixed;z-index:999999999;">
     <div style="width:38px;height:38px;border-radius:100%;overflow:hidden;display:flex;justify-content:center;background:#fff;">
       <!-- switched to raw.githubusercontent URL so placeholder shows -->
       <img id="avatarImg"
@@ -70,7 +70,7 @@
   </button>
 
   <div id="avatarMenu" role="menu" aria-labelledby="avatarBtn" class="gp-hidden"
-       style="background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; position:absolute; z-index:999999999999;">
+       style="background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; position:fixed; z-index:999999999999;">
     <a role="menuitem" href="/overview/"    style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Overview</a>
     <a role="menuitem" href="/profile/"     style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
     <a role="menuitem" href="/wallet/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
@@ -127,7 +127,7 @@
           </a>
 
           <!-- ====== Mobile avatar (button + dropdown) - minimal change ====== -->
-          <div style="position:relative; display:inline-block; z-index:999999999;">
+          <div style="position:fixed; display:inline-block; z-index:999999999;">
             <button id="avatarBtnMobile" aria-haspopup="true" aria-expanded="false" title="Account"
                     style="background:transparent;border:0;padding:0;cursor:pointer;">
               <div style="width:40px;height:40px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#dff7ea;">
@@ -139,7 +139,7 @@
             </button>
 
             <div id="avatarMenuMobile" role="menu" aria-labelledby="avatarBtnMobile" class="gp-hidden"
-                 style="position:absolute; right:0; top:calc(100% + 8px); background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; z-index:999999999;">
+                 style="position:fixed; right:0; top:calc(100% + 8px); background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; z-index:999999999;">
               <a role="menuitem" href="/overview/"    style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Overview</a>
               <a role="menuitem" href="/profile/"     style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
               <a role="menuitem" href="/wallet/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
@@ -172,9 +172,9 @@
 
     /* container + topbar */
     .gp-topnav {
-      position: sticky;
+      position: fixed;
       top: 0;
-      z-index: 999999999;
+      z-index: 9999999;
       backdrop-filter: blur(6px);
       background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.82));
       border-bottom: 1px solid rgba(15,23,42,0.03);
