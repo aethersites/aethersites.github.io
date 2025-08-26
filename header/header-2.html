@@ -640,6 +640,46 @@ function closeMenu(btn, menu) {
 </script>
 
 <script>
+  <!-- Firebase init (module) — paste this BEFORE your logoutFlow script -->
+<script type="module">
+  // Only import the bare minimum auth functions
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+  // ===== REPLACE THIS WITH YOUR FIREBASE CONFIG OBJECT =====
+  const firebaseConfig = {
+apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+  // =========================================================
+
+  // Initialize Firebase safely; if it errors we'll still expose a graceful stub
+  try {
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Expose a safe signOut helper to the global window object
+    window.firebaseAuthSignOut = async function firebaseAuthSignOut() {
+      try {
+        // attempt signOut, but don't throw to caller if it fails
+        await signOut(auth);
+        console.debug('[firebase] signOut succeeded');
+      } catch (err) {
+        console.warn('[firebase] signOut failed', err);
+      }
+    };
+  } catch (err) {
+    // If init fails, provide a harmless stub so other code can call it without error.
+    console.warn('[firebase] initializeApp failed or firebase not configured', err);
+    window.firebaseAuthSignOut = async function () { /* no-op */ };
+  }
+</script>
+
 (function () {
   // Helper to read cookies
   function getCookie(name) {
