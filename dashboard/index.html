@@ -531,6 +531,113 @@ async function showOnboardingModalIfNeeded() {
   const overlay = document.createElement('div');
   overlay.id = 'gp-onb-overlay';
   overlay.style = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,0.6);backdrop-filter: blur(4px);';
+  
+  // --- PASTE THIS BLOCK RIGHT AFTER the overlay.style = '...'; line ---
+overlay.innerHTML = `
+  <div id="gp-onb-modal" role="dialog" aria-modal="true"
+       style="width:min(1100px,96%);max-height:92vh;overflow:auto;border-radius:1rem;background:white;padding:24px;box-shadow:0 10px 40px rgba(2,6,23,.5);">
+
+    <!-- Scoped CSS: keeps styles inside the modal so your dashboard won't change -->
+    <style>
+      /* All styles prefixed with #gp-onb-modal to avoid leaking */
+      #gp-onb-modal { --gp-primary: #12B981; --gp-muted: #6b7280; --gp-border: #E5E7EB; }
+      #gp-onb-modal .btn-gradient { color:#fff; background: linear-gradient(90deg,#17A34B,#12B981); }
+      #gp-onb-modal .card { background:#fff; border:1px solid var(--gp-border); border-radius:1rem; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+      #gp-onb-modal .chip { display:inline-flex; align-items:center; gap:.5rem; padding:.5rem 1rem; border-radius:9999px; border:1px solid var(--gp-border); font-size:.875rem; cursor:pointer; background:#fff; color:#111827; }
+      #gp-onb-modal .chip-selected { background:var(--gp-primary); color:#fff; border-color:transparent; }
+      #gp-onb-modal .progress-track { width:100%; height:.5rem; background:#E5E7EB; border-radius:9999px; overflow:hidden; }
+      #gp-onb-modal .progress-fill { height:100%; width:0%; border-radius:9999px; background: linear-gradient(90deg,#17A34B,#12B981); transition: width .36s cubic-bezier(.2,.9,.2,1); }
+      #gp-onb-modal button:disabled { opacity:.55; cursor:not-allowed; }
+      /* add more modal-only rules here as needed */
+    </style>
+
+    <!--
+      PASTE YOUR ONBOARDING HTML MARKUP HERE.
+      Example: your <main class="soft-gradient"> ... </main> block (everything you pasted earlier)
+      KEEP the IDs the same (step-1, step-2, step-3, nextBtn, backBtn, finishBtn, etc.)
+    -->
+    <!-- START: paste your existing onboarding <main> ... </main> markup here -->
+    <main class="soft-gradient min-h-screen">
+      <!-- minimal placeholder if you don't paste full content -->
+      <div style="max-width:720px;margin:0 auto;text-align:center;padding:28px;">
+        <h2>Welcome to GoodPlates</h2>
+        <p>Onboarding content goes here. Replace this with your full HTML if you have it.</p>
+        <div style="margin-top:18px;">
+          <button id="gp-onb-skip" style="margin-right:8px;">Skip</button>
+          <button id="gp-onb-finish" class="btn-gradient">Finish</button>
+        </div>
+      </div>
+    </main>
+    <!-- END: paste your onboarding markup -->
+  </div>
+`;
+
+document.body.appendChild(overlay);
+
+// --- container-scoped helpers: always use these so we don't touch the rest of the page ---
+const container = document.getElementById('gp-onb-modal');
+if (!container) return console.error('Onboarding container missing.');
+
+const get = sel => container.querySelector(sel);
+
+// basic elements (these must exist in your pasted onboarding HTML)
+const finishBtn = get('#finishBtn') || get('#gp-onb-finish') || (get('#finishLink') && get('#finishLink button'));
+const skipBtn = get('#gp-onb-skip') || get('#gp-onb-close');
+const closeBtn = get('#gp-onb-close');
+
+// quick close/skip behavior: mark onboardingComplete true on skip
+if (skipBtn) {
+  skipBtn.addEventListener('click', async () => {
+    try {
+      await updateDoc(profileRef, { onboardingComplete: true, onboardingCompletedAt: serverTimestamp() });
+    } catch (err) {
+      console.error('Failed to skip onboarding:', err);
+    }
+    const o = document.getElementById('gp-onb-overlay'); if (o) o.remove();
+  });
+}
+
+if (closeBtn) {
+  closeBtn.addEventListener('click', () => { const o = document.getElementById('gp-onb-overlay'); if (o) o.remove(); });
+}
+
+// finish: save full profile and close
+if (finishBtn) {
+  finishBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    // visual feedback
+    const prevText = finishBtn.textContent;
+    finishBtn.textContent = 'Saving...';
+    finishBtn.disabled = true;
+
+    try {
+      // Build a small "profilePatch" — adjust fields if you added more inputs
+      const displayNameInput = get('#gp-onb-display-name');
+      const displayName = displayNameInput ? displayNameInput.value.trim() : '';
+
+      const profilePatch = {
+        onboardingComplete: true,
+        onboardingCompletedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      if (displayName) profilePatch.displayName = displayName;
+
+      // write to Firestore profile doc (profileRef was created earlier in your function)
+      await updateDoc(profileRef, profilePatch);
+
+      // close modal and reload dashboard to reflect changes
+      const o = document.getElementById('gp-onb-overlay'); if (o) o.remove();
+      setTimeout(() => { window.location.reload(); }, 250);
+
+    } catch (err) {
+      console.error('Failed to complete onboarding:', err);
+      finishBtn.textContent = 'Failed — try again';
+      finishBtn.disabled = false;
+      setTimeout(() => finishBtn.textContent = prevText, 2000);
+    }
+  });
+}
+
 
   // insert onboarding markup into the overlay and mount it
 overlay.innerHTML = `
@@ -1410,6 +1517,8 @@ showStep(currentStep);
 })();
   showOnboardingModalIfNeeded().catch(console.error);
 
+
+
 </script>
 
 
@@ -1419,4 +1528,5 @@ showStep(currentStep);
 
 </body>
 </html>
+
 
