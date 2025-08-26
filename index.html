@@ -8,14 +8,8 @@
     <link rel="icon" href="favicon.png" type="image/png">
     <link rel="apple-touch-icon" href="favicon.png">  <meta charset="utf-8" />
     <!-- ============ Navigation ============ -->
- <div id="global-header"></div>
-<script>
-  // change the filename depending on the page/user state
-  const headerType = "header-1"; // "header-2" or "header-3"
-  fetch(`/header/${headerType}.html`)
-    .then(res => res.text())
-    .then(html => document.querySelector("#global-header").innerHTML = html);
-</script>
+ <div id="global-header" aria-live="polite" aria-busy="true"></div>
+<script type="module" src="/header/header-loader.js"></script>
 
   <style>
     /* ============ Design Tokens ============ */
