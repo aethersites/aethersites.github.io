@@ -56,7 +56,7 @@ function disableActionButtons(){
     // For native <button> or non-anchor controls, disable interaction
     btn.setAttribute('aria-disabled','true');
     btn.classList.add('disabled');
-    btn.style.pointerEvents = 'none';
+    btn.style.pointerEvents = 'auto';
     btn.style.opacity = '0.6';
   });
 }
