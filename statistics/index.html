@@ -26,17 +26,19 @@
 </head>
 
 <body class="min-h-screen bg-white-50 font-sans text-gray-900">
-
-  <!-- global header (moved into body so fetch target exists) -->
-  <div id="global-header"></div>
-  <script>
-    // change the filename depending on the page/user state
-    const headerType = "header-2"; // "header-2" or "header-3"
-    fetch(`/header/${headerType}.html`)
-      .then(res => res.text())
-      .then(html => { document.querySelector("#global-header").innerHTML = html; })
-      .catch(() => {/* fail silently */});
-  </script>
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-2"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => {
+      const temp = document.createElement("div");
+      temp.innerHTML = html;
+      // Insert the header as the first element inside <body>
+      document.body.insertBefore(temp.firstElementChild, document.body.firstChild);
+    })
+    .catch(() => {/* fail silently */});
+</script>
 
   <!-- Hero -->
   <section class="hero py-16 px-6 lg:px-8">
