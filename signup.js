@@ -11,7 +11,6 @@ const firebaseConfig = {
     messagingSenderId: "541149626283",
     appId: "1:541149626283:web:928888f0b42cda49b7dcee",
     measurementId: "G-HKMSHM726J"
-  };
 };
 
 const app = initializeApp(firebaseConfig);
@@ -85,8 +84,12 @@ signupForm.addEventListener('submit', async (e) => {
 
         // Redirect straight to /onboarding/ so user finishes setup there
         // If you want a short delay so the user can read the success message, keep a small timeout:
-        setTimeout(() => { window.location.href = '/onboarding/'; }, 700);
-
+// show success and redirect to onboarding (replace history so Back doesn't return to the success state)
+console.log('[signup] signup succeeded — uid=', user.uid, 'email=', user.email);
+console.log('[signup] redirecting to /onboarding/ shortly');
+document.getElementById('signupSuccessMessage').classList.add('show');
+setTimeout(() => { window.location.replace('/onboarding/'); }, 150);
+      
     } catch (error) {
         // This catch will handle both auth and Firestore errors
         if (error.code && error.code.includes('email')) {
