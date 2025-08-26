@@ -6,6 +6,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 
   <title>Groceries & Pantry</title>
+  <div id="global-header" aria-live="polite" aria-busy="true"></div>
+        <script type="module" src="/header/header-loader.js"></script>
+  
   <style>
     :root{
       --page-bg: #ffffff;
@@ -98,19 +101,7 @@
   </style>
 </head>
 <body>
-  <script>
-  // change the filename depending on the page/user state
-  const headerType = "header-2"; // "header-2" or "header-3"
-  fetch(`/header/${headerType}.html`)
-    .then(res => res.text())
-    .then(html => {
-      const temp = document.createElement("div");
-      temp.innerHTML = html;
-      // Insert the header as the first element inside <body>
-      document.body.insertBefore(temp.firstElementChild, document.body.firstChild);
-    })
-    .catch(() => {/* fail silently */});
-</script>
+
 
   <div class="canvas" role="application" aria-label="Groceries and pantry app">
 
