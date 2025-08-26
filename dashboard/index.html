@@ -297,91 +297,7 @@
 
       </div>
      
-      
-    </main>
-  </div>
-    <script type="module" src="../dashboard/dashboard.js"></script>
-
-  <!-- ====== ADDED: minimal iframe-onboarding injector (no changes to dashboard.js required) ====== -->
-  <script type="module">
-    import { auth, db } from "/static/js/dashboard-firebase.js";
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-    import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
-    function waitForAuthOnce() {
-      return new Promise(resolve => {
-        const unsub = onAuthStateChanged(auth, user => { unsub(); resolve(user); });
-      });
-    }
-
-    (async function openOnboardingIframeIfNeeded(){
-      try {
-        const user = await waitForAuthOnce();
-        if (!user || user.isAnonymous) return;
-
-        const uid = user.uid;
-        const profileRef = doc(db, 'profiles', uid);
-        const snap = await getDoc(profileRef);
-        const profile = snap.exists() ? snap.data() : null;
-
-        if (profile && profile.onboardingComplete === true) return;
-
-        if (!profile) {
-          await setDoc(profileRef, { onboardingComplete: false, onboardingStartedAt: serverTimestamp() }, { merge: true });
-        }
-
-        const overlay = document.createElement('div');
-        overlay.id = 'gp-onb-overlay';
-        overlay.style = 'position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,0.45);backdrop-filter: blur(4px);';
-
-        const iframe = document.createElement('iframe');
-        // Loads the onboarding page you requested
-        iframe.src = '/onboarding/index.html?embedded=1';
-        iframe.setAttribute('title', 'Onboarding');
-        iframe.style = 'width:min(1100px,96%);height:min(820px,92vh);border-radius:12px;border:0;box-shadow:0 20px 60px rgba(2,6,23,0.6);';
-        iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups';
-
-        overlay.appendChild(iframe);
-        document.body.appendChild(overlay);
-
-        function onMessage(e) {
-          if (e.origin !== location.origin) return;
-          const data = e.data || {};
-          if (data && data.type === 'onboardingComplete') {
-            window.removeEventListener('message', onMessage);
-            window.removeEventListener('keydown', onKey);
-            const o = document.getElementById('gp-onb-overlay'); if (o) o.remove();
-            setTimeout(() => window.location.reload(), 200);
-          }
-        }
-        window.addEventListener('message', onMessage, false);
-
-        function onKey(e) {
-          if (e.key === 'Escape') {
-            window.removeEventListener('message', onMessage);
-            window.removeEventListener('keydown', onKey);
-            const o = document.getElementById('gp-onb-overlay'); if (o) o.remove();
-          }
-        }
-        window.addEventListener('keydown', onKey, false);
-
-      } catch (err) {
-        console.error('onboarding iframe error', err);
-      }
-    })();
-  </script>
-  <!-- ====== END ADDED SCRIPT ====== -->
-
-  <div id="footer"></div>
-<script>
-  fetch("/footer/index.html")
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById("footer").innerHTML = data;
-    });
-</script>
-
- <!-- START MARK  -->
+<!-- START MARK  -->
       
     <!-- end module script -->
     </script>
@@ -568,9 +484,18 @@
 </script>
 
 <!-- END MARK  -->
-
-
-
+      
+    </main>
+  </div>
+    <script type="module" src="../dashboard/dashboard.js"></script>
+  <div id="footer"></div>
+<script>
+  fetch("/footer/index.html")
+    .then(res => res.text())
+    .then(data => {
+      document.getElementById("footer").innerHTML = data;
+    });
+</script>
 
 </body>
 </html>
