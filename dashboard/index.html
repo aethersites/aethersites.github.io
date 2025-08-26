@@ -381,7 +381,7 @@
     });
 </script>
 
-  <!-- START AVATAR PORTAL + DROPDOWN (paste this just before </body>) -->
+ <!-- START AVATAR PORTAL + DROPDOWN (paste this just before </body>) -->
 <script>
 (function () {
   // Inject protective CSS so portal menus and avatar buttons are above overlays
@@ -595,13 +595,15 @@
 <script type="module">
   // logout-hook.js — small module to wire a Logout button to Firebase signOut()
 <script type="module">
-  // Firebase SDK imports (must be module)
+  // Firebase + logout hook (single module block — DO NOT NEST THIS INSIDE ANOTHER <script type="module">
+  // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
-  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // ====== PASTE YOUR FIREBASE CONFIG OBJECT BELOW ======
-  // Replace the placeholder object with your real firebaseConfig (apiKey, authDomain, etc.)
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
   const firebaseConfig = {
     apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
     authDomain: "goodplates-7ae36.firebaseapp.com",
@@ -611,18 +613,11 @@
     appId: "1:541149626283:web:928888f0b42cda49b7dcee",
     measurementId: "G-HKMSHM726J"
   };
-  // ======================================================
 
-  // Initialize Firebase (run before calling getAuth())
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-  // analytics optional — ignore errors if not configured
-  try { const analytics = getAnalytics(app); } catch (e) { /* ignore */ }
+  const analytics = getAnalytics(app);
 
-  // Create a single auth instance and reuse it everywhere in this script
-  const auth = getAuth(app);
-
-  // --- logout-hook code (uses the `auth` instance above) ---
-  const DEFAULT_SELECTOR = '[data-gp-action="logout"], #logoutBtn, .gp-logout, .logout, a[data-logout]';
 
   function findRedirect() {
     const bodyRedirect = document.body?.getAttribute('data-redirect');
@@ -645,21 +640,20 @@
     } catch (e) { /* ignore */ }
   }
 
-  // Helper: set disabled state for all logout controls
+  // Use data attribute (not generic "disabled" class) to avoid colliding with page CSS.
   function setAllLogoutDisabled(disabled = true) {
     const els = Array.from(document.querySelectorAll(DEFAULT_SELECTOR));
     els.forEach(el => {
       if (disabled) {
         el._logout_pending = true;
         el.setAttribute('aria-disabled', 'true');
-        // anchors should be removed from tab order while disabled
+        el.setAttribute('data-gp-logout-disabled', 'true');
         if (el.tagName === 'A') el.setAttribute('tabindex', '-1');
-        el.classList.add('disabled');
       } else {
         el._logout_pending = false;
         el.removeAttribute('aria-disabled');
+        el.removeAttribute('data-gp-logout-disabled');
         if (el.tagName === 'A') el.removeAttribute('tabindex');
-        el.classList.remove('disabled');
       }
     });
   }
@@ -667,35 +661,25 @@
   async function handleLogoutClick(e) {
     e.preventDefault();
     const el = e.currentTarget;
-
-    // if this or any other logout is already pending, ignore
     if (el._logout_pending) return;
-
-    // disable all logout controls
     setAllLogoutDisabled(true);
 
     try {
-      // use the auth instance we created above
-      await signOut(auth);
-
+      await signOut(auth); // uses the initialized auth instance
       console.debug('[logout-hook] signOut successful');
 
-      // close menus, update UI
       closeAvatarMenus();
       const signedState = document.getElementById('signedState');
       if (signedState) signedState.textContent = 'Not signed in';
 
       const redirectTo = findRedirect();
       if (redirectTo) {
-        // short delay so user sees immediate feedback
         setTimeout(() => { location.href = redirectTo; }, 220);
       } else {
-        // no redirect: re-enable buttons so user can interact
         setAllLogoutDisabled(false);
       }
     } catch (err) {
       console.error('[logout-hook] signOut failed', err);
-      // restore so user can retry
       setAllLogoutDisabled(false);
       alert('Sign out failed — please try again.');
     }
@@ -707,11 +691,7 @@
       if (el._logout_hooked) return;
       el._logout_hooked = true;
       el.addEventListener('click', handleLogoutClick);
-
-      // If it's an anchor and you want it to behave like a button for A11Y:
-      if (el.tagName === 'A' && !el.hasAttribute('role')) {
-        el.setAttribute('role', 'button');
-      }
+      if (el.tagName === 'A' && !el.hasAttribute('role')) el.setAttribute('role', 'button');
     });
   }
 
@@ -721,7 +701,6 @@
     if (!mo) {
       mo = new MutationObserver(() => attachLogoutButtons());
       mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
-      // optionally disconnect on page unload to be tidy
       window.addEventListener('unload', () => { if (mo) mo.disconnect(); });
     }
   }
@@ -729,6 +708,8 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 </script>
+
+
 
 
 <!-- END AVATAR PORTAL + DROPDOWN -->
