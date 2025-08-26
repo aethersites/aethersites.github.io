@@ -1,6 +1,6 @@
-// dashboard.js (cleaned/minimal edits)
+// dashboard.js (iframe-friendly onboarding)
 
-// --- imports ---
+/* --- imports --- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import {
@@ -8,20 +8,20 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,         // moved here (was incorrectly imported inside function)
+  setDoc as setDocAgain, // harmless alias if used elsewhere
+  updateDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-// --- Firebase config ---
+/* --- Firebase config --- */
 const firebaseConfig = {
   apiKey:  "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-    authDomain: "goodplates-7ae36.firebaseapp.com",
-    projectId: "goodplates-7ae36",
-    storageBucket: "goodplates-7ae36.firebasestorage.app",
-    messagingSenderId: "541149626283",
-    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
-
+  authDomain: "goodplates-7ae36.firebaseapp.com",
+  projectId: "goodplates-7ae36",
+  storageBucket: "goodplates-7ae36.firebasestorage.app",
+  messagingSenderId: "541149626283",
+  appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+  measurementId: "G-HKMSHM726J"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -29,10 +29,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 export { auth, db };
 
-// --- DOM Ready ---
+/* --- DOM Ready --- */
 document.addEventListener('DOMContentLoaded', () => {
 
-  // --- showOnboardingModalIfNeeded (unchanged logic, uses top-level updateDoc) ---
+  /* === showOnboardingModalIfNeeded: iframe version === */
   async function showOnboardingModalIfNeeded(user, profileDoc = null) {
     if (!user || user.isAnonymous) return;
     const uid = user.uid;
@@ -47,90 +47,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (profile && profile.onboardingComplete === true) return; // nothing to do
 
+    // ensure a seed so later writes merge cleanly
     if (!profile) {
       await setDoc(profileRef, { onboardingComplete: false, onboardingStartedAt: serverTimestamp() }, { merge: true });
     }
 
-    // Build simple overlay
+    // create iframe overlay (minimal)
     const overlay = document.createElement('div');
     overlay.id = 'gp-onb-overlay';
-    overlay.style = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,0.5);';
+    overlay.style = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,0.45);backdrop-filter: blur(4px);';
 
-    overlay.innerHTML = `
-      <div id="gp-onb-modal" role="dialog" aria-modal="true" aria-labelledby="gp-onb-title"
-           style="width:min(900px,96%);max-height:92vh;overflow:auto;border-radius:12px;background:#fff;padding:20px;">
-        <h2 id="gp-onb-title" style="margin:0 0 12px 0;">Welcome — quick setup</h2>
-        <p style="margin:0 0 16px 0;color:#555;">A few simple steps to personalize your dashboard.</p>
+    const iframe = document.createElement('iframe');
+    iframe.src = '/onboarding/index.html?embedded=1';
+    iframe.setAttribute('title', 'Onboarding');
+    iframe.style = 'width:min(1100px,96%);height:min(820px,92vh);border-radius:12px;border:0;box-shadow:0 20px 60px rgba(2,6,23,0.6);';
+    // allow scripts & same-origin (same origin required to accept messages securely)
+    iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups';
 
-        <label style="display:block;margin-bottom:8px;">
-          Display name
-          <input id="gp-onb-display-name" placeholder="Your name" style="width:100%;padding:8px;border-radius:6px;border:1px solid #e5e7eb;" />
-        </label>
-
-        <label style="display:block;margin-bottom:8px;">
-          Diet
-          <select id="gp-onb-diet" style="width:100%;padding:8px;border-radius:6px;border:1px solid #e5e7eb;">
-            <option value="">Choose (optional)</option>
-            <option value="none">None</option>
-            <option value="vegetarian">Vegetarian</option>
-            <option value="vegan">Vegan</option>
-          </select>
-        </label>
-
-        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;">
-          <button id="gp-onb-skip" style="padding:8px 14px;border-radius:8px;border:1px solid #e5e7eb;background:transparent;">Skip</button>
-          <button id="gp-onb-finish" style="padding:8px 14px;border-radius:8px;background:#10b981;color:#fff;border:none;">Finish</button>
-        </div>
-      </div>
-    `;
-
+    overlay.appendChild(iframe);
     document.body.appendChild(overlay);
-    const displayInput = document.getElementById('gp-onb-display-name');
-    if (displayInput) displayInput.focus();
 
-    // Skip behavior: mark onboardingComplete true so we don't nag again
-    document.getElementById('gp-onb-skip').addEventListener('click', async () => {
-      try {
-        await updateDoc(profileRef, { onboardingComplete: true, onboardingCompletedAt: serverTimestamp() });
-      } catch (err) {
-        console.error('Failed to skip onboarding:', err);
+    // message listener: close overlay when child signals completion
+    function onMessage(e) {
+      // accept only messages from same origin for safety
+      if (e.origin !== location.origin) return;
+      const data = e.data || {};
+      if (data && data.type === 'onboardingComplete') {
+        window.removeEventListener('message', onMessage);
+        window.removeEventListener('keydown', onKey);
+        const o = document.getElementById('gp-onb-overlay'); if (o) o.remove();
+        // reload so dashboard can reflect changes (lightweight)
+        setTimeout(() => window.location.reload(), 200);
       }
-      document.body.removeChild(overlay);
-    });
+    }
+    window.addEventListener('message', onMessage, false);
 
-    // Finish: gather fields and persist
-    document.getElementById('gp-onb-finish').addEventListener('click', async (e) => {
-      e.preventDefault();
-      const displayName = (document.getElementById('gp-onb-display-name')?.value || '').trim();
-      const diet = document.getElementById('gp-onb-diet')?.value || '';
-
-      const profilePatch = {
-        onboardingComplete: true,
-        onboardingCompletedAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      };
-      if (displayName) profilePatch.displayName = displayName;
-      if (diet) profilePatch.diet = diet;
-
-      try {
-        // update profile doc
-        await updateDoc(profileRef, profilePatch);
-        // optionally also update users/{uid} for display name
-        if (displayName) {
-          await setDoc(doc(db, 'users', uid), {
-            name: { first: displayName.split(' ')[0] || '', last: displayName.split(' ').slice(1).join(' ') || '' }
-          }, { merge: true });
-        }
-        document.body.removeChild(overlay);
-        setTimeout(() => window.location.reload(), 250);
-      } catch (err) {
-        console.error('Failed to complete onboarding:', err);
-        alert('Unable to save onboarding — try again.');
+    // allow Escape to close overlay (dev convenience)
+    function onKey(e) {
+      if (e.key === 'Escape') {
+        window.removeEventListener('message', onMessage);
+        window.removeEventListener('keydown', onKey);
+        const o = document.getElementById('gp-onb-overlay'); if (o) o.remove();
       }
-    });
+    }
+    window.addEventListener('keydown', onKey, false);
   } // end showOnboardingModalIfNeeded
 
-  // --- DOM refs ---
+  /* --- DOM refs --- */
   const form = document.getElementById('profileForm');
   const saveStatus = document.getElementById('saveStatus');
   const loginBtn = document.getElementById('loginBtn');
@@ -141,12 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const avatarInput = document.getElementById('avatarInput');
   const removeAvatarBtn = document.getElementById('removeAvatar');
 
-  // Missing variables referenced later — define them or fallback to null
   const notSignedIn = document.getElementById('notSignedIn') || null;
   const mainEl = document.querySelector('main') || null;
   const profileFormEl = form || null;
 
-  // helper to attach a listener once to an element (prevents duplicates)
+  /* --- helpers --- */
   function addOnce(el, ev, fn) {
     if (!el) return;
     if (!el.__listeners) el.__listeners = new Set();
@@ -201,20 +163,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
       document.getElementById('stripeCustomerId').textContent = userDoc.stripeCustomerId || '—';
     } else {
-      form.reset();
-      form.elements['email'].value = auth.currentUser?.email || '';
-      document.getElementById('createdAt').textContent = '—';
-      document.getElementById('stripeCustomerId').textContent = '—';
+      if (form) form.reset();
+      if (form) form.elements['email'].value = auth.currentUser?.email || '';
+      const createdAtEl = document.getElementById('createdAt');
+      if (createdAtEl) createdAtEl.textContent = '—';
+      const stripeEl = document.getElementById('stripeCustomerId');
+      if (stripeEl) stripeEl.textContent = '—';
     }
 
     if (profileDoc) {
-      form.elements['aboutMe'].value = profileDoc.aboutMe || '';
+      if (form) form.elements['aboutMe'].value = profileDoc.aboutMe || '';
     } else {
-      form.elements['aboutMe'].value = '';
+      if (form) form.elements['aboutMe'].value = '';
     }
 
-    previewName.textContent = `${form.elements['firstName'].value || ''} ${form.elements['lastName'].value || ''}`.trim() || (auth.currentUser?.email || '—');
-    previewEmail.textContent = form.elements['email'].value || '';
+    if (previewName) previewName.textContent = `${(form?.elements['firstName']?.value || '')} ${(form?.elements['lastName']?.value || '')}`.trim() || (auth.currentUser?.email || '—');
+    if (previewEmail) previewEmail.textContent = form?.elements['email']?.value || '';
   }
 
   async function saveToFirestore(user, usersPayload, profilesPayload) {
