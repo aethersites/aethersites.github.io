@@ -382,7 +382,6 @@
 </script>
 
   <!-- START AVATAR PORTAL + DROPDOWN (paste this just before </body>) -->
-<!-- START AVATAR PORTAL + DROPDOWN (paste this just before </body>) -->
 <script>
 (function () {
   // Inject protective CSS so portal menus and avatar buttons are above overlays
@@ -596,8 +595,33 @@
 <script type="module">
   // logout-hook.js — small module to wire a Logout button to Firebase signOut()
 <script type="module">
+  // Firebase SDK imports (must be module)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
   import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
+  // ====== PASTE YOUR FIREBASE CONFIG OBJECT BELOW ======
+  // Replace the placeholder object with your real firebaseConfig (apiKey, authDomain, etc.)
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+  // ======================================================
+
+  // Initialize Firebase (run before calling getAuth())
+  const app = initializeApp(firebaseConfig);
+  // analytics optional — ignore errors if not configured
+  try { const analytics = getAnalytics(app); } catch (e) { /* ignore */ }
+
+  // Create a single auth instance and reuse it everywhere in this script
+  const auth = getAuth(app);
+
+  // --- logout-hook code (uses the `auth` instance above) ---
   const DEFAULT_SELECTOR = '[data-gp-action="logout"], #logoutBtn, .gp-logout, .logout, a[data-logout]';
 
   function findRedirect() {
@@ -651,7 +675,7 @@
     setAllLogoutDisabled(true);
 
     try {
-      const auth = getAuth(); // will throw if Firebase not initialized
+      // use the auth instance we created above
       await signOut(auth);
 
       console.debug('[logout-hook] signOut successful');
@@ -663,7 +687,7 @@
 
       const redirectTo = findRedirect();
       if (redirectTo) {
-        // small delay for user feedback, then redirect
+        // short delay so user sees immediate feedback
         setTimeout(() => { location.href = redirectTo; }, 220);
       } else {
         // no redirect: re-enable buttons so user can interact
@@ -673,8 +697,6 @@
       console.error('[logout-hook] signOut failed', err);
       // restore so user can retry
       setAllLogoutDisabled(false);
-
-      // user visible fallback
       alert('Sign out failed — please try again.');
     }
   }
@@ -709,8 +731,8 @@
 </script>
 
 
-
 <!-- END AVATAR PORTAL + DROPDOWN -->
+
 
 
 
