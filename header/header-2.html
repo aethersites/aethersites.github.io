@@ -69,8 +69,9 @@
           </div>
         </button>
 
-        <div id="avatarMenu" role="menu" aria-labelledby="avatarBtn" hidden
-             style="position:absolute; right:0; top:calc(100% + 8px); background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; z-index:300;">
+<div id="avatarMenu" role="menu" aria-labelledby="avatarBtn" hidden
+     style="background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0;">
+    
           <a role="menuitem" href="/overview/"    style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Overview</a>
           <a role="menuitem" href="/profile/"     style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
           <a role="menuitem" href="/wallet/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
@@ -290,73 +291,6 @@
     })();
   </script>
 
-  <!-- minimal avatar dropdown script (added without changing other code) -->
-  <script>
-    (function () {
-      const btn = document.getElementById('avatarBtn');
-      const menu = document.getElementById('avatarMenu');
-      const btnMobile = document.getElementById('avatarBtnMobile');
-      const menuMobile = document.getElementById('avatarMenuMobile');
-
-      function setExpanded(button, expanded) {
-        if (!button) return;
-        button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-      }
-
-      function toggleMenu(menuEl, btnEl) {
-        if (!menuEl || !btnEl) return;
-        const isHidden = menuEl.hasAttribute('hidden');
-        if (isHidden) {
-          menuEl.removeAttribute('hidden');
-          setExpanded(btnEl, true);
-          // focus first item for keyboard users
-          const first = menuEl.querySelector('[role="menuitem"]');
-          if (first) first.focus();
-        } else {
-          menuEl.setAttribute('hidden', '');
-          setExpanded(btnEl, false);
-        }
-      }
-
-      // Attach click handlers
-      if (btn && menu) {
-        btn.addEventListener('click', function (e) {
-          e.stopPropagation();
-          toggleMenu(menu, btn);
-        });
-      }
-      if (btnMobile && menuMobile) {
-        btnMobile.addEventListener('click', function (e) {
-          e.stopPropagation();
-          toggleMenu(menuMobile, btnMobile);
-        });
-      }
-
-      // close when clicking outside
-      document.addEventListener('click', function (e) {
-        if (menu && !menu.hasAttribute('hidden')) {
-          if (!menu.contains(e.target) && !(btn && btn.contains(e.target))) {
-            menu.setAttribute('hidden', '');
-            setExpanded(btn, false);
-          }
-        }
-        if (menuMobile && !menuMobile.hasAttribute('hidden')) {
-          if (!menuMobile.contains(e.target) && !(btnMobile && btnMobile.contains(e.target))) {
-            menuMobile.setAttribute('hidden', '');
-            setExpanded(btnMobile, false);
-          }
-        }
-      }, { capture: true });
-
-      // close on Escape
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-          if (menu && !menu.hasAttribute('hidden')) { menu.setAttribute('hidden', ''); setExpanded(btn, false); }
-          if (menuMobile && !menuMobile.hasAttribute('hidden')) { menuMobile.setAttribute('hidden', ''); setExpanded(btnMobile, false); }
-        }
-      });
-    })();
-  </script>
 </header>
 
 <!-- ===== main stylesheet (keeps rest of page intact) ===== -->
@@ -496,6 +430,8 @@
   }
   #avatarBtn { position: relative; z-index: 1200; }
 #avatarMenu { z-index: 1201 !important; position: absolute; } /* keep absolute but higher z */
+
+
 </style>
 
 
@@ -512,14 +448,15 @@
 .gp-topnav #avatarMenuMobile {
   position: fixed !important;
   z-index: 2147483647 !important;
-  visibility: hidden !important;
-  box-sizing: border-box !important;
+  /* allow JS to control visibility */
+  visibility: hidden;               /* no !important */
+  box-sizing: border-box;
   width: auto !important;
   min-width: 180px !important;
   max-width: calc(100% - 16px) !important;
   overflow-y: auto !important;
   max-height: calc(100vh - 32px) !important;
-  transition: none !important; /* make sizing deterministic */
+  transition: none !important;
 }
 
 /* Safety: ensure header area accepts pointer events */
