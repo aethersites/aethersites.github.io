@@ -382,6 +382,7 @@
 </script>
 
   <!-- START AVATAR PORTAL + DROPDOWN (paste this just before </body>) -->
+<!-- START AVATAR PORTAL + DROPDOWN (paste this just before </body>) -->
 <script>
 (function () {
   // Inject protective CSS so portal menus and avatar buttons are above overlays
@@ -591,7 +592,128 @@
   }, true);
 })();
 </script>
+
+<script type="module">
+  // logout-hook.js — small module to wire a Logout button to Firebase signOut()
+<script type="module">
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+  const DEFAULT_SELECTOR = '[data-gp-action="logout"], #logoutBtn, .gp-logout, .logout, a[data-logout]';
+
+  function findRedirect() {
+    const bodyRedirect = document.body?.getAttribute('data-redirect');
+    if (bodyRedirect) return bodyRedirect;
+    const params = new URLSearchParams(location.search);
+    return params.get('next') || params.get('redirect') || null;
+  }
+
+  function closeAvatarMenus() {
+    try {
+      const menu = document.getElementById('avatarMenu');
+      const menuMobile = document.getElementById('avatarMenuMobile');
+      const btn = document.getElementById('avatarBtn');
+      const btnMobile = document.getElementById('avatarBtnMobile');
+
+      if (menu) { menu.hidden = true; menu.removeAttribute('data-gp-open'); }
+      if (menuMobile) { menuMobile.hidden = true; menuMobile.removeAttribute('data-gp-open'); }
+      if (btn) btn.setAttribute('aria-expanded','false');
+      if (btnMobile) btnMobile.setAttribute('aria-expanded','false');
+    } catch (e) { /* ignore */ }
+  }
+
+  // Helper: set disabled state for all logout controls
+  function setAllLogoutDisabled(disabled = true) {
+    const els = Array.from(document.querySelectorAll(DEFAULT_SELECTOR));
+    els.forEach(el => {
+      if (disabled) {
+        el._logout_pending = true;
+        el.setAttribute('aria-disabled', 'true');
+        // anchors should be removed from tab order while disabled
+        if (el.tagName === 'A') el.setAttribute('tabindex', '-1');
+        el.classList.add('disabled');
+      } else {
+        el._logout_pending = false;
+        el.removeAttribute('aria-disabled');
+        if (el.tagName === 'A') el.removeAttribute('tabindex');
+        el.classList.remove('disabled');
+      }
+    });
+  }
+
+  async function handleLogoutClick(e) {
+    e.preventDefault();
+    const el = e.currentTarget;
+
+    // if this or any other logout is already pending, ignore
+    if (el._logout_pending) return;
+
+    // disable all logout controls
+    setAllLogoutDisabled(true);
+
+    try {
+      const auth = getAuth(); // will throw if Firebase not initialized
+      await signOut(auth);
+
+      console.debug('[logout-hook] signOut successful');
+
+      // close menus, update UI
+      closeAvatarMenus();
+      const signedState = document.getElementById('signedState');
+      if (signedState) signedState.textContent = 'Not signed in';
+
+      const redirectTo = findRedirect();
+      if (redirectTo) {
+        // small delay for user feedback, then redirect
+        setTimeout(() => { location.href = redirectTo; }, 220);
+      } else {
+        // no redirect: re-enable buttons so user can interact
+        setAllLogoutDisabled(false);
+      }
+    } catch (err) {
+      console.error('[logout-hook] signOut failed', err);
+      // restore so user can retry
+      setAllLogoutDisabled(false);
+
+      // user visible fallback
+      alert('Sign out failed — please try again.');
+    }
+  }
+
+  function attachLogoutButtons(selector = DEFAULT_SELECTOR) {
+    const els = Array.from(document.querySelectorAll(selector));
+    els.forEach(el => {
+      if (el._logout_hooked) return;
+      el._logout_hooked = true;
+      el.addEventListener('click', handleLogoutClick);
+
+      // If it's an anchor and you want it to behave like a button for A11Y:
+      if (el.tagName === 'A' && !el.hasAttribute('role')) {
+        el.setAttribute('role', 'button');
+      }
+    });
+  }
+
+  let mo = null;
+  function init() {
+    attachLogoutButtons();
+    if (!mo) {
+      mo = new MutationObserver(() => attachLogoutButtons());
+      mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+      // optionally disconnect on page unload to be tidy
+      window.addEventListener('unload', () => { if (mo) mo.disconnect(); });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+</script>
+
+
+
 <!-- END AVATAR PORTAL + DROPDOWN -->
+
+
+
 
 
 
