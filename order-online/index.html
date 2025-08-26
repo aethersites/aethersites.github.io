@@ -4,14 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GoodPlates</title>
-   <div id="global-header"></div>
-<script>
-  // change the filename depending on the page/user state
-  const headerType = "header-2"; // "header-2" or "header-3"
-  fetch(`/header/${headerType}.html`)
-    .then(res => res.text())
-    .then(html => document.querySelector("#global-header").innerHTML = html);
-</script>
+   
 
 <!doctype html>
 <html lang="en">
@@ -265,6 +258,20 @@
 
 </head>
 <body>
+  <script>
+  // change the filename depending on the page/user state
+  const headerType = "header-2"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => {
+      const temp = document.createElement("div");
+      temp.innerHTML = html;
+      // Insert the header as the first element inside <body>
+      document.body.insertBefore(temp.firstElementChild, document.body.firstChild);
+    })
+    .catch(() => {/* fail silently */});
+</script>
+  
   <div class="container">
     <header class="header">
       <h1 class="title">Recipe Groceries</h1>
