@@ -228,5 +228,29 @@
       }
     })();
   </script>
+  
+  <!-- 1) Initialize Firebase first (module) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "REDACTED",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  try { getAnalytics(app); } catch(e) { /* optional */ }
+</script>
+
+<!-- 2) Then import the logout module from the correct path -->
+<script type="module" src="/logout.js"></script>
+
+
 </body>
 </html>
