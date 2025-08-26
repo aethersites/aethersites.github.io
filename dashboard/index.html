@@ -500,12 +500,9 @@
 
 <!-- ====== PASTE THIS AT THE BOTTOM OF YOUR DASHBOARD PAGE (before </body>) ====== -->
 <script type="module">
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-
-
-const auth = getAuth();
-const db = getFirestore();
+import { auth, db } from "/static/js/dashboard-firebase.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 async function waitForAuthOnce() {
   return new Promise(resolve => {
