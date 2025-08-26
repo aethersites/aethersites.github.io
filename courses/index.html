@@ -4,14 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Meal Courses — Culinary Education</title>
-  <div id="global-header"></div>
-<script>
-  // change the filename depending on the page/user state
-  const headerType = "header-2"; // "header-2" or "header-3"
-  fetch(`/header/${headerType}.html`)
-    .then(res => res.text())
-    .then(html => document.querySelector("#global-header").innerHTML = html);
-</script>
+  
 
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -24,7 +17,21 @@
   </style>
 </head>
 <body class="min-h-screen bg-gray-50 text-gray-900">
-
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-2"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => {
+      const temp = document.createElement("div");
+      temp.innerHTML = html;
+      // Insert the header as the first element inside <body>
+      document.body.insertBefore(temp.firstElementChild, document.body.firstChild);
+    })
+    .catch(() => {/* fail silently */});
+</script>
+  
+  
   <main>
     <!-- Hero -->
 <section class="bg-[#F1FDF4] py-16 px-6 lg:px-8">
