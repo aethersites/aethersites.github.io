@@ -38,8 +38,22 @@ function showInlineError(msg){
 }
 
 /* Disable action buttons (Return to Homepage / Sign in) */
+/* Disable action buttons BUT keep anchors with href clickable */
 function disableActionButtons(){
   $$('.actions .btn').forEach(btn => {
+    const tag = btn.tagName && btn.tagName.toLowerCase();
+    const isAnchorWithHref = (tag === 'a' && btn.getAttribute('href'));
+
+    // Keep normal links clickable so users can navigate after sign-out
+    if (isAnchorWithHref) {
+      btn.removeAttribute('aria-disabled');
+      btn.classList.remove('disabled');
+      btn.style.pointerEvents = '';
+      btn.style.opacity = '';
+      return;
+    }
+
+    // For native <button> or non-anchor controls, disable interaction
     btn.setAttribute('aria-disabled','true');
     btn.classList.add('disabled');
     btn.style.pointerEvents = 'none';
