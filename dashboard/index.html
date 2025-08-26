@@ -497,5 +497,696 @@
     });
 </script>
 
+
+<!-- ====== PASTE THIS AT THE BOTTOM OF YOUR DASHBOARD PAGE (before </body>) ====== -->
+<script type="module">
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+
+const auth = getAuth();
+const db = getFirestore();
+
+async function waitForAuthOnce() {
+  return new Promise(resolve => {
+    const unsub = onAuthStateChanged(auth, user => { unsub(); resolve(user); });
+  });
+}
+
+async function showOnboardingModalIfNeeded() {
+  const user = await waitForAuthOnce();
+  if (!user || user.isAnonymous) {
+    window.location.href = '/login-form/?next=/';
+    return;
+  }
+
+  const uid = user.uid;
+  const profileRef = doc(db, 'profiles', uid);
+  const snap = await getDoc(profileRef);
+  const already = snap.exists() && snap.data()?.onboardingComplete === true;
+  if (already) return; // nothing to do
+
+  if (!snap.exists()) {
+    await setDoc(profileRef, { onboardingComplete: false, onboardingStartedAt: serverTimestamp() }, { merge: true });
+  }
+
+  // create overlay (container .onb-root will contain the pasted markup)
+  const overlay = document.createElement('div');
+  overlay.id = 'gp-onb-overlay';
+  overlay.style = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,0.6);backdrop-filter: blur(4px);';
+
+  const modalInner = `
+    <div id="gp-onb-modal" style="width:min(1100px,96%);max-height:92vh;overflow:auto;border-radius:1rem;background:transparent;">
+
+
+<style>
+    /* visuals */
+    .btn-gradient { color:#fff; background: linear-gradient(90deg,#17A34B,#12B981); }
+    .soft-gradient { background: linear-gradient(135deg,#F3F4F6,#FFFFFF 40%,#F3F4F6); }
+    .card { background:#fff; border:1px solid #E5E7EB; border-radius:1rem; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+    .card-hover { transition: transform .12s, box-shadow .12s; }
+    .card-hover:hover { transform: translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.06); }
+
+    /* chips */
+    .chip {
+      display:inline-flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem; border-radius:9999px;
+      border:1px solid #E5E7EB; font-size:0.875rem; cursor:pointer; user-select:none; background:#fff; color:#111827;
+      transition: transform .12s, box-shadow .12s, background-color .12s, color .12s;
+      outline:none;
+    }
+    .chip:hover { transform: translateY(-3px) scale(1.02); box-shadow:0 6px 18px rgba(2,6,23,0.08); background:#21cc93; }
+    .chip:focus { box-shadow:0 0 0 4px rgba(16,185,129,0.12); }
+    .chip-selected { background:#12B981; color:#fff; border-color:transparent; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.06); }
+
+    /* allergies grid */
+    #allergiesContainer { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    @media (min-width:640px){ #allergiesContainer { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (min-width:768px){ #allergiesContainer { grid-template-columns:repeat(4,minmax(0,1fr)); } }
+
+    /* Progress bar gradient animation */
+    .progress-track { width:100%; height:0.5rem; background:#E5E7EB; border-radius:9999px; overflow:hidden; }
+    .progress-fill {
+      height:100%;
+      width:0%;
+      border-radius:9999px;
+      /* animated gradient background */
+      background: linear-gradient(90deg, rgba(23,163,75,0.95) 0%, rgba(18,185,129,0.95) 25%, rgba(16,185,129,0.95) 50%, rgba(18,185,129,0.95) 75%, rgba(23,163,75,0.95) 100%);
+      background-size: 200% 100%;
+      animation: moveGradient 3s linear infinite;
+      transition: width 360ms cubic-bezier(.2,.9,.2,1);
+    }
+    @keyframes moveGradient {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    /* small helper disabled style */
+    button:disabled { opacity:0.55; cursor:not-allowed; }
+  </style>
+<main class="soft-gradient min-h-screen">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold mb-2">Welcome to GoodPlates</h1>
+        <p class="text-gray-600">Let's personalize your experience in just 3 simple steps</p>
+      </div>
+
+      <!-- Progress -->
+      <div class="mb-6">
+        <div class="flex justify-between text-sm text-gray-500 mb-2">
+          <span id="progressLabel">Step 1 of 3</span>
+          <span id="progressPct">33% Complete</span>
+        </div>
+        <div class="progress-track mb-2">
+          <!-- single progress fill element -->
+          <div id="progressBar" class="progress-fill" style="width:33%"></div>
+        </div>
+      </div>
+
+      <!-- Step Containers -->
+      <section id="step-1" class="card p-8 mb-8">
+        <h2 class="text-2xl font-semibold text-center mb-2">What do you want to do with groceries?</h2>
+        <p class="text-gray-600 text-center mb-8">Choose one or more goals to help us customize your experience</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <button data-goal="grocery-list" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">🛒</div>
+            <h3 class="font-semibold mb-1">Make Grocery List</h3>
+            <p class="text-sm text-gray-600">Create organized shopping lists</p>
+          </button>
+
+          <button data-goal="family-plan" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">👥</div>
+            <h3 class="font-semibold mb-1">Grocery Family Plan</h3>
+            <p class="text-sm text-gray-600">Plan meals for the whole family</p>
+          </button>
+
+          <button data-goal="in-app-order" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">📱</div>
+            <h3 class="font-semibold mb-1">Order Using In-App Capabilities</h3>
+            <p class="text-sm text-gray-600">Shop directly through the app</p>
+          </button>
+
+          <button data-goal="budget-track" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">💵</div>
+            <h3 class="font-semibold mb-1">Track Grocery Budget</h3>
+            <p class="text-sm text-gray-600">Monitor spending and save money</p>
+          </button>
+
+          <button data-goal="calorie-goals" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">🎯</div>
+            <h3 class="font-semibold mb-1">Set Calories Goals</h3>
+            <p class="text-sm text-gray-600">Reach your nutrition targets</p>
+          </button>
+
+          <button data-goal="health-calc" class="card card-hover p-6 text-center group" aria-pressed="false" type="button">
+            <div class="w-12 h-12 rounded-full bg-gray-200 grid place-items-center mx-auto mb-4 text-white text-xl">📈</div>
+            <h3 class="font-semibold mb-1">Calculate Health</h3>
+            <p class="text-sm text-gray-600">Track nutrients and wellness</p>
+          </button>
+        </div>
+      </section>
+
+      <!-- Step 2 -->
+      <section id="step-2" class="card p-8 mb-8 hidden">
+        <h2 class="text-2xl font-semibold text-center mb-2">Nutrition & Preferences</h2>
+        <p class="text-gray-600 text-center mb-6">Quick selects — pick the items that apply</p>
+
+        <div class="max-w-3xl mx-auto space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Food allergies (tap to select)</label>
+            <div id="allergiesContainer" style="gap:12px;">
+              <button class="chip" data-value="peanuts" type="button">Peanuts</button>
+              <button class="chip" data-value="tree_nuts" type="button">Tree nuts</button>
+              <button class="chip" data-value="dairy" type="button">Dairy / Milk</button>
+              <button class="chip" data-value="eggs" type="button">Eggs</button>
+              <button class="chip" data-value="shellfish" type="button">Shellfish</button>
+              <button class="chip" data-value="fish" type="button">Fish</button>
+              <button class="chip" data-value="soy" type="button">Soy</button>
+              <button class="chip" data-value="wheat_gluten" type="button">Wheat / Gluten</button>
+              <button class="chip" data-value="sesame" type="button">Sesame</button>
+              <button class="chip" data-value="mustard" type="button">Mustard</button>
+              <button class="chip" data-value="sulfites" type="button">Sulfites</button>
+              <button class="chip" data-value="celery" type="button">Celery</button>
+              <button class="chip" data-value="lupin" type="button">Lupin</button>
+              <button class="chip" data-value="mollusks" type="button">Mollusks</button>
+              <button class="chip" data-value="none" type="button">No allergies</button>
+            </div>
+            <p class="text-xs text-gray-500 mt-1">Tap chips to toggle. Selected chips will be saved to your profile.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Diet</label>
+            <select id="dietSelect" class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900">
+              <option value="">Choose a diet...</option>
+              <option value="none">None / No specific diet</option>
+              <option value="vegetarian">Vegetarian</option>
+              <option value="vegan">Vegan</option>
+              <option value="pescatarian">Pescatarian</option>
+              <option value="flexitarian">Flexitarian</option>
+              <option value="keto">Keto / Low-carb</option>
+              <option value="paleo">Paleo</option>
+              <option value="mediterranean">Mediterranean</option>
+              <option value="lowfat">Low-fat</option>
+              <option value="whole30">Whole30</option>
+              <option value="halal">Halal</option>
+              <option value="kosher">Kosher</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Calorie target (pick a preset)</label>
+            <select id="caloriesSelect" class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900">
+              <option value="">Choose calorie target...</option>
+              <option value="1200">1200 kcal — Weight loss (low)</option>
+              <option value="1400">1400 kcal — Weight loss</option>
+              <option value="1600">1600 kcal — Light activity</option>
+              <option value="1800">1800 kcal — Moderate</option>
+              <option value="2000">2000 kcal — Average adult</option>
+              <option value="2200">2200 kcal — Active</option>
+              <option value="2500">2500 kcal — High activity</option>
+              <option value="custom">Custom</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Set a calorie goal with our <a href="/calculator/" class="underline">Calorie Calculator</a>. Advanced users can set macros later in settings.</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">What currency do you usually buy groceries in?</label>
+            <select id="currencySelect" class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900">
+              <option value="">Choose currency...</option>
+              <option value="USD">USD — US Dollar</option>
+              <option value="EUR">EUR — Euro</option>
+              <option value="GBP">GBP — British Pound</option>
+              <option value="CAD">CAD — Canadian Dollar</option>
+              <option value="AUD">AUD — Australian Dollar</option>
+              <option value="NZD">NZD — New Zealand Dollar</option>
+              <option value="JPY">JPY — Japanese Yen</option>
+              <option value="CNY">CNY — Chinese Yuan</option>
+              <option value="INR">INR — Indian Rupee</option>
+              <option value="SEK">SEK — Swedish Krona</option>
+              <option value="NOK">NOK — Norwegian Krone</option>
+              <option value="DKK">DKK — Danish Krone</option>
+              <option value="CHF">CHF — Swiss Franc</option>
+              <option value="BRL">BRL — Brazilian Real</option>
+              <option value="ZAR">ZAR — South African Rand</option>
+              <option value="MXN">MXN — Mexican Peso</option>
+              <option value="SGD">SGD — Singapore Dollar</option>
+              <option value="HKD">HKD — Hong Kong Dollar</option>
+              <option value="ILS">ILS — Israeli Shekel</option>
+              <option value="RUB">RUB — Russian Ruble</option>
+              <option value="other">Other...</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 3 -->
+      <section id="step-3" class="card p-8 mb-8 hidden">
+        <h2 class="text-2xl font-semibold text-center mb-2">Select your country of residence</h2>
+        <p class="text-gray-600 text-center mb-8">This helps us customize your experience with local stores and currency</p>
+
+        <div class="max-w-md mx-auto">
+          <div class="relative">
+            <select id="countrySelect" class="w-full h-12 rounded-xl border border-gray-200 bg-white pl-4 pr-10 text-gray-900">
+              <option value="">Choose your country...</option>
+<option>Afghanistan</option>
+<option>Albania</option>
+<option>Algeria</option>
+<option>Andorra</option>
+<option>Angola</option>
+<option>Antigua and Barbuda</option>
+<option>Argentina</option>
+<option>Armenia</option>
+<option>Australia</option>
+<option>Austria</option>
+<option>Azerbaijan</option>
+<option>Bahamas</option>
+<option>Bahrain</option>
+<option>Bangladesh</option>
+<option>Barbados</option>
+<option>Belarus</option>
+<option>Belgium</option>
+<option>Belize</option>
+<option>Benin</option>
+<option>Bhutan</option>
+<option>Bolivia</option>
+<option>Bosnia and Herzegovina</option>
+<option>Botswana</option>
+<option>Brazil</option>
+<option>Brunei</option>
+<option>Bulgaria</option>
+<option>Burkina Faso</option>
+<option>Burundi</option>
+<option>Cabo Verde</option>
+<option>Cambodia</option>
+<option>Cameroon</option>
+<option>Canada</option>
+<option>Central African Republic</option>
+<option>Chad</option>
+<option>Chile</option>
+<option>China</option>
+<option>Colombia</option>
+<option>Comoros</option>
+<option>Congo (Congo-Brazzaville)</option>
+<option>Costa Rica</option>
+<option>Croatia</option>
+<option>Cuba</option>
+<option>Cyprus</option>
+<option>Czechia (Czech Republic)</option>
+<option>Democratic Republic of the Congo</option>
+<option>Denmark</option>
+<option>Djibouti</option>
+<option>Dominica</option>
+<option>Dominican Republic</option>
+<option>Ecuador</option>
+<option>Egypt</option>
+<option>El Salvador</option>
+<option>Equatorial Guinea</option>
+<option>Eritrea</option>
+<option>Estonia</option>
+<option>Eswatini (fmr. "Swaziland")</option>
+<option>Ethiopia</option>
+<option>Fiji</option>
+<option>Finland</option>
+<option>France</option>
+<option>Gabon</option>
+<option>Gambia</option>
+<option>Georgia</option>
+<option>Germany</option>
+<option>Ghana</option>
+<option>Greece</option>
+<option>Grenada</option>
+<option>Guatemala</option>
+<option>Guinea</option>
+<option>Guinea-Bissau</option>
+<option>Guyana</option>
+<option>Haiti</option>
+<option>Holy See</option>
+<option>Honduras</option>
+<option>Hungary</option>
+<option>Iceland</option>
+<option>India</option>
+<option>Indonesia</option>
+<option>Iran</option>
+<option>Iraq</option>
+<option>Ireland</option>
+<option>Israel</option>
+<option>Italy</option>
+<option>Jamaica</option>
+<option>Japan</option>
+<option>Jordan</option>
+<option>Kazakhstan</option>
+<option>Kenya</option>
+<option>Kiribati</option>
+<option>Kuwait</option>
+<option>Kyrgyzstan</option>
+<option>Laos</option>
+<option>Latvia</option>
+<option>Lebanon</option>
+<option>Lesotho</option>
+<option>Liberia</option>
+<option>Libya</option>
+<option>Liechtenstein</option>
+<option>Lithuania</option>
+<option>Luxembourg</option>
+<option>Madagascar</option>
+<option>Malawi</option>
+<option>Malaysia</option>
+<option>Maldives</option>
+<option>Mali</option>
+<option>Malta</option>
+<option>Marshall Islands</option>
+<option>Mauritania</option>
+<option>Mauritius</option>
+<option>Mexico</option>
+<option>Micronesia</option>
+<option>Moldova</option>
+<option>Monaco</option>
+<option>Mongolia</option>
+<option>Montenegro</option>
+<option>Morocco</option>
+<option>Mozambique</option>
+<option>Myanmar (formerly Burma)</option>
+<option>Namibia</option>
+<option>Nauru</option>
+<option>Nepal</option>
+<option>Netherlands</option>
+<option>New Zealand</option>
+<option>Nicaragua</option>
+<option>Niger</option>
+<option>Nigeria</option>
+<option>North Korea</option>
+<option>North Macedonia</option>
+<option>Norway</option>
+<option>Oman</option>
+<option>Pakistan</option>
+<option>Palau</option>
+<option>Palestine State</option>
+<option>Panama</option>
+<option>Papua New Guinea</option>
+<option>Paraguay</option>
+<option>Peru</option>
+<option>Philippines</option>
+<option>Poland</option>
+<option>Portugal</option>
+<option>Qatar</option>
+<option>Romania</option>
+<option>Russia</option>
+<option>Rwanda</option>
+<option>Saint Kitts and Nevis</option>
+<option>Saint Lucia</option>
+<option>Saint Vincent and the Grenadines</option>
+<option>Samoa</option>
+<option>San Marino</option>
+<option>Sao Tome and Principe</option>
+<option>Saudi Arabia</option>
+<option>Senegal</option>
+<option>Serbia</option>
+<option>Seychelles</option>
+<option>Sierra Leone</option>
+<option>Singapore</option>
+<option>Slovakia</option>
+<option>Slovenia</option>
+<option>Solomon Islands</option>
+<option>Somalia</option>
+<option>South Africa</option>
+<option>South Korea</option>
+<option>South Sudan</option>
+<option>Spain</option>
+<option>Sri Lanka</option>
+<option>Sudan</option>
+<option>Suriname</option>
+<option>Sweden</option>
+<option>Switzerland</option>
+<option>Syria</option>
+<option>Tajikistan</option>
+<option>Tanzania</option>
+<option>Thailand</option>
+<option>Timor-Leste</option>
+<option>Togo</option>
+<option>Tonga</option>
+<option>Trinidad and Tobago</option>
+<option>Tunisia</option>
+<option>Turkey</option>
+<option>Turkmenistan</option>
+<option>Tuvalu</option>
+<option>Uganda</option>
+<option>Ukraine</option>
+<option>United Arab Emirates</option>
+<option>United Kingdom</option>
+<option>United States of America</option>
+<option>Uruguay</option>
+<option>Uzbekistan</option>
+<option>Vanuatu</option>
+<option>Venezuela</option>
+<option>Vietnam</option>
+<option>Yemen</option>
+<option>Zambia</option>
+<option>Zimbabwe</option>
+              <option value="other">Other...</option>
+            </select>
+            <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">▾</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <div class="flex justify-between items-center">
+        <button id="backBtn" class="px-5 h-11 rounded-xl border border-gray-300 bg-white text-gray-800 hover:bg-gray-50" type="button">Back</button>
+
+        <div class="flex gap-2" aria-hidden="true">
+          <div id="dot1" class="w-3 h-3 rounded-full" style="background:#12B981;"></div>
+          <div id="dot2" class="w-3 h-3 rounded-full bg-gray-200"></div>
+          <div id="dot3" class="w-3 h-3 rounded-full bg-gray-200"></div>
+        </div>
+
+        <button id="nextBtn" class="px-6 h-11 rounded-xl btn-gradient" type="button">Next</button>
+        <a id="finishLink" href="#" class="hidden">
+          <button id="finishBtn" class="px-6 h-11 rounded-xl btn-gradient" type="button">Finish</button>
+        </a>
+      </div>
+    </div>
+  </main>
+
+    </div>
+  `;
+
+  overlay.innerHTML = modalInner;
+  document.body.appendChild(overlay);
+
+  // container scope: find elements inside the injected markup using container.querySelector
+  const container = overlay.querySelector('#gp-onb-modal');
+  if (!container) return console.error('Onboarding container missing.');
+
+  // ---- IMPORTANT: your pasted HTML should include elements with these IDs (or similar).
+  // We'll look them up inside the container (so duplicate global IDs elsewhere won't collide).
+  const get = sel => container.querySelector(sel);
+
+  // IDs we expect from your onboarding markup (if your markup differs, adjust selectors here)
+  const stepEls = {
+    1: get('#step-1'),
+    2: get('#step-2'),
+    3: get('#step-3')
+  };
+  const backBtn = get('#backBtn');
+  const nextBtn = get('#nextBtn');
+  const finishBtn = get('#finishBtn') || get('#finishLink button');
+  const finishLink = get('#finishLink');
+  const progressBar = get('#progressBar');
+  const progressLabel = get('#progressLabel');
+  const progressPct = get('#progressPct');
+  const dots = [ get('#dot1'), get('#dot2'), get('#dot3') ];
+
+  const goalsGrid = get('[data-goal]') ? container : get('#step-1'); // fallback
+  const allergiesContainer = get('#allergiesContainer');
+  const dietSelect = get('#dietSelect');
+  const caloriesSelect = get('#caloriesSelect');
+  const currencySelect = get('#currencySelect');
+  const countrySelect = get('#countrySelect');
+
+  // create a small status area if not present
+  let statusEl = get('#onboardingStatus');
+  if (!statusEl) {
+    statusEl = document.createElement('div');
+    statusEl.id = 'onboardingStatus';
+    statusEl.style.marginTop = '8px';
+    statusEl.style.color = '#065f46';
+    container.appendChild(statusEl);
+  }
+
+  // state
+  let currentStep = 1;
+  let selectedGoals = [];
+  let selectedAllergies = [];
+  let selectedDiet = "";
+  let selectedCalories = "";
+  let selectedCurrency = "";
+  let selectedCountry = "";
+  const steps = [1,2,3];
+
+  function updateProgress() {
+    const total = steps.length;
+    const pct = Math.round((currentStep / total) * 100);
+    if (progressBar) progressBar.style.width = pct + '%';
+    if (progressLabel) progressLabel.textContent = `Step ${currentStep} of ${total}`;
+    if (progressPct) progressPct.textContent = `${pct}% Complete`;
+    dots.forEach((d,i) => { if (d) d.style.background = (i < currentStep) ? '#12B981' : '#E5E7EB'; });
+  }
+
+  function showStep(step) {
+    steps.forEach(s => { if (stepEls[s]) stepEls[s].classList.toggle('hidden', s !== step); });
+    if (backBtn) backBtn.disabled = step === 1;
+    const can = canProceed();
+    if (step < 3) {
+      if (nextBtn) nextBtn.classList.remove('hidden'), (nextBtn.disabled = !can);
+      if (finishLink) finishLink.classList.add('hidden');
+    } else {
+      if (nextBtn) nextBtn.classList.add('hidden');
+      if (finishLink) finishLink.classList.remove('hidden'), (finishBtn.disabled = !can);
+    }
+    updateProgress();
+  }
+
+  function canProceed() {
+    if (currentStep === 1) return selectedGoals.length > 0;
+    if (currentStep === 2) return selectedDiet !== "" && selectedCalories !== "" && selectedCurrency !== "";
+    if (currentStep === 3) return selectedCountry !== "";
+    return false;
+  }
+
+  // Step 1 toggles (select cards with data-goal). Look inside container for elements that have data-goal attribute.
+  container.querySelectorAll('[data-goal]').forEach(card => {
+    card.addEventListener('click', () => {
+      const g = card.dataset.goal;
+      const i = selectedGoals.indexOf(g);
+      if (i === -1) {
+        selectedGoals.push(g);
+        card.setAttribute('data-selected','true');
+        card.classList.add('ring-2','ring-green-600','bg-green-50');
+        card.setAttribute('aria-pressed','true');
+      } else {
+        selectedGoals.splice(i,1);
+        card.removeAttribute('data-selected');
+        card.classList.remove('ring-2','ring-green-600','bg-green-50');
+        card.setAttribute('aria-pressed','false');
+      }
+      if (nextBtn) nextBtn.disabled = !canProceed();
+    });
+  });
+
+  // allergies chips
+  if (allergiesContainer) {
+    allergiesContainer.querySelectorAll('button[data-value]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = btn.dataset.value;
+        if (val === 'none') {
+          selectedAllergies = ['none'];
+          allergiesContainer.querySelectorAll('button').forEach(b => b.classList.toggle('chip-selected', b.dataset.value === 'none'));
+        } else {
+          const i = selectedAllergies.indexOf(val);
+          if (i === -1) {
+            const noneIdx = selectedAllergies.indexOf('none');
+            if (noneIdx !== -1) selectedAllergies.splice(noneIdx,1);
+            selectedAllergies.push(val);
+            btn.classList.add('chip-selected');
+          } else {
+            selectedAllergies.splice(i,1);
+            btn.classList.remove('chip-selected');
+          }
+          allergiesContainer.querySelectorAll('button[data-value="none"]').forEach(b => {
+            b.classList.toggle('chip-selected', selectedAllergies.length === 1 && selectedAllergies[0] === 'none');
+          });
+        }
+      });
+    });
+  }
+
+  // selects wiring
+  if (dietSelect) dietSelect.addEventListener('change', e => { selectedDiet = e.target.value; updateNextFinishState(); });
+  if (caloriesSelect) caloriesSelect.addEventListener('change', e => { selectedCalories = e.target.value; updateNextFinishState(); });
+  if (currencySelect) currencySelect.addEventListener('change', e => { selectedCurrency = e.target.value; updateNextFinishState(); });
+  if (countrySelect) countrySelect.addEventListener('change', e => { selectedCountry = e.target.value; updateNextFinishState(); });
+
+  function updateNextFinishState(){ if (nextBtn) nextBtn.disabled = !canProceed(); if (finishBtn) finishBtn.disabled = !canProceed(); }
+
+  // navigation wiring (back/next)
+  if (backBtn) backBtn.addEventListener('click', () => { currentStep = Math.max(1, currentStep - 1); showStep(currentStep); });
+  if (nextBtn) nextBtn.addEventListener('click', () => { if (!canProceed()) return; currentStep = Math.min(3, currentStep + 1); showStep(currentStep); });
+
+  // optional close button inside your pasted markup (if present). If you want non-dismissable, remove your close from markup.
+  const closeBtn = container.querySelector('#gp-onb-close');
+  if (closeBtn) closeBtn.addEventListener('click', () => { overlay.remove(); });
+
+  // save function (writes onboardingComplete:true)
+  async function saveProfileAndClose() {
+    if (!finishBtn) return;
+    finishBtn.disabled = true;
+    const prev = finishBtn.textContent;
+    finishBtn.textContent = 'Saving...';
+    statusEl.style.color = '#065f46';
+    statusEl.textContent = '';
+
+    try {
+      const userNow = auth.currentUser;
+      if (!userNow || userNow.isAnonymous) { window.location.href = '/login-form/?next=/'; return; }
+      const uidNow = uid || userNow.uid;
+      const profileRefNow = doc(db, 'profiles', uidNow);
+      const userRefNow = doc(db, 'users', uidNow);
+
+      const caloriesNumber = selectedCalories && selectedCalories !== 'custom' ? parseInt(selectedCalories, 10) : null;
+      const profilePatch = {
+        nutritionInfo: { allergies: selectedAllergies.filter(Boolean), dietaryType: selectedDiet || '' },
+        nutritionGoals: { calories: caloriesNumber },
+        defaultCurrency: selectedCurrency || '',
+        dietTags: selectedGoals || [],
+        location: selectedCountry || '',
+        onboardingComplete: true,
+        onboardingCompletedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      const existing = await getDoc(profileRefNow);
+      if (existing.exists()) await updateDoc(profileRefNow, profilePatch);
+      else await setDoc(profileRefNow, { ...profilePatch, createdAt: serverTimestamp() }, { merge: true });
+
+      const userPatch = {};
+      if (selectedGoals.length) userPatch.dietTags = selectedGoals;
+      if (selectedCountry) userPatch.location = selectedCountry;
+      if (Object.keys(userPatch).length) await setDoc(userRefNow, userPatch, { merge: true });
+
+      statusEl.style.color = '#065f46';
+      statusEl.textContent = 'Saved — closing...';
+      finishBtn.textContent = 'Saved';
+
+      setTimeout(() => {
+        const o = document.getElementById('gp-onb-overlay');
+        if (o) o.remove();
+        window.location.reload();
+      }, 350);
+
+    } catch (err) {
+      console.error('Save failed', err);
+      statusEl.style.color = '#b91c1c';
+      statusEl.textContent = 'Failed to save — try again';
+      finishBtn.disabled = false;
+      finishBtn.textContent = prev;
+    }
+  }
+
+  // wire finish (container-scoped)
+  if (finishBtn) finishBtn.addEventListener('click', (e) => { if (!canProceed()) { e.preventDefault(); return; } saveProfileAndClose(); });
+
+  // show first step
+  showStep(currentStep);
+
+  // (optional) prefill logic from profile snapshot if you want to pre-check cards -- left minimal for now
+}
+
+showOnboardingModalIfNeeded().catch(e => { console.error('onboarding modal error', e); });
+</script>
+<!-- ====== END PASTE ====== -->
+
+
 </body>
 </html>
+
