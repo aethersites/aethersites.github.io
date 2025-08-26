@@ -1,21 +1,28 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // --- Firebase config ---
-const firebaseConfig = {
-  apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-  authDomain: "goodplates-7ae36.firebaseapp.com",
-  projectId: "goodplates-7ae36",
-  storageBucket: "goodplates-7ae36.firebasestorage.app",
-  messagingSenderId: "541149626283",
-  appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-  measurementId: "G-HKMSHM726J"
-};
+const firebaseConfig = {apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+
+// export the initialized instances so every other module reuses them
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+// (Optional) export other helpers if you want:
+// export { signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+
 
 // --- DOM Ready ---
 document.addEventListener('DOMContentLoaded', () => {
