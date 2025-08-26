@@ -59,7 +59,7 @@
 
       <!-- ====== Desktop avatar (button + dropdown) - minimal change ====== -->
       <div style="position:relative; display:inline-block;">
-        <button id="avatarBtn" aria-haspopup="true" aria-expanded="false" title="Account"
+        <button id="avatarBtn" aria-haspopup="true" aria-expanded="false" aria-controls="avatarMenu" title="Account"
                 style="background:transparent;border:0;padding:0;cursor:pointer;">
           <div style="width:38px;height:38px;border-radius:100%;overflow:hidden;display:flex;justify-content:center;background:#fff;">
             <!-- switched to raw.githubusercontent URL so placeholder shows -->
@@ -429,10 +429,8 @@
     padding-top: 72px; /* adjust this if you make the header taller/shorter */
   }
   #avatarBtn { position: relative; z-index: 1200; }
-#avatarMenu { z-index: 1201 !important; position: absolute; } /* keep absolute but higher z */
 
-
-/* Safety: ensure header area accepts pointer events */
+  /* Safety: ensure header area accepts pointer events */
 .gp-topnav, .gp-topnav * { pointer-events: auto !important; }
 
   /* Global dropdown baseline — applies when menu is moved to body */
@@ -545,7 +543,7 @@ function closeMenu(btn, menu) {
   btn && btn.setAttribute('aria-expanded', 'false');
   menu.classList.remove('gp-visible');
   menu.classList.add('gp-hidden');
-  // clear inline width so next open measures cleanly
+  // clear inline width so next open re-measures cleanly
   menu.style.width = '';
   menu.style.maxHeight = '';
 }
@@ -632,54 +630,6 @@ function closeMenu(btn, menu) {
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAvatarDropdown);
   else setTimeout(initAvatarDropdown, 0);
-})();
-</script>
-
-<script>
-(function () {
-  const btn = document.getElementById('avatarBtn');
-  const menu = document.getElementById('avatarMenu');
-  if (!btn || !menu) return;
-
-  // Ensure we can measure if needed and let JS control visibility
-  if (menu.hasAttribute('hidden')) menu.removeAttribute('hidden');
-  menu.classList.add('gp-hidden');
-
-  btn.addEventListener('click', function (e) {
-    e.stopPropagation();
-    const open = menu.classList.contains('gp-visible');
-    if (open) {
-      menu.classList.remove('gp-visible');
-      menu.classList.add('gp-hidden');
-      btn.setAttribute('aria-expanded', 'false');
-    } else {
-      menu.classList.remove('gp-hidden');
-      menu.classList.add('gp-visible');
-      btn.setAttribute('aria-expanded', 'true');
-      // focus first item for a11y
-      const first = menu.querySelector('[role="menuitem"], a, button');
-      if (first && typeof first.focus === 'function') first.focus();
-    }
-  });
-
-  // Close when clicking outside
-  document.addEventListener('click', function (e) {
-    if (menu.classList.contains('gp-visible') && !menu.contains(e.target) && !btn.contains(e.target)) {
-      menu.classList.remove('gp-visible');
-      menu.classList.add('gp-hidden');
-      btn.setAttribute('aria-expanded', 'false');
-    }
-  });
-
-  // Escape to close
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && menu.classList.contains('gp-visible')) {
-      menu.classList.remove('gp-visible');
-      menu.classList.add('gp-hidden');
-      btn.setAttribute('aria-expanded', 'false');
-      btn.focus();
-    }
-  });
 })();
 </script>
 
