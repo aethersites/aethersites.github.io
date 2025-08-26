@@ -77,7 +77,7 @@ signupForm.addEventListener('submit', async (e) => {
 
         // Only show success + redirect after Firestore writes succeed
         document.getElementById('signupSuccessMessage').classList.add('show');
-        setTimeout(() => window.location.href = '/dashboard/', 2000);
+        setTimeout(() => window.location.href = '/onboarding/', 2000);
     } catch (error) {
         // This catch will handle both auth and Firestore errors
         if (error.code && error.code.includes('email')) {
