@@ -84,7 +84,7 @@
   <div id="global-header"></div>
 <script>
   // change the filename depending on the page/user state
-  const headerType = "header-1"; // "header-2" or "header-3"
+  const headerType = "header-2"; // "header-2" or "header-3"
   fetch(`/header/${headerType}.html`)
     .then(res => res.text())
     .then(html => document.querySelector("#global-header").innerHTML = html);
