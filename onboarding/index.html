@@ -442,205 +442,267 @@
   </footer>
 
   <!-- Firebase + App logic (type=module) -->
-  <script type="module">
-    // ---------- REPLACE WITH YOUR FIREBASE CONFIG ----------
-    const firebaseConfig = {
-          apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+  <!-- REPLACE your existing <script type="module"> ... </script> with this -->
+<script type="module">
+  // ---------- FIREBASE CONFIG (keep your existing values) ----------
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
     authDomain: "goodplates-7ae36.firebaseapp.com",
     projectId: "goodplates-7ae36",
     storageBucket: "goodplates-7ae36.firebasestorage.app",
     messagingSenderId: "541149626283",
     appId: "1:541149626283:web:928888f0b42cda49b7dcee",
     measurementId: "G-HKMSHM726J"
+  };
 
-    };
-    // ------------------------------------------------------
+  // modular SDK imports (v9 style you used)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 
-    // import modular SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+  // UI state (unchanged)
+  let currentStep = 1;
+  let selectedGoals = [];
+  let selectedCountry = "";
+  let selectedAllergies = [];
+  let selectedDiet = "";
+  let selectedCalories = "";
+  let selectedCurrency = "";
 
-    // State (UI)
-    let currentStep = 1;
-    let selectedGoals = [];
-    let selectedCountry = "";
-    let selectedAllergies = [];
-    let selectedDiet = "";
-    let selectedCalories = "";
-    let selectedCurrency = "";
+  const steps = [1,2,3];
 
-    const steps = [1,2,3];
+  // Elements
+  const stepEls = {1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3')};
+  const backBtn = document.getElementById('backBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const finishBtn = document.getElementById('finishBtn');
+  const finishLink = document.getElementById('finishLink');
+  const progressBar = document.getElementById('progressBar');
+  const progressLabel = document.getElementById('progressLabel');
+  const progressPct = document.getElementById('progressPct');
+  const dots = [document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3')];
+  const countrySelect = document.getElementById('countrySelect');
+  const allergiesContainer = document.getElementById('allergiesContainer');
+  const dietSelect = document.getElementById('dietSelect');
+  const caloriesSelect = document.getElementById('caloriesSelect');
+  const currencySelect = document.getElementById('currencySelect');
 
-    // Elements
-    const stepEls = {1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3')};
-    const backBtn = document.getElementById('backBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const finishBtn = document.getElementById('finishBtn');
-    const finishLink = document.getElementById('finishLink');
-    const progressBar = document.getElementById('progressBar');
-    const progressLabel = document.getElementById('progressLabel');
-    const progressPct = document.getElementById('progressPct');
-    const dots = [document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3')];
-    const countrySelect = document.getElementById('countrySelect');
-    const allergiesContainer = document.getElementById('allergiesContainer');
-    const dietSelect = document.getElementById('dietSelect');
-    const caloriesSelect = document.getElementById('caloriesSelect');
-    const currencySelect = document.getElementById('currencySelect');
+  // create an inline status element next to finish button (no alert)
+  const statusEl = document.createElement('div');
+  statusEl.id = 'onboardingStatus';
+  statusEl.style.marginLeft = '12px';
+  statusEl.style.alignSelf = 'center';
+  statusEl.style.fontSize = '0.95rem';
+  statusEl.style.color = '#065f46'; // greenish for success
+  statusEl.style.display = 'inline-block';
+  statusEl.textContent = '';
+  // insert after the finishLink container so it shows next to the button
+  finishLink.parentElement.appendChild(statusEl);
 
-    // Helpers
-    function updateProgress(){
-      const totalSteps = steps.length;
-      const pct = Math.round((currentStep / totalSteps) * 100);
-      progressBar.style.width = pct + '%';
-      progressLabel.textContent = `Step ${currentStep} of ${totalSteps}`;
-      progressPct.textContent = `${pct}% Complete`;
-      dots.forEach((d,i) => { d.style.background = (i < currentStep) ? '#12B981' : '#E5E7EB'; });
-    }
+  // Helpers
+  function updateProgress(){
+    const totalSteps = steps.length;
+    const pct = Math.round((currentStep / totalSteps) * 100);
+    progressBar.style.width = pct + '%';
+    progressLabel.textContent = `Step ${currentStep} of ${totalSteps}`;
+    progressPct.textContent = `${pct}% Complete`;
+    dots.forEach((d,i) => { d.style.background = (i < currentStep) ? '#12B981' : '#E5E7EB'; });
+  }
 
-    function showStep(step){
-      steps.forEach(s => stepEls[s].classList.toggle('hidden', s !== step));
-      backBtn.disabled = step === 1;
-      const canGo = canProceed();
-      if (step < 3) { nextBtn.classList.remove('hidden'); finishLink.classList.add('hidden'); nextBtn.disabled = !canGo; }
-      else { nextBtn.classList.add('hidden'); finishLink.classList.remove('hidden'); finishBtn.disabled = !canGo; }
-      updateProgress();
-    }
+  function showStep(step){
+    steps.forEach(s => stepEls[s].classList.toggle('hidden', s !== step));
+    backBtn.disabled = step === 1;
+    const canGo = canProceed();
+    if (step < 3) { nextBtn.classList.remove('hidden'); finishLink.classList.add('hidden'); nextBtn.disabled = !canGo; }
+    else { nextBtn.classList.add('hidden'); finishLink.classList.remove('hidden'); finishBtn.disabled = !canGo; }
+    updateProgress();
+  }
 
-    function canProceed(){
-      if (currentStep === 1) return selectedGoals.length > 0;
-      if (currentStep === 2) return selectedDiet !== "" && selectedCalories !== "" && selectedCurrency !== "";
-      if (currentStep === 3) return selectedCountry !== "";
-      return false;
-    }
+  function canProceed(){
+    if (currentStep === 1) return selectedGoals.length > 0;
+    if (currentStep === 2) return selectedDiet !== "" && selectedCalories !== "" && selectedCurrency !== "";
+    if (currentStep === 3) return selectedCountry !== "";
+    return false;
+  }
 
-    // Step 1: toggle multiple goals
-    stepEls[1].querySelectorAll('[data-goal]').forEach(card => {
-      card.addEventListener('click', () => {
-        const goal = card.dataset.goal;
-        const idx = selectedGoals.indexOf(goal);
-        if (idx === -1) { selectedGoals.push(goal); card.setAttribute('data-selected','true'); card.classList.add('ring-2','ring-green-600','bg-green-50'); card.setAttribute('aria-pressed','true'); }
-        else { selectedGoals.splice(idx,1); card.removeAttribute('data-selected'); card.classList.remove('ring-2','ring-green-600','bg-green-50'); card.setAttribute('aria-pressed','false'); }
-        nextBtn.disabled = !canProceed();
-      });
+  // Step 1: toggle multiple goals
+  stepEls[1].querySelectorAll('[data-goal]').forEach(card => {
+    card.addEventListener('click', () => {
+      const goal = card.dataset.goal;
+      const idx = selectedGoals.indexOf(goal);
+      if (idx === -1) { selectedGoals.push(goal); card.setAttribute('data-selected','true'); card.classList.add('ring-2','ring-green-600','bg-green-50'); card.setAttribute('aria-pressed','true'); }
+      else { selectedGoals.splice(idx,1); card.removeAttribute('data-selected'); card.classList.remove('ring-2','ring-green-600','bg-green-50'); card.setAttribute('aria-pressed','false'); }
+      nextBtn.disabled = !canProceed();
     });
+  });
 
-    // Allergies chips handlers
-    allergiesContainer.querySelectorAll('button[data-value]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const val = btn.dataset.value;
-        if (val === 'none') {
-          selectedAllergies = ['none'];
-          allergiesContainer.querySelectorAll('button').forEach(b => b.classList.toggle('chip-selected', b.dataset.value === 'none'));
+  // Allergies chips handlers
+  allergiesContainer.querySelectorAll('button[data-value]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.value;
+      if (val === 'none') {
+        selectedAllergies = ['none'];
+        allergiesContainer.querySelectorAll('button').forEach(b => b.classList.toggle('chip-selected', b.dataset.value === 'none'));
+      } else {
+        const i = selectedAllergies.indexOf(val);
+        if (i === -1) {
+          const noneIdx = selectedAllergies.indexOf('none');
+          if (noneIdx !== -1) selectedAllergies.splice(noneIdx,1);
+          selectedAllergies.push(val);
+          btn.classList.add('chip-selected');
         } else {
-          const i = selectedAllergies.indexOf(val);
-          if (i === -1) {
-            const noneIdx = selectedAllergies.indexOf('none');
-            if (noneIdx !== -1) selectedAllergies.splice(noneIdx,1);
-            selectedAllergies.push(val);
-            btn.classList.add('chip-selected');
-          } else {
-            selectedAllergies.splice(i,1);
-            btn.classList.remove('chip-selected');
-          }
-          allergiesContainer.querySelectorAll('button[data-value="none"]').forEach(b => {
-            b.classList.toggle('chip-selected', selectedAllergies.length === 1 && selectedAllergies[0] === 'none');
-          });
+          selectedAllergies.splice(i,1);
+          btn.classList.remove('chip-selected');
         }
-      });
-    });
-
-    // diet/calories/currency/country handlers
-    dietSelect.addEventListener('change', e => { selectedDiet = e.target.value; updateNextFinishState(); });
-    caloriesSelect.addEventListener('change', e => { selectedCalories = e.target.value; updateNextFinishState(); });
-    currencySelect.addEventListener('change', e => { selectedCurrency = e.target.value; updateNextFinishState(); });
-    countrySelect.addEventListener('change', e => { selectedCountry = e.target.value; updateNextFinishState(); });
-
-    function updateNextFinishState(){ nextBtn.disabled = !canProceed(); finishBtn.disabled = !canProceed(); }
-
-    // navigation
-    backBtn.addEventListener('click', () => { currentStep = Math.max(1, currentStep - 1); showStep(currentStep); });
-    nextBtn.addEventListener('click', () => { if (!canProceed()) return; currentStep = Math.min(3, currentStep + 1); showStep(currentStep); });
-
-    // ---------- FIRESTORE SAVE & REDIRECT ----------
-    async function ensureAuth() {
-      return new Promise((resolve, reject) => {
-        let resolved = false;
-        onAuthStateChanged(auth, (user) => {
-          if (user) { resolved = true; resolve(user); }
-          else {
-            // sign in anonymously so we have an auth.uid to write under rules
-            signInAnonymously(auth).then(uCred => { resolved = true; resolve(uCred.user); }).catch(err => { if(!resolved) reject(err); });
-          }
-        }, (err) => { reject(err); });
-      });
-    }
-
-    async function saveProfileAndRedirect() {
-      finishBtn.disabled = true;
-      finishBtn.textContent = 'Saving...';
-
-      try {
-        const user = await ensureAuth();
-        if (!user) throw new Error('Authentication failed');
-
-        const uid = user.uid;
-        const profileRef = doc(db, 'profiles', uid);
-        const userRef = doc(db, 'users', uid);
-
-        // Build profile payload
-        // Convert calories to number when possible
-        const caloriesNumber = selectedCalories && selectedCalories !== 'custom' ? parseInt(selectedCalories, 10) : null;
-
-        const profilePatch = {
-          'nutritionInfo': { allergies: selectedAllergies.filter(Boolean), dietaryType: selectedDiet || '' },
-          'nutritionGoals': { calories: caloriesNumber },
-          defaultCurrency: selectedCurrency || '',
-          dietTags: selectedGoals || [],
-          updatedAt: serverTimestamp()
-        };
-
-        // If country available add it
-        if (selectedCountry) profilePatch.location = selectedCountry;
-
-        // Write: check if profile exists and set createdAt only if not
-        const existing = await getDoc(profileRef);
-        if (existing.exists()) {
-          await setDoc(profileRef, profilePatch, { merge: true });
-        } else {
-          await setDoc(profileRef, { ...profilePatch, createdAt: serverTimestamp() }, { merge: true });
-        }
-
-        // Optional: update users/{uid} small fields (merge)
-        const userPatch = {};
-        if (selectedGoals.length) userPatch.dietTags = selectedGoals;
-        if (selectedCountry) userPatch.location = selectedCountry;
-        if (Object.keys(userPatch).length) {
-          await setDoc(userRef, userPatch, { merge: true });
-        }
-
-        // Redirect to dashboard on success
-        window.location.href = '/dashboard/';
-      } catch (err) {
-        console.error('Save failed', err);
-        alert('There was an error saving your profile. Please check the console and try again.');
-        finishBtn.disabled = false;
-        finishBtn.textContent = 'Finish';
+        allergiesContainer.querySelectorAll('button[data-value="none"]').forEach(b => {
+          b.classList.toggle('chip-selected', selectedAllergies.length === 1 && selectedAllergies[0] === 'none');
+        });
       }
-    }
-
-    // wire finish button to save flow
-    finishBtn.addEventListener('click', (e) => {
-      if (!canProceed()) { e.preventDefault(); return; }
-      saveProfileAndRedirect();
     });
+  });
 
-    // Init UI
-    showStep(currentStep);
-  </script>
+  // diet/calories/currency/country handlers
+  dietSelect.addEventListener('change', e => { selectedDiet = e.target.value; updateNextFinishState(); });
+  caloriesSelect.addEventListener('change', e => { selectedCalories = e.target.value; updateNextFinishState(); });
+  currencySelect.addEventListener('change', e => { selectedCurrency = e.target.value; updateNextFinishState(); });
+  countrySelect.addEventListener('change', e => { selectedCountry = e.target.value; updateNextFinishState(); });
+
+  function updateNextFinishState(){ nextBtn.disabled = !canProceed(); finishBtn.disabled = !canProceed(); }
+
+  // navigation
+  backBtn.addEventListener('click', () => { currentStep = Math.max(1, currentStep - 1); showStep(currentStep); });
+  nextBtn.addEventListener('click', () => { if (!canProceed()) return; currentStep = Math.min(3, currentStep + 1); showStep(currentStep); });
+
+  // ---------- AUTH & ONBOARDING CHECK ----------
+  // Helper: wait for the auth state once
+  function currentUserOnce() {
+    return new Promise((resolve) => {
+      const unsub = onAuthStateChanged(auth, (user) => {
+        unsub();
+        resolve(user);
+      });
+      // no timeout required; onAuthStateChanged usually fires quickly
+    });
+  }
+
+  (async function requireAuthAndProfile() {
+    try {
+      const user = await currentUserOnce();
+
+      // if no logged-in user OR anonymous user -> redirect to login form
+      if (!user || user.isAnonymous) {
+        // Redirect to your login form and include next param
+        window.location.href = '/login-form/?next=/onboarding/';
+        return;
+      }
+
+      // user is signed in (non-anonymous). Check profile doc
+      const uid = user.uid;
+      const profileRef = doc(db, 'profiles', uid);
+      const snap = await getDoc(profileRef);
+
+      if (snap.exists()) {
+        const data = snap.data() || {};
+        if (data.onboardingComplete === true) {
+          // already onboarded -> go to dashboard
+          window.location.href = '/dashboard/';
+          return;
+        }
+        // If desired, we could pre-fill selections from profile (not implemented here)
+      } else {
+        // create a minimal profile doc to ensure the doc exists and record start
+        await setDoc(profileRef, {
+          onboardingComplete: false,
+          onboardingStartedAt: serverTimestamp()
+        }, { merge: true });
+      }
+
+      // if we reach here, the user is allowed to complete onboarding — enable UI (it's already interactive)
+    } catch (err) {
+      console.error('Auth/profile check failed', err);
+      // If something is wrong, fall back to redirect to login
+      window.location.href = '/login-form/?next=/onboarding/';
+    }
+  })();
+
+  // ---------- FIRESTORE SAVE & REDIRECT (no anonymous fallback) ----------
+  async function saveProfileAndRedirect() {
+    finishBtn.disabled = true;
+    const prevText = finishBtn.textContent;
+    finishBtn.textContent = 'Saving...';
+    statusEl.style.color = '#065f46';
+    statusEl.textContent = '';
+
+    try {
+      // ensure user is still signed in
+      const user = auth.currentUser;
+      if (!user || user.isAnonymous) {
+        // no proper auth; send to login
+        window.location.href = '/login-form/?next=/onboarding/';
+        return;
+      }
+
+      const uid = user.uid;
+      const profileRef = doc(db, 'profiles', uid);
+      const userRef = doc(db, 'users', uid);
+
+      // Build profile payload
+      const caloriesNumber = selectedCalories && selectedCalories !== 'custom' ? parseInt(selectedCalories, 10) : null;
+
+      const profilePatch = {
+        'nutritionInfo': { allergies: selectedAllergies.filter(Boolean), dietaryType: selectedDiet || '' },
+        'nutritionGoals': { calories: caloriesNumber },
+        defaultCurrency: selectedCurrency || '',
+        dietTags: selectedGoals || [],
+        location: selectedCountry || '',
+        onboardingComplete: true,
+        onboardingCompletedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      // If profile exists, merge; otherwise create with createdAt
+      const existing = await getDoc(profileRef);
+      if (existing.exists()) {
+        await updateDoc(profileRef, profilePatch);
+      } else {
+        await setDoc(profileRef, { ...profilePatch, createdAt: serverTimestamp() }, { merge: true });
+      }
+
+      // Update small user fields in users/{uid}
+      const userPatch = {};
+      if (selectedGoals.length) userPatch.dietTags = selectedGoals;
+      if (selectedCountry) userPatch.location = selectedCountry;
+      if (Object.keys(userPatch).length) {
+        await setDoc(userRef, userPatch, { merge: true });
+      }
+
+      // show success briefly then redirect (no popups)
+      statusEl.style.color = '#065f46';
+      statusEl.textContent = 'Saved — redirecting…';
+      finishBtn.textContent = 'Saved';
+      setTimeout(() => { window.location.href = '/dashboard/'; }, 600);
+    } catch (err) {
+      console.error('Save failed', err);
+      statusEl.style.color = '#b91c1c'; // crimson
+      statusEl.textContent = 'Failed to save — try again';
+      finishBtn.disabled = false;
+      finishBtn.textContent = prevText;
+    }
+  }
+
+  // wire finish button to save flow
+  finishBtn.addEventListener('click', (e) => {
+    if (!canProceed()) { e.preventDefault(); return; }
+    saveProfileAndRedirect();
+  });
+
+  // Init UI
+  showStep(currentStep);
+</script>
+
 </body>
 </html>
