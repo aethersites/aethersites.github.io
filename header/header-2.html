@@ -57,28 +57,27 @@
              style="width:80%; height:80%; object-fit:cover; border-radius:50%; display:block;" />
       </a>
 
-      <!-- ====== Desktop avatar (button + dropdown) - minimal change ====== -->
-      <div style="position:relative; display:inline-block; z-index:999999999;">
-        <button id="avatarBtn" aria-haspopup="true" aria-expanded="false" aria-controls="avatarMenu" title="Account"
-                style="background:transparent;border:0;padding:0;cursor:pointer;">
-          <div style="width:38px;height:38px;border-radius:100%;overflow:hidden;display:flex;justify-content:center;background:#fff;">
-            <!-- switched to raw.githubusercontent URL so placeholder shows -->
-            <img id="avatarImg"
-                 src="https://raw.githubusercontent.com/aethersites/aethersites.github.io/90eef6d3bd32bac358155d82a6be2a6762b5ae78/usericon.png"
-                 alt="avatar">
-          </div>
-        </button>
+     <!-- ====== Desktop avatar (button + dropdown) - minimal change ====== -->
+<div style="position:relative; display:inline-block; z-index:99999999999;">
+  <button id="avatarBtn" aria-haspopup="true" aria-expanded="false" aria-controls="avatarMenu" title="Account"
+          style="background:transparent;border:0;padding:0;cursor:pointer;position:relative;z-index:999999999;">
+    <div style="width:38px;height:38px;border-radius:100%;overflow:hidden;display:flex;justify-content:center;background:#fff;">
+      <!-- switched to raw.githubusercontent URL so placeholder shows -->
+      <img id="avatarImg"
+           src="https://raw.githubusercontent.com/aethersites/aethersites.github.io/90eef6d3bd32bac358155d82a6be2a6762b5ae78/usericon.png"
+           alt="avatar">
+    </div>
+  </button>
 
-<div id="avatarMenu" role="menu" aria-labelledby="avatarBtn" hidden
-     style="background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0;">
-    
-          <a role="menuitem" href="/overview/"    style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Overview</a>
-          <a role="menuitem" href="/profile/"     style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
-          <a role="menuitem" href="/wallet/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
-          <a role="menuitem" href="/subscription/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Subscription</a>
-          <a role="menuitem" href="/logout/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;border-top:1px solid rgba(15,23,42,0.04);margin-top:6px;">Logout</a>
-        </div>
-      </div>
+  <div id="avatarMenu" role="menu" aria-labelledby="avatarBtn" hidden
+       style="background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; position:absolute; z-index:999999999999;">
+    <a role="menuitem" href="/overview/"    style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Overview</a>
+    <a role="menuitem" href="/profile/"     style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
+    <a role="menuitem" href="/wallet/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
+    <a role="menuitem" href="/subscription/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Subscription</a>
+    <a role="menuitem" href="/logout/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;border-top:1px solid rgba(15,23,42,0.04);margin-top:6px;">Logout</a>
+  </div>
+</div>
 
       <!-- mobile hamburger -->
       <button id="gpHamburger" class="gp-hamburger" aria-controls="gpMobileMenu" aria-expanded="false" aria-label="Open menu">
