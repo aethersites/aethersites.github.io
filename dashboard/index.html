@@ -381,14 +381,35 @@
     });
 </script>
 
-  <!-- START MARK  -->
-      
-    <!-- end module script -->
-    </script>
-
-    <!-- Avatar dropdown script (moved out of module; safe standalone script) -->
-    <script>
+  <!-- START AVATAR PORTAL + DROPDOWN (paste this just before </body>) -->
+<script>
 (function () {
+  // Inject protective CSS so portal menus and avatar buttons are above overlays
+  (function addPortalStyles() {
+    try {
+      const css = `
+/* Ensure avatar buttons are clickable even when host page has overlays */
+#avatarBtn, #avatarBtnMobile {
+  position: relative !important;
+  z-index: 10000002 !important;
+  pointer-events: auto !important;
+}
+
+/* Portal menu (menus moved to body) */
+.gp-portal, #avatarMenu, #avatarMenuMobile {
+  position: fixed !important;
+  z-index: 10000001 !important;
+  pointer-events: auto !important;
+  box-sizing: border-box;
+}
+`;
+      const s = document.createElement('style');
+      s.setAttribute('data-gp-portal-style', '1');
+      s.appendChild(document.createTextNode(css));
+      (document.head || document.documentElement).appendChild(s);
+    } catch (e) { /* ignore */ }
+  })();
+
   function $id(id) { return document.getElementById(id); }
 
   function ensurePortal(menu) {
@@ -397,11 +418,12 @@
     menu.classList.add('gp-portal');
   }
 
-  // NOTE: uses both menu.dataset.gpLockedWidth and btn.dataset.gpLockedWidth fallback
+  // Place menu to the right aligned with button; flip up if required.
   function placeMenu(btn, menu) {
     if (!btn || !menu) return;
     ensurePortal(menu);
 
+    // Prepare measurement
     menu.style.visibility = 'hidden';
     menu.hidden = false;
     menu.style.display = 'block';
@@ -411,48 +433,33 @@
     const prevTrans = menu.style.transition;
     menu.style.transition = 'none';
 
-    // Try to reuse locked width from menu OR button (button persists across menu replacements)
+    // Determine cached width if available
     let locked = null;
-    if (menu.dataset && menu.dataset.gpLockedWidth) {
-      locked = parseInt(menu.dataset.gpLockedWidth, 10);
-    } else if (btn.dataset && btn.dataset.gpLockedWidth) {
-      locked = parseInt(btn.dataset.gpLockedWidth, 10);
-    }
+    if (menu.dataset && menu.dataset.gpLockedWidth) locked = parseInt(menu.dataset.gpLockedWidth, 10);
+    else if (btn.dataset && btn.dataset.gpLockedWidth) locked = parseInt(btn.dataset.gpLockedWidth, 10);
 
     if (!locked || Number.isNaN(locked)) {
-      // Clear any inline width constraints for honest measurement
       menu.style.width = 'auto';
       menu.style.minWidth = '';
       menu.style.maxWidth = '';
-
-      // Measure intrinsic content width (scrollWidth is reliable)
       const intrinsic = Math.ceil(menu.scrollWidth || 180);
       const maxW = Math.max(0, window.innerWidth - 16);
       locked = Math.min(intrinsic, maxW);
-
-      // Persist to both menu and button so menu node swaps won't lose the value
-      try {
-        menu.dataset.gpLockedWidth = String(locked);
-      } catch (e) { /* ignore if can't set */ }
-      try {
-        btn.dataset.gpLockedWidth = String(locked);
-      } catch (e) { /* ignore if can't set */ }
+      try { menu.dataset.gpLockedWidth = String(locked); } catch (e) {}
+      try { btn.dataset.gpLockedWidth = String(locked); } catch (e) {}
     }
 
-    // Apply locked width and reasonable height
     menu.style.width = locked + 'px';
     menu.style.minWidth = locked + 'px';
     menu.style.maxWidth = locked + 'px';
     menu.style.overflowY = 'auto';
     menu.style.maxHeight = (window.innerHeight - 32) + 'px';
 
-    // Position: right-align to button, flip if needed
     const rect = btn.getBoundingClientRect();
     const gap = 8;
     const menuW = locked;
     let left = rect.right - menuW;
     let top = rect.bottom + gap;
-
     left = Math.max(8, Math.min(left, window.innerWidth - menuW - 8));
 
     const contentH = menu.scrollHeight || menu.offsetHeight || 0;
@@ -473,8 +480,9 @@
     placeMenu(btn, menu);
     menu.setAttribute('data-gp-open', 'true');
     if (btn) btn.setAttribute('aria-expanded', 'true');
-    const firstItem = menu.querySelector('[role="menuitem"], a, button');
-    if (firstItem) firstItem.focus();
+    const first = menu.querySelector('[role="menuitem"], a, button');
+    if (first && typeof first.focus === 'function') first.focus();
+    // re-place shortly after for stable layout (handles font loads)
     setTimeout(function () { placeMenu(btn, menu); }, 45);
   }
 
@@ -484,7 +492,6 @@
     menu.style.visibility = 'hidden';
     menu.removeAttribute('data-gp-open');
     if (btn) btn.setAttribute('aria-expanded', 'false');
-    // KEEP persisted gpLockedWidth on btn/menu to ensure stable reopen sizing
   }
 
   function onceAdd(el, ev, fn) {
@@ -521,6 +528,7 @@
       });
     }
 
+    // Close on outside click
     onceAdd(document, 'click', function (e) {
       if (menu && menu.getAttribute('data-gp-open') === 'true') {
         if (!menu.contains(e.target) && !(btn && btn.contains(e.target))) closeMenu(btn, menu);
@@ -530,6 +538,7 @@
       }
     });
 
+    // Escape closes
     onceAdd(document, 'keydown', function (e) {
       if (e.key === 'Escape') {
         if (menu && menu.getAttribute('data-gp-open') === 'true') closeMenu(btn, menu);
@@ -537,6 +546,7 @@
       }
     });
 
+    // Reposition on resize/scroll
     onceAdd(window, 'resize', function () {
       if (menu && menu.getAttribute('data-gp-open') === 'true') placeMenu(btn, menu);
       if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenu(btnMobile, menuMobile);
@@ -546,6 +556,7 @@
       if (menuMobile && menuMobile.getAttribute('data-gp-open') === 'true') placeMenu(btnMobile, menuMobile);
     }, true);
 
+    // ensure header area accepts pointer events
     const top = document.querySelector('.gp-topnav');
     if (top) {
       top.style.pointerEvents = 'auto';
@@ -555,7 +566,8 @@
 
   function init() { bindControls(); }
 
-  try { init(); } catch (e) { /* silent fail */ }
+  // Try init now, but be resilient for dynamic injection
+  try { init(); } catch (e) { /* ignore */ }
 
   const mo = new MutationObserver(function () {
     if ($id('avatarBtn') || $id('avatarBtnMobile')) init();
@@ -564,10 +576,24 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else setTimeout(init, 0);
+
+  // Optional: close menus when navigating away via link inside the menu
+  document.addEventListener('click', function (e) {
+    const menu = $id('avatarMenu');
+    const menuMobile = $id('avatarMenuMobile');
+    if (e.target && e.target.closest && e.target.closest('#avatarMenu, #avatarMenuMobile')) {
+      // allow link to process, then close menus (small timeout ensures navigation begins)
+      setTimeout(function () {
+        try { if (menu) closeMenu($id('avatarBtn'), menu); } catch (e) {}
+        try { if (menuMobile) closeMenu($id('avatarBtnMobile'), menuMobile); } catch (e) {}
+      }, 40);
+    }
+  }, true);
 })();
 </script>
+<!-- END AVATAR PORTAL + DROPDOWN -->
 
-<!-- END MARK  -->
+
 
 </body>
 </html>
