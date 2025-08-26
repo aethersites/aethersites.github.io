@@ -532,8 +532,66 @@ async function showOnboardingModalIfNeeded() {
   overlay.id = 'gp-onb-overlay';
   overlay.style = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,0.6);backdrop-filter: blur(4px);';
 
-  const modalInner = `
-    <div id="gp-onb-modal" style="width:min(1100px,96%);max-height:92vh;overflow:auto;border-radius:1rem;background:transparent;">
+  // insert onboarding markup into the overlay and mount it
+overlay.innerHTML = `
+  <div id="gp-onb-modal"
+       style="width:min(1100px,96%);max-height:92vh;overflow:auto;border-radius:1rem;background:white;padding:24px;box-shadow:0 10px 40px rgba(2,6,23,.5);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2 style="margin:0;font-size:20px;font-weight:700;">Welcome to GoodPlates — quick setup</h2>
+      <button id="gp-onb-close" aria-label="Close onboarding"
+              style="background:transparent;border:none;font-size:18px;cursor:pointer;">✕</button>
+    </div>
+
+    <div id="gp-onb-steps" style="min-height:140px;">
+      <!-- TODO: replace this with your real onboarding content -->
+      <p style="margin:0 0 12px 0;color:var(--muted);">A few quick steps to get your dashboard personalized.</p>
+      <label style="display:block;margin-bottom:8px;">
+        Display name<br/>
+        <input id="gp-onb-display-name" placeholder="Your name" style="width:100%;padding:8px;border-radius:8px;border:1px solid var(--border);" />
+      </label>
+      <!-- add more inputs/steps here as needed -->
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:18px;">
+      <button id="gp-onb-skip" style="padding:8px 12px;border-radius:8px;background:transparent;border:1px solid var(--border);cursor:pointer;">Skip</button>
+      <button id="gp-onb-finish" style="padding:8px 12px;border-radius:8px;background:linear-gradient(90deg,var(--primary),var(--primary-700));color:#fff;border:none;cursor:pointer;">Finish</button>
+    </div>
+  </div>
+`;
+
+document.body.appendChild(overlay);
+
+// optional: close button / skip behaviour
+document.getElementById('gp-onb-close').addEventListener('click', () => {
+  // you can decide whether close should skip or force completion
+  document.body.removeChild(overlay);
+});
+
+document.getElementById('gp-onb-skip').addEventListener('click', async () => {
+  // mark complete so we don't nag the user again (or change to your preferred behavior)
+  try {
+    await updateDoc(profileRef, { onboardingComplete: true });
+  } catch (err) {
+    console.error('Failed to skip onboarding:', err);
+  }
+  document.body.removeChild(overlay);
+});
+
+// finish handler: write onboardingComplete:true and optionally store name
+document.getElementById('gp-onb-finish').addEventListener('click', async () => {
+  const nameInput = document.getElementById('gp-onb-display-name');
+  const updates = { onboardingComplete: true, onboardingCompletedAt: serverTimestamp() };
+  if (nameInput && nameInput.value.trim()) updates.displayName = nameInput.value.trim();
+
+  try {
+    await updateDoc(profileRef, updates);
+    // remove overlay and let the dashboard continue
+    document.body.removeChild(overlay);
+  } catch (err) {
+    console.error('Failed to complete onboarding:', err);
+    // optionally show an error message instead of closing
+  }
+});
 
 
 <style>
@@ -1350,6 +1408,8 @@ showStep(currentStep);
     document.querySelectorAll = _querySelectorAll;
   }
 })();
+  showOnboardingModalIfNeeded().catch(console.error);
+
 </script>
 
 
