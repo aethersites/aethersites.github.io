@@ -76,10 +76,7 @@
           <a role="menuitem" href="/profile/"     style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
           <a role="menuitem" href="/wallet/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
           <a role="menuitem" href="/subscription/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Subscription</a>
-<a id="logoutLink" role="menuitem" href="/logout/"
-   style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;border-top:1px solid rgba(15,23,42,0.04);margin-top:6px;">
-  Logout
-</a>
+          <a role="menuitem" href="/logout/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;border-top:1px solid rgba(15,23,42,0.04);margin-top:6px;">Logout</a>
         </div>
       </div>
 
@@ -148,10 +145,7 @@
               <a role="menuitem" href="/profile/"     style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
               <a role="menuitem" href="/wallet/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
               <a role="menuitem" href="/subscription/" style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Subscription</a>
-<a id="logoutLinkMobile" role="menuitem" href="/logout/"
-   style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;border-top:1px solid rgba(15,23,42,0.04);margin-top:6px;">
-  Logout
-</a>
+              <a role="menuitem" href="/logout/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;border-top:1px solid rgba(15,23,42,0.04);margin-top:6px;">Logout</a>
             </div>
           </div>
         </div>
@@ -636,178 +630,6 @@ function closeMenu(btn, menu) {
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAvatarDropdown);
   else setTimeout(initAvatarDropdown, 0);
-})();
-</script>
-
-<script>
-  <!-- Firebase init (module) — paste this BEFORE your logoutFlow script -->
-<script type="module">
-  // Only import the bare minimum auth functions
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-
-  // ===== REPLACE THIS WITH YOUR FIREBASE CONFIG OBJECT =====
-  const firebaseConfig = {
-apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-    authDomain: "goodplates-7ae36.firebaseapp.com",
-    projectId: "goodplates-7ae36",
-    storageBucket: "goodplates-7ae36.firebasestorage.app",
-    messagingSenderId: "541149626283",
-    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
-  };
-  // =========================================================
-
-  // Initialize Firebase safely; if it errors we'll still expose a graceful stub
-  try {
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // Expose a safe signOut helper to the global window object
-    window.firebaseAuthSignOut = async function firebaseAuthSignOut() {
-      try {
-        // attempt signOut, but don't throw to caller if it fails
-        await signOut(auth);
-        console.debug('[firebase] signOut succeeded');
-      } catch (err) {
-        console.warn('[firebase] signOut failed', err);
-      }
-    };
-  } catch (err) {
-    // If init fails, provide a harmless stub so other code can call it without error.
-    console.warn('[firebase] initializeApp failed or firebase not configured', err);
-    window.firebaseAuthSignOut = async function () { /* no-op */ };
-  }
-</script>
-
-  <script>
-(function () {
-  // Helper to read cookies
-  function getCookie(name) {
-    const m = document.cookie.match('(?:^|; )' + name + '=([^;]+)');
-    return m ? decodeURIComponent(m[1]) : null;
-  }
-
-  // Remove common client-side tokens & cookies (adjust names if your app uses different ones)
-  function clearClientAuth() {
-    try {
-      localStorage.removeItem('authToken');
-      sessionStorage.removeItem('authToken');
-      localStorage.removeItem('google_token');
-      sessionStorage.removeItem('google_token');
-    } catch (e) { /* ignore */ }
-
-    // Clear likely session cookie names (safe no-op if they don't exist)
-    document.cookie = 'session=; Max-Age=0; path=/';
-    document.cookie = 'auth=; Max-Age=0; path=/';
-    document.cookie = 'sessionid=; Max-Age=0; path=/';
-    document.cookie = 'connect.sid=; Max-Age=0; path=/';
-  }
-
-  // Try to sign out / revoke Google tokens (best-effort)
-  async function googleSignOutAndRevoke() {
-    try {
-      // older gapi flow
-      if (window.gapi && gapi.auth2 && gapi.auth2.getAuthInstance) {
-        const auth = gapi.auth2.getAuthInstance();
-        if (auth && auth.signOut) await auth.signOut();
-      }
-    } catch (e) { /* ignore */ }
-
-    try {
-      // new Google Identity Services: stop auto sign-in
-      if (window.google && google.accounts && google.accounts.id && google.accounts.id.disableAutoSelect) {
-        google.accounts.id.disableAutoSelect();
-      }
-    } catch (e) { /* ignore */ }
-
-    // If a token is stored under common names, try revoking
-    const token = localStorage.getItem('google_token') ||
-                  sessionStorage.getItem('google_token') ||
-                  (document.cookie.match(/(?:^|; )google_token=([^;]+)/) || [null, null])[1];
-    if (token) {
-      try {
-        // revoke — use no-cors because cross-origin revoke may not return CORS headers
-        await fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(token), {
-          method: 'POST',
-          mode: 'no-cors'
-        });
-      } catch (e) { /* ignore */ }
-    }
-  }
-
-  // Try server logout: prefer POST /api/logout, fallback to GET the anchor href
-  async function serverLogout(logoutHref) {
-    // Collect CSRF tokens from common cookie names
-    const csrftoken = getCookie('csrftoken') || getCookie('XSRF-TOKEN') || getCookie('csrf_token') || null;
-    const headers = {};
-    if (csrftoken) {
-      // common header names — Django uses X-CSRFToken, others use X-CSRF-Token
-      headers['X-CSRFToken'] = csrftoken;
-      headers['X-CSRF-Token'] = csrftoken;
-    }
-
-    // 1) Try POST /api/logout (preferred). credentials: 'include' sends cookies.
-    try {
-      await fetch('/api/logout', {
-        method: 'POST',
-        credentials: 'include',
-        headers: headers
-      });
-      // even if server returns 403/401, we continue to fallback attempts and client cleanup
-      return;
-    } catch (e) {
-      // network error — fallthrough to fallback GET
-    }
-
-    // 2) Fallback: try GET the provided logout href (many simple servers implement this).
-    try {
-      if (logoutHref) {
-        await fetch(logoutHref, { method: 'GET', credentials: 'include' });
-      }
-    } catch (e) {
-      /* ignore */
-    }
-  }
-
-  // Main logout flow attached to anchor click
-  async function logoutFlow(e) {
-    // Preserve normal fallback if JS is disabled — this only runs when JS is active
-    if (e && e.preventDefault) e.preventDefault();
-
-    // href to redirect to after logout (use anchor href if present)
-    const href = (e && e.currentTarget && e.currentTarget.getAttribute && e.currentTarget.getAttribute('href')) || '/';
-
-    // 1) Ask server to clear session (POST /api/logout preferred)
-    await serverLogout(href);
-
-    // 2) Revoke Google or third-party tokens (best-effort)
-    await googleSignOutAndRevoke();
-
-    // 3) Clear client-side storage & cookies
-    clearClientAuth();
-
-    // 4) Redirect the user to logout URL or home
-    window.location.href = href || '/';
-  }
-
-  // Attach click handlers to desktop and mobile logout anchors
-  document.addEventListener('DOMContentLoaded', function () {
-    const desktop = document.getElementById('logoutLink');
-    if (desktop) desktop.addEventListener('click', logoutFlow);
-
-    const mobile = document.getElementById('logoutLinkMobile');
-    if (mobile) mobile.addEventListener('click', logoutFlow);
-  });
-
-  // If markup is injected dynamically, attempt to attach handlers later as well
-  // (resilient: doesn't double-bind due to same element id)
-  setTimeout(function () {
-    const desktop = document.getElementById('logoutLink');
-    if (desktop) desktop.addEventListener('click', logoutFlow);
-    const mobile = document.getElementById('logoutLinkMobile');
-    if (mobile) mobile.addEventListener('click', logoutFlow);
-  }, 1000);
 })();
 </script>
 
