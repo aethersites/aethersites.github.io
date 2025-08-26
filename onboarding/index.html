@@ -680,11 +680,58 @@
         await setDoc(userRef, userPatch, { merge: true });
       }
 
-      // show success briefly then redirect (no popups)
+            // show success briefly and redirect to a safe "next" target if present
+      // (prefers ?next=... then sessionStorage.gp-login-next; prevents open-redirects)
+      function getRawNext() {
+        try {
+          const params = new URLSearchParams(location.search);
+          const q = params.get('next');
+          if (q) return decodeURIComponent(String(q));
+        } catch (e) { /* ignore */ }
+        try {
+          const s = sessionStorage.getItem('gp-login-next');
+          if (s) return s;
+        } catch (e) { /* ignore */ }
+        return null;
+      }
+
+      function validateNextTarget(next) {
+        if (!next) return null;
+        // Reject absolute/external URLs
+        if (next.startsWith('http:') || next.startsWith('https:') || next.startsWith('//')) return null;
+        // Must start with a single slash to be a path
+        if (!next.startsWith('/')) return null;
+        try {
+          const url = new URL(next, location.origin);
+          if (url.origin !== location.origin) return null;
+          const path = url.pathname + url.search + url.hash;
+          // Prevent redirect loops and avoid sending back to auth pages
+          const blockedStarts = ['/login', '/signup', '/onboarding'];
+          for (const b of blockedStarts) {
+            if (path === b || path.startsWith(b + '/') || path.startsWith(b + '?')) return null;
+          }
+          // reasonable length guard
+          if (path.length > 2048) return null;
+          return path;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      const rawNext = getRawNext();
+      const safeNext = validateNextTarget(rawNext);
+
+      // clean up the stored marker so it won't be reused
+      try { sessionStorage.removeItem('gp-login-next'); } catch (_) {}
+
+      // show inline success then navigate
       statusEl.style.color = '#065f46';
       statusEl.textContent = 'Saved — redirecting…';
       finishBtn.textContent = 'Saved';
-      setTimeout(() => { window.location.href = '/dashboard/'; }, 600);
+      setTimeout(() => {
+        window.location.href = safeNext || '/dashboard/';
+      }, 600);
+
     } catch (err) {
       console.error('Save failed', err);
       statusEl.style.color = '#b91c1c'; // crimson
