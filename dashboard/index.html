@@ -1184,8 +1184,181 @@ async function showOnboardingModalIfNeeded() {
 
 showOnboardingModalIfNeeded().catch(e => { console.error('onboarding modal error', e); });
 </script>
+
+<!-- PASTE HERE: (1) your <style> and (2) your <main> markup ... -->
+
+<!-- OPTIONAL: if you want to include your onboarding JS, paste it inside this wrapper -->
+<script>
+(function(){
+  // root is the modal container we injected above
+  const root = document.currentScript.parentElement;
+
+  // Save originals
+  const _getElementById = document.getElementById.bind(document);
+  const _querySelector = document.querySelector.bind(document);
+  const _querySelectorAll = document.querySelectorAll.bind(document);
+
+  // Scoped implementations that prefer the modal root, then fallback to original document
+  document.getElementById = function(id) {
+    const fromRoot = root.querySelector('#' + id);
+    return fromRoot || _getElementById(id);
+  };
+  document.querySelector = function(sel) {
+    const fromRoot = root.querySelector(sel);
+    return fromRoot || _querySelector(sel);
+  };
+  document.querySelectorAll = function(sel) {
+    const fromRootList = root.querySelectorAll(sel);
+    return (fromRootList && fromRootList.length) ? fromRootList : _querySelectorAll(sel);
+  };
+
+  try {
+// ---------- CLEANED ONBOARDING UI JS (paste inside the wrapper) ----------
+/* UI state (no firebase, no auth) */
+let currentStep = 1;
+let selectedGoals = [];
+let selectedCountry = "";
+let selectedAllergies = [];
+let selectedDiet = "";
+let selectedCalories = "";
+let selectedCurrency = "";
+const steps = [1,2,3];
+
+/* Elements (these resolve to the modal-scoped elements because wrapper overrides document.*) */
+const stepEls = {1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3')};
+const backBtn = document.getElementById('backBtn');
+const nextBtn = document.getElementById('nextBtn');
+const finishBtn = document.getElementById('finishBtn') || (document.getElementById('finishLink') && document.getElementById('finishLink').querySelector('button'));
+const finishLink = document.getElementById('finishLink');
+const progressBar = document.getElementById('progressBar');
+const progressLabel = document.getElementById('progressLabel');
+const progressPct = document.getElementById('progressPct');
+const dots = [ document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3') ];
+const countrySelect = document.getElementById('countrySelect');
+const allergiesContainer = document.getElementById('allergiesContainer');
+const dietSelect = document.getElementById('dietSelect');
+const caloriesSelect = document.getElementById('caloriesSelect');
+const currencySelect = document.getElementById('currencySelect');
+
+/* Optional status element — if injector created one this will find it; otherwise we skip */
+let statusEl = document.getElementById('onboardingStatus');
+
+/* Helpers */
+function updateProgress(){
+  const totalSteps = steps.length;
+  const pct = Math.round((currentStep / totalSteps) * 100);
+  if (progressBar) progressBar.style.width = pct + '%';
+  if (progressLabel) progressLabel.textContent = `Step ${currentStep} of ${totalSteps}`;
+  if (progressPct) progressPct.textContent = `${pct}% Complete`;
+  dots.forEach((d,i) => { if (d) d.style.background = (i < currentStep) ? '#12B981' : '#E5E7EB'; });
+}
+
+function showStep(step){
+  steps.forEach(s => { if (stepEls[s]) stepEls[s].classList.toggle('hidden', s !== step); });
+  if (backBtn) backBtn.disabled = step === 1;
+  const canGo = canProceed();
+  if (step < 3) {
+    if (nextBtn) { nextBtn.classList.remove('hidden'); nextBtn.disabled = !canGo; }
+    if (finishLink) finishLink.classList.add('hidden');
+  } else {
+    if (nextBtn) nextBtn.classList.add('hidden');
+    if (finishLink) { finishLink.classList.remove('hidden'); if (finishBtn) finishBtn.disabled = !canGo; }
+  }
+  updateProgress();
+}
+
+function canProceed(){
+  if (currentStep === 1) return selectedGoals.length > 0;
+  if (currentStep === 2) return selectedDiet !== "" && selectedCalories !== "" && selectedCurrency !== "";
+  if (currentStep === 3) return selectedCountry !== "";
+  return false;
+}
+
+/* Step 1: toggle multiple goals (cards with data-goal) */
+const modalGoalCards = Array.from(document.querySelectorAll('[data-goal]'));
+modalGoalCards.forEach(card => {
+  card.addEventListener('click', () => {
+    const goal = card.dataset.goal;
+    const idx = selectedGoals.indexOf(goal);
+    if (idx === -1) {
+      selectedGoals.push(goal);
+      card.setAttribute('data-selected','true');
+      card.classList.add('ring-2','ring-green-600','bg-green-50');
+      card.setAttribute('aria-pressed','true');
+    } else {
+      selectedGoals.splice(idx,1);
+      card.removeAttribute('data-selected');
+      card.classList.remove('ring-2','ring-green-600','bg-green-50');
+      card.setAttribute('aria-pressed','false');
+    }
+    if (nextBtn) nextBtn.disabled = !canProceed();
+    if (finishBtn) finishBtn.disabled = !canProceed();
+  });
+});
+
+/* Allergies chips handlers */
+if (allergiesContainer) {
+  allergiesContainer.querySelectorAll('button[data-value]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.value;
+      if (val === 'none') {
+        selectedAllergies = ['none'];
+        allergiesContainer.querySelectorAll('button').forEach(b => b.classList.toggle('chip-selected', b.dataset.value === 'none'));
+      } else {
+        const i = selectedAllergies.indexOf(val);
+        if (i === -1) {
+          const noneIdx = selectedAllergies.indexOf('none');
+          if (noneIdx !== -1) selectedAllergies.splice(noneIdx,1);
+          selectedAllergies.push(val);
+          btn.classList.add('chip-selected');
+        } else {
+          selectedAllergies.splice(i,1);
+          btn.classList.remove('chip-selected');
+        }
+        allergiesContainer.querySelectorAll('button[data-value="none"]').forEach(b => {
+          b.classList.toggle('chip-selected', selectedAllergies.length === 1 && selectedAllergies[0] === 'none');
+        });
+      }
+    });
+  });
+}
+
+/* selects handlers (diet/calories/currency/country) */
+if (dietSelect) dietSelect.addEventListener('change', e => { selectedDiet = e.target.value; updateNextFinishState(); });
+if (caloriesSelect) caloriesSelect.addEventListener('change', e => { selectedCalories = e.target.value; updateNextFinishState(); });
+if (currencySelect) currencySelect.addEventListener('change', e => { selectedCurrency = e.target.value; updateNextFinishState(); });
+if (countrySelect) countrySelect.addEventListener('change', e => { selectedCountry = e.target.value; updateNextFinishState(); });
+
+function updateNextFinishState(){ if (nextBtn) nextBtn.disabled = !canProceed(); if (finishBtn) finishBtn.disabled = !canProceed(); }
+
+/* navigation wiring */
+if (backBtn) backBtn.addEventListener('click', () => { currentStep = Math.max(1, currentStep - 1); showStep(currentStep); });
+if (nextBtn) nextBtn.addEventListener('click', () => { if (!canProceed()) return; currentStep = Math.min(3, currentStep + 1); showStep(currentStep); });
+
+/* Note: do NOT attach a save or auth listener here. The parent injector will handle saving.
+   We only enable/disable the finish button. */
+
+showStep(currentStep);
+/* ---------- END CLEANED UI JS ---------- */
+
+
+
+    // Example: if your original script did `const backBtn = document.getElementById('backBtn')`,
+    // it will now return the button inside the modal and work without edits.
+
+  } finally {
+    // restore originals so rest of the page stays normal
+    document.getElementById = _getElementById;
+    document.querySelector = _querySelector;
+    document.querySelectorAll = _querySelectorAll;
+  }
+})();
+</script>
+
+
 <!-- ====== END PASTE ====== -->
 
+<script type="module" src="/static/js/dashboard-firebase.js"></script>
 
 </body>
 </html>
