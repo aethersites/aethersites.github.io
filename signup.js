@@ -1,21 +1,21 @@
+// signup.js (modular v12.x)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-// <-- Add Firestore import right after the auth import
 import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+  apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
     authDomain: "goodplates-7ae36.firebaseapp.com",
     projectId: "goodplates-7ae36",
     storageBucket: "goodplates-7ae36.firebasestorage.app",
     messagingSenderId: "541149626283",
     appId: "1:541149626283:web:928888f0b42cda49b7dcee",
     measurementId: "G-HKMSHM726J"
+  };
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-// <-- Initialize Firestore here
 const db = getFirestore(app);
 
 const signupForm = document.getElementById('signupForm');
@@ -31,7 +31,7 @@ signupForm.addEventListener('submit', async (e) => {
     document.getElementById('signupPasswordError').classList.remove('show');
 
     try {
-        // capture the user credential so we have the created user's UID
+        // create user
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
@@ -48,6 +48,7 @@ signupForm.addEventListener('submit', async (e) => {
         });
 
         // --- Create profile doc in "profiles" collection ---
+        // NOTE: add onboardingComplete:false to mark this user needs onboarding
         await setDoc(doc(db, "profiles", user.uid), {
           nutritionGoals: {
             calories: 2000,
@@ -61,8 +62,8 @@ signupForm.addEventListener('submit', async (e) => {
           },
           aboutMe: "",
           preferredUnits: "metric",
-          defaultServingSize: 1,      // number
-          defaultServingUnit: "g",      // optional but recommended
+          defaultServingSize: 1,
+          defaultServingUnit: "g",
           householdSize: 1,
 
           groceryLists: [],
@@ -72,12 +73,20 @@ signupForm.addEventListener('submit', async (e) => {
           spendingHistory: [],
           calorieHistory: [],
           aiSuggestionsEnabled: true,
-          notificationsEnabled: true
+          notificationsEnabled: true,
+
+          // onboarding flag (important)
+          onboardingComplete: false,
+          onboardingStartedAt: serverTimestamp()
         });
 
-        // Only show success + redirect after Firestore writes succeed
+        // Only show success + redirect AFTER Firestore writes succeed
         document.getElementById('signupSuccessMessage').classList.add('show');
-        setTimeout(() => window.location.href = '/dashboard/', 2000);
+
+        // Redirect straight to /onboarding/ so user finishes setup there
+        // If you want a short delay so the user can read the success message, keep a small timeout:
+        setTimeout(() => { window.location.href = '/onboarding/'; }, 700);
+
     } catch (error) {
         // This catch will handle both auth and Firestore errors
         if (error.code && error.code.includes('email')) {
