@@ -1,25 +1,26 @@
-// header-loader.js (simpler + debug logging)
-// Include on each page: <div id="global-header"></div> + <script type="module" src="/header/header-loader.js"></script>
+// header-loader.js (adjusted to use header-1.html / header-2.html)
+// Include on each page: 
+// <div id="global-header" aria-live="polite" aria-busy="true"></div>
+// <script type="module" src="/header/header-loader.js"></script>
 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 
 const HEADER_BASE = "/header";
-const VISITOR_HEADER = "header-1";
-const LOGGED_IN_HEADER = "header-2";
+const VISITOR_HEADER = "header-1";   // will load /header/header-1.html
+const LOGGED_IN_HEADER = "header-2"; // will load /header/header-2.html
 const VISITOR_CACHE_KEY = "header-1-html-v1";
 const FETCH_TIMEOUT_MS = 7000;
 
 const firebaseConfig = {
   apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-    authDomain: "goodplates-7ae36.firebaseapp.com",
-    projectId: "goodplates-7ae36",
-    storageBucket: "goodplates-7ae36.firebasestorage.app",
-    messagingSenderId: "541149626283",
-    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
-  };
-
+  authDomain: "goodplates-7ae36.firebaseapp.com",
+  projectId: "goodplates-7ae36",
+  storageBucket: "goodplates-7ae36.firebasestorage.app",
+  messagingSenderId: "541149626283",
+  appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+  measurementId: "G-HKMSHM726J"
+};
 
 const app = (getApps().length > 0) ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -55,6 +56,7 @@ if (!container) {
     }
   }
 
+  // ---------- Fixed: load headerName.html directly ----------
   async function fetchHeaderHtml(headerName, { cacheVisitor = false } = {}) {
     if (cacheVisitor && headerName === VISITOR_HEADER) {
       try {
@@ -65,7 +67,8 @@ if (!container) {
         }
       } catch (e) {}
     }
-    const url = `${HEADER_BASE}/${headerName}/index.html`;
+    // NOTE: changed to .html filenames (not index.html)
+    const url = `${HEADER_BASE}/${headerName}.html`;
     console.log("header-loader: fetching", url);
     const res = await fetchWithTimeout(url);
     if (!res.ok) throw new Error(`Fetch failed: ${url} status ${res.status}`);
