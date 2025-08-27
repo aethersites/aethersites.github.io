@@ -19,16 +19,19 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Utility: Fetch profile from your backend (you must implement this API endpoint)
+// Utility: Fetch profile from Firestore
 async function fetchUserProfile(uid) {
   const userDoc = await getDoc(doc(db, "users", uid));
   if (!userDoc.exists()) throw new Error("User not found");
-  return userDoc.data(); // Should include { subscriptionTier: "pro" | "premium" | "free", ... }
+  const data = userDoc.data();
+  console.log("Fetched user profile:", data); // Debug log
+  return data; // Should include { subscriptionTier: "pro" | "premium" | "free", ... }
 }
 
 // UI: Remove pro badges and upgrade button for pro/premium users
 function updateProUI(user, tier) {
   const subscriptionTier = (tier || user?.subscriptionTier || "").toLowerCase();
+  console.log("updateProUI called with tier:", subscriptionTier); // Debug log
   const allowedTiers = ["pro", "premium"];
   if (allowedTiers.includes(subscriptionTier)) {
     document.querySelectorAll('.pro-badge').forEach(badge => badge.remove());
