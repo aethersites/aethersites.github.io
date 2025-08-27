@@ -122,33 +122,6 @@
       color: var(--primary-700);
       font-weight: 600;
     }
-    #avatarMenu, #avatarMenuMobile {
-  position: fixed !important;
-  z-index: 9999999999 !important;
-  box-sizing: border-box;
-  pointer-events: auto !important;
-  display: block;
-  visibility: hidden;
-  opacity: 0;
-  transform-origin: top right;
-  transition: opacity 120ms ease, transform 120ms ease;
-  min-width: 180px;
-  max-width: calc(100% - 16px);
-  overflow-y: auto;
-  max-height: calc(100vh - 32px);
-}
-.gp-hidden {
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  transform: translateY(-6px) scale(0.99);
-}
-.gp-visible {
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-  transform: translateY(0) scale(1);
-}
     @media (max-width: 1100px) { .sidebar{ display:none; } }
   </style>
 </head>
@@ -328,8 +301,6 @@ redirectIfNotLoggedIn(user); // default = /login
 </body>
 </html>
 <!-- <<close>> -->
-
-
 
 
 
