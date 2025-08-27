@@ -1,6 +1,7 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -16,12 +17,13 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 // Utility: Fetch profile from your backend (you must implement this API endpoint)
 async function fetchUserProfile(uid) {
-  const response = await fetch(`/api/user/${uid}`);
-  if (!response.ok) throw new Error("Failed to fetch user profile");
-  return await response.json(); // Should include { subscriptionTier: "pro" | "premium" | "free", ... }
+  const userDoc = await getDoc(doc(db, "users", uid));
+  if (!userDoc.exists()) throw new Error("User not found");
+  return userDoc.data(); // Should include { subscriptionTier: "pro" | "premium" | "free", ... }
 }
 
 // UI: Remove pro badges and upgrade button for pro/premium users
