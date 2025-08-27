@@ -278,50 +278,6 @@
   </div>
 <script>
 
-
-
-<script>
-/**
- * Redirects to a given URL if the user is NOT logged in.
- * @param {Object|null} user - The user object (null/undefined if not logged in).
- * @param {string} [redirectUrl='/login-form'] - The URL to redirect to if not logged in.
- */
-function redirectIfNotLoggedIn(user, redirectUrl = '/login-form') {
-  // Check if user is falsy or missing essential identifier
-  if (!user || !(user.uid || user.id || user.email)) {
-    window.location.href = redirectUrl;
-  }
-}
-
-// Example usage after fetching user profile:
-// redirectIfNotLoggedIn(user); // Redirects to /login-form if not logged in
-// redirectIfNotLoggedIn(user, '/signup'); // Custom redirect
-</script>
-
-/**
- * Call this after fetching the user object and their subscription tier.
- * Removes "Pro" markers and upgrade button for pro/premium users.
- * @param {Object} user - The user object.
- * @param {string} [tier] - Optional subscription tier (if not in user object).
- */
-function updateProUI(user, tier) {
-  const subscriptionTier = (tier || user?.subscriptionTier || "").toLowerCase();
-  const allowedTiers = ["pro", "premium", "Premium", "Pro"];
-  if (allowedTiers.includes(subscriptionTier)) {
-    // Remove all "Pro" badges
-    document.querySelectorAll('.pro-badge').forEach(badge => badge.remove());
-    // Remove the upgrade button
-    document.querySelectorAll('.upgrade-btn-main').forEach(btn => btn.remove());
-  }
-}
-
-// Example usage after loading user profile:
-updateProUI(user); // user.subscriptionTier = "pro" or "premium" or "Premium" or "Pro"
-</script>
-
-updateProUI(user);
-redirectIfNotLoggedIn(user); // default = /login-form
-
 <script type="module" src="/template.js"></script>
 <script src="/dropdown.js"></script>
 
