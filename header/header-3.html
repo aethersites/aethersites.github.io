@@ -284,9 +284,9 @@
 /**
  * Redirects to a given URL if the user is NOT logged in.
  * @param {Object|null} user - The user object (null/undefined if not logged in).
- * @param {string} [redirectUrl='/login'] - The URL to redirect to if not logged in.
+ * @param {string} [redirectUrl='/login-form'] - The URL to redirect to if not logged in.
  */
-function redirectIfNotLoggedIn(user, redirectUrl = '/login') {
+function redirectIfNotLoggedIn(user, redirectUrl = '/login-form') {
   // Check if user is falsy or missing essential identifier
   if (!user || !(user.uid || user.id || user.email)) {
     window.location.href = redirectUrl;
@@ -294,7 +294,7 @@ function redirectIfNotLoggedIn(user, redirectUrl = '/login') {
 }
 
 // Example usage after fetching user profile:
-// redirectIfNotLoggedIn(user); // Redirects to /login if not logged in
+// redirectIfNotLoggedIn(user); // Redirects to /login-form if not logged in
 // redirectIfNotLoggedIn(user, '/signup'); // Custom redirect
 </script>
 
@@ -320,7 +320,7 @@ updateProUI(user); // user.subscriptionTier = "pro" or "premium"
 </script>
 
 updateProUI(user);
-redirectIfNotLoggedIn(user); // default = /login
+redirectIfNotLoggedIn(user); // default = /login-form
 
 <script type="module" src="/template.js"></script>
 <script src="/dropdown.js"></script>
