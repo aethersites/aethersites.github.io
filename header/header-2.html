@@ -140,7 +140,7 @@
             </button>
 
             <div id="avatarMenuMobile" role="menu" aria-labelledby="avatarBtnMobile" hidden
-                 style="position:absolute; right:0; top:calc(100% + 8px); background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; z-index:9999999999;">
+                 style="position:absolute; right:0; top:calc(100% + 8px); background:#fff; color:#000; border-radius:10px; box-shadow:0 8px 24px rgba(2,6,23,0.08); min-width:180px; padding:6px 0; z-index:999999;">
               <a role="menuitem" href="/overview/"    style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Overview</a>
               <a role="menuitem" href="/profile/"     style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Profile</a>
               <a role="menuitem" href="/wallet/"      style="display:block;padding:10px 14px;text-decoration:none;color:#000;font-weight:600;">Wallet</a>
@@ -216,7 +216,7 @@
   border-radius: inherit;
   background: linear-gradient(90deg, #17A34B, #12B981);
   transition: opacity 0.3s ease-in-out;
-  z-index: 9999999;
+  z-index: 999999;
   opacity: 1;
 }
 
@@ -228,7 +228,7 @@
   border-radius: inherit;
   background: linear-gradient(90deg, #119140, #0fa673);
   transition: opacity 0.3s ease-in-out;
-  z-index: 9999999;
+  z-index: 999999;
   opacity: 0;
 }
 
@@ -338,7 +338,7 @@
         .gp-topnav #avatarBtn img, .gp-topnav #avatarBtnMobile img { pointer-events: none; }
         .gp-topnav .gp-links a { color: var(--muted); }
         .gp-topnav, .gp-topnav * { pointer-events: auto !important; }
-        .gp-topnav #avatarMenu, .gp-topnav #avatarMenuMobile { z-index: 999999999 !important; }
+        .gp-topnav #avatarMenu, .gp-topnav #avatarMenuMobile { z-index: 999999 !important; }
 
   /* ===== Topnav styling (keeps your header clean) ===== */
   .gp-topnav,
