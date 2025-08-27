@@ -33,25 +33,25 @@
     });
   }
   function openMenu(btn, menu) {
-  placeMenuFixed(btn, menu);
-  // ensure the browser doesn't keep the element hidden
-  menu.removeAttribute('hidden');
-  menu.setAttribute('data-gp-open', 'true');
-  btn && btn.setAttribute('aria-expanded', 'true');
-  const first = menu.querySelector('[role="menuitem"], a, button');
-  if (first && typeof first.focus === 'function') first.focus();
-}
+    placeMenuFixed(btn, menu);
+    // ensure the browser doesn't keep the element hidden
+    menu.removeAttribute('hidden');
+    menu.setAttribute('data-gp-open', 'true');
+    btn && btn.setAttribute('aria-expanded', 'true');
+    const first = menu.querySelector('[role="menuitem"], a, button');
+    if (first && typeof first.focus === 'function') first.focus();
+  }
   function closeMenu(btn, menu) {
-  if (!menu) return;
-  menu.removeAttribute('data-gp-open');
-  // keep the hidden attribute in sync so browser hides it
-  menu.setAttribute('hidden', '');
-  btn && btn.setAttribute('aria-expanded', 'false');
-  menu.classList.remove('gp-visible');
-  menu.classList.add('gp-hidden');
-  menu.style.width = '';
-  menu.style.maxHeight = '';
-}
+    if (!menu) return;
+    menu.removeAttribute('data-gp-open');
+    // keep the hidden attribute in sync so browser hides it
+    menu.setAttribute('hidden', '');
+    btn && btn.setAttribute('aria-expanded', 'false');
+    menu.classList.remove('gp-visible');
+    menu.classList.add('gp-hidden');
+    menu.style.width = '';
+    menu.style.maxHeight = '';
+  }
   function initAvatarDropdown() {
     const btn = $id('avatarBtn');
     const menu = $id('avatarMenu');
@@ -63,45 +63,44 @@
       el._gp_listened[ev] = true;
     }
     if (btn) {
-  onceAdd(btn, 'click', function (e) {
-    e.stopPropagation();
-    // re-query current elements in case they were replaced/moved
-    const curBtn = document.getElementById('avatarBtn');
-    const curMenu = document.getElementById('avatarMenu');
-    if (!curBtn || !curMenu) return;
-    const isOpen = curMenu.getAttribute('data-gp-open') === 'true';
-    if (isOpen) closeMenu(curBtn, curMenu);
-    else openMenu(curBtn, curMenu);
-  });
+      onceAdd(btn, 'click', function (e) {
+        // e.stopPropagation(); // <--- REMOVE THIS LINE!
+        // re-query current elements in case they were replaced/moved
+        const curBtn = document.getElementById('avatarBtn');
+        const curMenu = document.getElementById('avatarMenu');
+        if (!curBtn || !curMenu) return;
+        const isOpen = curMenu.getAttribute('data-gp-open') === 'true';
+        if (isOpen) closeMenu(curBtn, curMenu);
+        else openMenu(curBtn, curMenu);
+      });
     }
     onceAdd(document, 'click', function (e) {
-  // re-query the DOM so we don't rely on possibly-stale `menu`/`btn` variables
-  const currentMenu = document.getElementById('avatarMenu');
-  const currentBtn = document.getElementById('avatarBtn');
-
-  if (currentMenu && currentMenu.getAttribute('data-gp-open') === 'true') {
-    if (!currentMenu.contains(e.target) && !(currentBtn && currentBtn.contains(e.target))) {
-      closeMenu(currentBtn, currentMenu);
-    }
-  }
-});
-          onceAdd(document, 'keydown', function (e) {
-        if (e.key === 'Escape') {
-          const curBtn = document.getElementById('avatarBtn');
-          const curMenu = document.getElementById('avatarMenu');
-          if (curMenu && curMenu.getAttribute('data-gp-open') === 'true') closeMenu(curBtn, curMenu);
+      // re-query the DOM so we don't rely on possibly-stale `menu`/`btn` variables
+      const currentMenu = document.getElementById('avatarMenu');
+      const currentBtn = document.getElementById('avatarBtn');
+      if (currentMenu && currentMenu.getAttribute('data-gp-open') === 'true') {
+        if (!currentMenu.contains(e.target) && !(currentBtn && currentBtn.contains(e.target))) {
+          closeMenu(currentBtn, currentMenu);
         }
-      });
-          onceAdd(window, 'resize', function () {
+      }
+    });
+    onceAdd(document, 'keydown', function (e) {
+      if (e.key === 'Escape') {
         const curBtn = document.getElementById('avatarBtn');
         const curMenu = document.getElementById('avatarMenu');
-        if (curMenu && curMenu.getAttribute('data-gp-open') === 'true') placeMenuFixed(curBtn, curMenu);
-      });
-          onceAdd(window, 'scroll', function () {
-        const curBtn = document.getElementById('avatarBtn');
-        const curMenu = document.getElementById('avatarMenu');
-        if (curMenu && curMenu.getAttribute('data-gp-open') === 'true') placeMenuFixed(curBtn, curMenu);
-      });
+        if (curMenu && curMenu.getAttribute('data-gp-open') === 'true') closeMenu(curBtn, curMenu);
+      }
+    });
+    onceAdd(window, 'resize', function () {
+      const curBtn = document.getElementById('avatarBtn');
+      const curMenu = document.getElementById('avatarMenu');
+      if (curMenu && curMenu.getAttribute('data-gp-open') === 'true') placeMenuFixed(curBtn, curMenu);
+    });
+    onceAdd(window, 'scroll', function () {
+      const curBtn = document.getElementById('avatarBtn');
+      const curMenu = document.getElementById('avatarMenu');
+      if (curMenu && curMenu.getAttribute('data-gp-open') === 'true') placeMenuFixed(curBtn, curMenu);
+    });
     const top = document.querySelector('.gp-topnav');
     if (top) {
       top.style.pointerEvents = 'auto';
