@@ -91,6 +91,18 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+.pro-badge,
+.upgrade-btn-main {
+  opacity: 0;
+  transition: opacity 0.5s cubic-bezier(0.4,0,0.2,1);
+  pointer-events: none;
+}
+
+body.show-pro-ui .pro-badge,
+body.show-pro-ui .upgrade-btn-main {
+  opacity: 1;
+  pointer-events: auto;
+}
     .chart-ghost { stroke:var(--primary-100); stroke-width:3; stroke-linecap:round; }
     .text-slate-700 { color: var(--fg) !important; }
     .text-slate-600 { color: var(--muted) !important; }
