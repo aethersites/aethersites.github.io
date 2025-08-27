@@ -1,6 +1,239 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GoodPlates - Groceries & Nutrition Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #ffffff;
+      --fg: #0f172a;
+      --muted: #6b7280;
+      --muted-2: #9ca3af;
+      --border: #e5e7eb;
+      --surface: #ffffff;
+      --surface-2: #f3f4f6;
+      --primary: #16a34a;
+      --primary-700: #15803d;
+      --primary-100: #dcfce7;
+      --ring: rgba(16,185,129,.35);
+      --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(2,6,23,.06);
+      --radius: 16px;
+      --accent: var(--primary);
+      --accent-soft: rgba(22,163,74,0.08);
+      --card: var(--surface);
+    }
+    body{
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .sidebar { width: 300px; }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .pro-badge{
+      background: linear-gradient(90deg,var(--primary-100), #e6ffef);
+      color:var(--primary);
+      font-weight:600; padding:4px 8px; border-radius:999px; font-size:12px;
+    }
+    .active-pill{
+      background: linear-gradient(90deg,var(--primary),var(--primary-700));
+      color:white; padding:10px 18px; border-radius:999px;
+    }
+    .small-dot{ width:6px;height:6px;border-radius:99px;background:var(--surface-2); }
+    .dot-active{ background:linear-gradient(90deg,var(--primary),#34d399); }
+    .dots { width:8px;height:8px;border-radius:999px;background:#f3f4f6; }
+    .shadow-soft{ box-shadow: 0 6px 20px rgba(16,24,40,0.06); }
+    .upgrade-btn-main {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      background: linear-gradient(270deg, #16a34a, #10b981, #16a34a);
+      background-size: 200% 200%;
+      color: white;
+      font-weight: 600;
+      text-align: center;
+      box-shadow: 0 6px 20px rgba(22, 163, 74, 0.18);
+      transition: box-shadow 0.8s ease, color 0.3s ease, background 0.3s ease, opacity 0.5s ease;
+    }
+    .upgrade-btn-main::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(120deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 80%);
+      opacity: 0;
+      transition: opacity 0.6s ease-in-out;
+      border-radius: inherit;
+    }
+    .upgrade-btn-main:hover {
+      color: #fff;
+      box-shadow: 0 0 15px rgba(22, 163, 74, 0.35),
+                  0 0 25px rgba(16, 185, 129, 0.2);
+      animation: gradientShift 3s ease-in-out infinite;
+    }
+    .upgrade-btn-main:hover::after {
+      opacity: 1;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .chart-ghost { stroke:var(--primary-100); stroke-width:3; stroke-linecap:round; }
+    .text-slate-700 { color: var(--fg) !important; }
+    .text-slate-600 { color: var(--muted) !important; }
+    .text-slate-500 { color: var(--muted) !important; }
+    .text-slate-400 { color: var(--muted-2) !important; }
+    .text-slate-800 { color: var(--fg) !important; }
+    .bg-white { background: var(--surface) !important; }
+    .bg-green-50 { background: var(--primary-100) !important; }
+    .bg-slate-50 { background: var(--surface-2) !important; }
+    .border-slate-100 { border-color: var(--border) !important; }
+    .rounded-md { border-radius: 10px !important; }
+    .nav-link{
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 10px;
+      transition: background-color 250ms ease, color 250ms ease;
+      color: var(--muted);
+      text-decoration: none;
+      width: 100%;
+    }
+    .nav-link:hover{
+      background: #e9fbef;
+      color: var(--primary-700);
+    }
+    .nav-active{
+      background: #F1FDF4;
+      color: var(--primary-700);
+      font-weight: 600;
+    }
+    @media (max-width: 1100px) { .sidebar{ display:none; } }
+  </style>
+</head>
+<body class="antialiased">
+  <div class="flex min-h-screen">
+
+    <!-- Sidebar -->
+    <aside class="sidebar bg-white/50 p-6 border-r border-white/60">
+      <div class="flex items-center gap-3 mb-6">
+        <img src="/favicon.png" alt="GoodPlates Logo" class="w-8 h-8 rounded-md object-contain">
+        <div class="font-semibold text-slate-700">GoodPlates</div>
+      </div>
+      <div class="text-xs uppercase mb-3 text-slate-400">Dashboard</div>
+      <div class="mt-0">
+        <nav class="mt-0 space-y-2">
+          <a href="/linkdestination/" class="nav-link nav-active">
+            <span class="font-semibold">Overview</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+          <a href="/linkdestination/" class="nav-link">
+            <span>Ingredients</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+          <a href="/linkdestination/" class="nav-link">
+            <span>Recipes</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+          <a href="/linkdestination/" class="nav-link">
+            <span>Groceries</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+          <a href="/linkdestination/" class="nav-link">
+            <span>Meal Plans</span>
+            <span class="ml-auto pro-badge">Pro</span>
+          </a>
+        </nav>
+      </div>
+      <div class="mt-10 border-t pt-6 text-slate-500">
+        <div class="text-xs uppercase mb-3 text-slate-400">Apps & Pages</div>
+        <ul class="space-y-2">
+          <li>
+            <a href="/linkdestination/" class="nav-link">
+              <span>Shopping List</span>
+              <span class="ml-auto pro-badge">Pro</span>
+            </a>
+          </li>
+          <li>
+            <a href="/linkdestination/" class="nav-link">
+              <span>Planner</span>
+              <span class="ml-auto pro-badge">Pro</span>
+            </a>
+          </li>
+          <li>
+            <a href="/linkdestination/" class="nav-link">
+              <span>Nutrition</span>
+              <span class="ml-auto pro-badge">Pro</span>
+            </a>
+          </li>
+          <li class="mt-3">
+            <a href="/linkdestination/" class="nav-link">
+              <span>Account Settings</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="mt-8">
+        <button class="upgrade-btn-main">
+          Upgrade to Pro
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main content area -->
+    <main class="flex-1 p-8">
+      <!-- Top bar -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-baseline gap-2">
+          <h2 class="text-base font-semibold text-slate-600">Dashboard</h2>
+          <span class="text-base font-normal text-slate-400">/ Profile</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="relative">
+            <input id="searchInput" class="w-96 pl-4 pr-10 py-2 rounded-full bg-white border border-slate-100 shadow-sm" placeholder="Search ingredients, recipes...">
+            <div class="absolute right-3 top-1/2 -translate-y-1/2">
+              <img src="https://www.shareicon.net/data/2017/02/09/878632_find_512x512.png" alt="Search" class="w-4 h-4 object-contain">
+            </div>
+          </div>
+          <a href="/"
+             class="w-9 h-9 rounded-full flex items-center justify-center hover:opacity-90 transition"
+             style="background: linear-gradient(270deg, #10b981, #16a34a);"
+             aria-label="Home" title="Home">
+            <img src="https://raw.githubusercontent.com/aethersites/aethersites.github.io/90eef6d3bd32bac358155d82a6be2a6762b5ae78/homeicon.png"
+                 alt="Home"
+                 class="w-5 h-5 object-contain" />
+          </a>
+          <a href="/linkdestination/"
+             class="w-9 h-9 rounded-full flex items-center justify-center hover:opacity-90 transition"
+             style="background: linear-gradient(270deg, #10b981, #16a34a);"
+             aria-label="Notifications" title="Notifications">
+            <img src="https://raw.githubusercontent.com/aethersites/aethersites.github.io/66c1b57c27716a6c3c14e2aa71467615ccc25b70/bellicon.png"
+                 alt="Notifications"
+                 class="w-5 h-5 object-contain" />
+          </a>
+          <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center overflow-hidden">
+            <img id="avatarImg" src="https://github.com/aethersites/aethersites.github.io/blob/90eef6d3bd32bac358155d82a6be2a6762b5ae78/usericon.png" alt="avatar" class="w-full h-full object-cover"/>
+          </div>
+        </div>
+      </div>
+
+      <!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>GoodPlates — Profile (Enhanced)</title>
@@ -989,3 +1222,10 @@ function loadProfileIntoForm(email, fromSnapshot=null){
   <script type="module" src="/dashboard/dashboard-firebase.js"></script>
 </body>
 </html>
+
+
+    </main>
+  </div>
+</body>
+</html>
+<!-- <<close>> -->
