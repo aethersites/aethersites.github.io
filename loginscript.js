@@ -282,7 +282,7 @@ const facebookProvider = new FacebookAuthProvider();
   signInWithPopup(auth, googleProvider)
     .then(result => {
       console.log("Google login:", result.user.email);
-      window.location.href = "dashboard.html";
+      window.location.href = "/dashboard/";
     })
     .catch(console.error);
   });
@@ -291,7 +291,7 @@ const facebookProvider = new FacebookAuthProvider();
   signInWithPopup(auth, facebookProvider)
     .then(result => {
       console.log("Facebook login:", result.user.email);
-      window.location.href = "dashboard.html";
+      window.location.href = "/dashboard/";
     })
     .catch(console.error);
   });
@@ -302,7 +302,7 @@ const facebookProvider = new FacebookAuthProvider();
     console.log("Logged in:", user.email);
   } else {
     console.log("Not logged in");
-    if (window.location.pathname.includes("dashboard.html")) {
+    if (window.location.pathname.includes("/dashboard")) {
       window.location.href = "index.html";
     }
   }
