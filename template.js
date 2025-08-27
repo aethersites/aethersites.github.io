@@ -1,34 +1,29 @@
 // Import Firebase modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-// If you want analytics, you can import it too:
-// import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-    authDomain: "goodplates-7ae36.firebaseapp.com",
-    projectId: "goodplates-7ae36",
-    storageBucket: "goodplates-7ae36.firebasestorage.app",
-    messagingSenderId: "541149626283",
-    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
+  apiKey: "redacted", // <-- replace with your actual key
+  authDomain: "redacted",
+  projectId: "redacted",
+  storageBucket: "redacted",
+  messagingSenderId: "redacted",
+  appId: "redacted"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-// const analytics = getAnalytics(app); // Optional
-
-// Initialize Firebase Auth
 const auth = getAuth(app);
 
-// Your UI functions (copy these from your HTML, or import if using modules)
-function redirectIfNotLoggedIn(user, redirectUrl = '/login') {
-  if (!user || !(user.uid || user.id || user.email)) {
-    window.location.href = redirectUrl;
-  }
+// Utility: Fetch profile from your backend (you must implement this API endpoint)
+async function fetchUserProfile(uid) {
+  const response = await fetch(`/api/user/${uid}`);
+  if (!response.ok) throw new Error("Failed to fetch user profile");
+  return await response.json(); // Should include { subscriptionTier: "pro" | "premium" | "free", ... }
 }
 
+// UI: Remove pro badges and upgrade button for pro/premium users
 function updateProUI(user, tier) {
   const subscriptionTier = (tier || user?.subscriptionTier || "").toLowerCase();
   const allowedTiers = ["pro", "premium"];
@@ -38,18 +33,27 @@ function updateProUI(user, tier) {
   }
 }
 
-// Listen for auth changes and run your UI logic when user is available
-onAuthStateChanged(auth, (user) => {
-  // You may want to fetch Firestore user profile data here to get subscriptionTier!
-  // For demo, assumes user.subscriptionTier exists (custom claims or added after login)
-  // If you store subscriptionTier in Firestore, you need to fetch it here.
+// UI: Redirect if not logged in
+function redirectIfNotLoggedIn(user, redirectUrl = '/login') {
+  if (!user || !(user.uid || user.id || user.email)) {
+    window.location.href = redirectUrl;
+  }
+}
 
-  // Example: If you store subscriptionTier in Firestore
-  // If not, just use user object as-is
-  updateProUI(user);
+// Main: Listen for auth changes, fetch profile, and update UI
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    try {
+      const profile = await fetchUserProfile(user.uid);
+      updateProUI(profile); // Use profile.subscriptionTier!
+      // You can also use additional profile data here as needed
+    } catch (err) {
+      console.error("Failed to load user profile:", err);
+    }
+  }
   redirectIfNotLoggedIn(user);
 });
 
-// Optionally, you can expose your functions for global usage if needed
+// Optionally, expose for debugging
 window.updateProUI = updateProUI;
 window.redirectIfNotLoggedIn = redirectIfNotLoggedIn;
