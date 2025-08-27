@@ -37,7 +37,7 @@ function updateProUI(user, tier) {
 }
 
 // UI: Redirect if not logged in
-function redirectIfNotLoggedIn(user, redirectUrl = '/login') {
+function redirectIfNotLoggedIn(user, redirectUrl = '/login-form') {
   if (!user || !(user.uid || user.id || user.email)) {
     window.location.href = redirectUrl;
   }
