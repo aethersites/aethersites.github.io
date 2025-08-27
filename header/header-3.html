@@ -123,6 +123,15 @@
       font-weight: 600;
     }
     @media (max-width: 1100px) { .sidebar{ display:none; } }
+.pro-badge,
+.upgrade-btn-main {
+  display: none !important;
+}
+body.show-pro-ui .pro-badge,
+body.show-pro-ui .upgrade-btn-main {
+  display: inline-block !important;
+}
+
   </style>
 </head>
 <body class="antialiased">
@@ -280,6 +289,12 @@ onAuthStateChanged(auth, async (user) => {
     const userDoc = await getDoc(doc(db, "users", user.uid));
     const data = userDoc.exists() ? userDoc.data() : {};
     const tier = (data.subscriptionTier || "").toLowerCase();
+
+// Add this block here!
+if (tier !== "pro" && tier !== "premium") {
+  document.body.classList.add("show-pro-ui");
+}
+
     if (tier === "pro" || tier === "premium") {
       document.querySelectorAll('.pro-badge').forEach(e => e.remove());
       document.querySelectorAll('.upgrade-btn-main').forEach(e => e.remove());
@@ -298,9 +313,5 @@ onAuthStateChanged(auth, async (user) => {
 </body>
 </html>
 <!-- <<close>> -->
-
-
-
-
 
 
