@@ -60,18 +60,23 @@
     }
     if (btn && menu) {
       onceAdd(btn, 'click', function (e) {
-        e.stopPropagation();
-        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-        const isOpen = menu.getAttribute('data-gp-open') === 'true';
-        if (isOpen) closeMenu(btn, menu);
-        else openMenu(btn, menu);
-      });
+  e.stopPropagation();
+  const isOpen = menu.getAttribute('data-gp-open') === 'true';
+  if (isOpen) closeMenu(btn, menu);
+  else openMenu(btn, menu);
+});
     }
     onceAdd(document, 'click', function (e) {
-      if (menu && menu.getAttribute('data-gp-open') === 'true') {
-        if (!menu.contains(e.target) && !(btn && btn.contains(e.target))) closeMenu(btn, menu);
-      }
-    });
+  // re-query the DOM so we don't rely on possibly-stale `menu`/`btn` variables
+  const currentMenu = document.getElementById('avatarMenu');
+  const currentBtn = document.getElementById('avatarBtn');
+
+  if (currentMenu && currentMenu.getAttribute('data-gp-open') === 'true') {
+    if (!currentMenu.contains(e.target) && !(currentBtn && currentBtn.contains(e.target))) {
+      closeMenu(currentBtn, currentMenu);
+    }
+  }
+});
     onceAdd(document, 'keydown', function (e) {
       if (e.key === 'Escape') {
         if (menu && menu.getAttribute('data-gp-open') === 'true') closeMenu(btn, menu);
