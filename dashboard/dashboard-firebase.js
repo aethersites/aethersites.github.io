@@ -29,6 +29,17 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 export { auth, db };
 
+// This goes near the top of dashboard-firebase.js or in a <script> tag after Firebase loads
+window.addEventListener('message', function(e) {
+  if (e.origin !== window.location.origin) return;
+  if (e.data && e.data.type === 'onboardingComplete') {
+    // Hide modal, optionally reload dashboard to reflect changes
+    const modal = document.getElementById('onboardingModal');
+    if (modal) modal.style.display = 'none';
+    window.location.reload();
+  }
+});
+
 /* --- DOM Ready --- */
 document.addEventListener('DOMContentLoaded', () => {
 
