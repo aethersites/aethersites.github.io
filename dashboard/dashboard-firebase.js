@@ -32,67 +32,30 @@ export { auth, db };
 /* --- DOM Ready --- */
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* === showOnboardingModalIfNeeded: iframe version === */
-  async function showOnboardingModalIfNeeded(user, profileDoc = null) {
-    if (!user || user.isAnonymous) return;
-    const uid = user.uid;
-    const profileRef = doc(db, 'profiles', uid);
+  // Replace your current showOnboardingModalIfNeeded with this:
+async function showOnboardingModalIfNeeded(user, profileDoc = null) {
+  if (!user || user.isAnonymous) return;
+  const uid = user.uid;
+  const profileRef = doc(db, 'profiles', uid);
 
-    // prefer passed-in profileDoc; otherwise fetch
-    let profile = profileDoc;
-    if (!profile) {
-      const snap = await getDoc(profileRef);
-      profile = snap.exists() ? snap.data() : null;
-    }
+  // prefer passed-in profileDoc; otherwise fetch
+  let profile = profileDoc;
+  if (!profile) {
+    const snap = await getDoc(profileRef);
+    profile = snap.exists() ? snap.data() : null;
+  }
 
-    if (profile && profile.onboardingComplete === true) return; // nothing to do
+  if (profile && profile.onboardingComplete === true) return; // nothing to do
 
-    // ensure a seed so later writes merge cleanly
-    if (!profile) {
-      await setDoc(profileRef, { onboardingComplete: false, onboardingStartedAt: serverTimestamp() }, { merge: true });
-    }
+  // ensure a seed so later writes merge cleanly
+  if (!profile) {
+    await setDoc(profileRef, { onboardingComplete: false, onboardingStartedAt: serverTimestamp() }, { merge: true });
+  }
 
-    // create iframe overlay (minimal)
-    const overlay = document.createElement('div');
-    overlay.id = 'gp-onb-overlay';
-    overlay.style = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,0.45);backdrop-filter: blur(4px);';
-
-    const iframe = document.createElement('iframe');
-    iframe.src = '/onboarding/index.html?embedded=1';
-    iframe.setAttribute('title', 'Onboarding');
-    iframe.style = 'width:min(1100px,96%);height:min(820px,92vh);border-radius:12px;border:0;box-shadow:0 20px 60px rgba(2,6,23,0.6);';
-    // allow scripts & same-origin (same origin required to accept messages securely)
-    iframe.sandbox = 'allow-same-origin allow-scripts allow-forms allow-popups';
-
-    overlay.appendChild(iframe);
-    document.body.appendChild(overlay);
-
-    // message listener: close overlay when child signals completion
-    function onMessage(e) {
-      // accept only messages from same origin for safety
-      if (e.origin !== location.origin) return;
-      const data = e.data || {};
-      if (data && data.type === 'onboardingComplete') {
-        window.removeEventListener('message', onMessage);
-        window.removeEventListener('keydown', onKey);
-        const o = document.getElementById('gp-onb-overlay'); if (o) o.remove();
-        // reload so dashboard can reflect changes (lightweight)
-        setTimeout(() => window.location.reload(), 200);
-      }
-    }
-    window.addEventListener('message', onMessage, false);
-
-    // allow Escape to close overlay (dev convenience)
-    function onKey(e) {
-      if (e.key === 'Escape') {
-        window.removeEventListener('message', onMessage);
-        window.removeEventListener('keydown', onKey);
-        const o = document.getElementById('gp-onb-overlay'); if (o) o.remove();
-      }
-    }
-    window.addEventListener('keydown', onKey, false);
-  } // end showOnboardingModalIfNeeded
-
+  // Show the modal (uses your modal div in HTML)
+  const modal = document.getElementById('onboardingModal');
+  if (modal) modal.style.display = 'flex';
+}
   /* --- DOM refs --- */
   const form = document.getElementById('profileForm');
   const saveStatus = document.getElementById('saveStatus');
