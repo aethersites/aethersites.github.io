@@ -1,4 +1,3 @@
-<script>
 (function () {
   function $id(id) { return document.getElementById(id); }
   function placeMenuFixed(btn, menu) {
@@ -100,4 +99,3 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAvatarDropdown);
   else setTimeout(initAvatarDropdown, 0);
 })();
-</script>
