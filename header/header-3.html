@@ -306,7 +306,7 @@ function redirectIfNotLoggedIn(user, redirectUrl = '/login-form') {
  */
 function updateProUI(user, tier) {
   const subscriptionTier = (tier || user?.subscriptionTier || "").toLowerCase();
-  const allowedTiers = ["pro", "premium"];
+  const allowedTiers = ["pro", "premium", "Premium", "Pro"];
   if (allowedTiers.includes(subscriptionTier)) {
     // Remove all "Pro" badges
     document.querySelectorAll('.pro-badge').forEach(badge => badge.remove());
@@ -316,7 +316,7 @@ function updateProUI(user, tier) {
 }
 
 // Example usage after loading user profile:
-updateProUI(user); // user.subscriptionTier = "pro" or "premium"
+updateProUI(user); // user.subscriptionTier = "pro" or "premium" or "Premium" or "Pro"
 </script>
 
 updateProUI(user);
