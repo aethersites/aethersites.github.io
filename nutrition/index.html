@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nutrition Dashboard — Weekly & Grocery Focus</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f6f8fb; --card:#ffffff; --muted:#667085; --fg:#0f172a; --accent:#0b61ff;
+      --success:#16a34a; --danger:#ef4444; --radius:14px; --shadow:0 10px 30px rgba(12,20,30,0.06);
+      --container:1200px; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{background:linear-gradient(180deg,var(--bg),#fff);color:var(--fg);-webkit-font-smoothing:antialiased;padding:32px}
+    .container{max-width:var(--container);margin:0 auto}
+
+    header{display:flex;align-items:center;gap:12px}
+    .logo{width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#fff,#eef6ff);display:flex;align-items:center;justify-content:center;border:1px solid rgba(12,20,30,0.04);font-weight:700}
+    h1{font-size:20px;margin:0}
+    .sub{font-size:13px;color:var(--muted)}
+    .actions{margin-left:auto;display:flex;gap:10px}
+    .btn{padding:8px 12px;border-radius:10px;border:1px solid rgba(12,20,30,0.06);background:var(--card);cursor:pointer;font-weight:700}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#0a4bd6);color:white;border:0}
+
+    .overview{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+    .stat{background:var(--card);padding:16px;border-radius:12px;border:1px solid rgba(12,20,30,0.04);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+    .stat .label{font-size:13px;color:var(--muted)}
+    .stat .value{font-size:20px;font-weight:800}
+    .progress{height:8px;border-radius:999px;background:linear-gradient(90deg,#eef6ff,#fff);overflow:hidden}
+    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--success),#34d399)}
+
+    .layout{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:18px;align-items:start}
+
+    /* Main column */
+    .card{background:var(--card);border-radius:14px;padding:16px;border:1px solid rgba(12,20,30,0.04);box-shadow:var(--shadow)}
+    .chart-row{display:flex;gap:12px;align-items:stretch}
+
+    /* line chart (weekly calories over time) */
+    .chart-large{flex:1;min-height:220px}
+    .chart-legend{display:flex;gap:12px;align-items:center;margin-top:8px}
+    .legend-item{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted)}
+    .legend-swatch{width:12px;height:12px;border-radius:3px}
+
+    /* mini charts */
+    .mini-chart{width:130px;height:120px;border-radius:12px;padding:12px;border:1px solid rgba(12,20,30,0.04);background:linear-gradient(180deg,#fff,#fbfdff);display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .mini-chart .num{font-weight:800;font-size:18px}
+    .mini-chart .lbl{font-size:13px;color:var(--muted);margin-top:6px}
+
+    /* Macros breakdown */
+    .macros{display:flex;gap:12px;margin-top:14px}
+    .macro{flex:1;padding:12px;border-radius:12px;border:1px solid rgba(12,20,30,0.04);background:#fff}
+    .macro .title{font-weight:700}
+    .macro .bar{height:10px;border-radius:999px;background:#f1f5f9;margin-top:8px}
+    .macro .bar > i{height:100%;display:block;border-radius:999px}
+    .p {background:#ff8a65;width:62%}
+    .c {background:#64b5f6;width:42%}
+    .f {background:#ffd54f;width:28%}
+
+    /* Right column */
+    aside{display:flex;flex-direction:column;gap:12px}
+    .goal{display:flex;flex-direction:column;gap:10px}
+    .goal .row{display:flex;align-items:center;justify-content:space-between}
+    .goal .meter{height:10px;border-radius:999px;background:#f1f5f9;flex:1;margin-left:10px}
+    .meal-history{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .meal-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;border:1px solid rgba(12,20,30,0.04);background:#fff}
+    .meal-item .thumb{width:44px;height:44px;border-radius:8px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+
+    /* table */
+    table{width:100%;border-collapse:collapse;margin-top:12px}
+    th,td{padding:10px;text-align:left;font-size:13px}
+    thead th{color:var(--muted);font-weight:700;border-bottom:1px solid rgba(12,20,30,0.04)}
+    tbody tr{border-bottom:1px solid rgba(12,20,30,0.03)}
+    tbody tr:last-child{border-bottom:0}
+
+    /* footer area */
+    .insights{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .insight{Padding:12px;border-radius:10px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid rgba(12,20,30,0.04)}
+
+    /* small helpers */
+    .muted-small{font-size:13px;color:var(--muted)}
+    .label{font-size:13px;color:var(--muted);font-weight:700}
+
+    @media (max-width:1000px){.overview{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.chart-row{flex-direction:column}.mini-chart{width:100%}.macros{flex-direction:column}.insights{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+    <!-- top counters (weekly focus) -->
+    <div class="overview">
+      <div class="stat">
+        <div class="label">Calories (this week)</div>
+        <div class="value" id="calories-week-value">— kcal</div>
+        <div class="muted-small" id="calories-week-remaining">Weekly target — kcal • remaining — kcal</div>
+        <div class="progress" aria-hidden style="margin-top:8px"><i id="calories-week-bar" style="width:0%"></i></div>
+      </div>
+
+      <div class="stat">
+        <div class="label">Protein (weekly avg)</div>
+        <div class="value" id="protein-week-value">— g</div>
+        <div class="muted-small" id="protein-week-goal">Goal — g</div>
+        <div class="progress" style="margin-top:8px"><i id="protein-week-bar" style="width:0%" class="p"></i></div>
+      </div>
+
+      <div class="stat">
+        <div class="label">Groceries spent (week)</div>
+        <div class="value" id="groceries-week-value">—</div>
+        <div class="muted-small" id="groceries-week-remaining">Budget — • remaining —</div>
+        <div class="progress" style="margin-top:8px"><i id="groceries-week-bar" style="width:0%" class="c"></i></div>
+      </div>
+
+      <div class="stat">
+        <div class="label">Pantry used</div>
+        <div class="value" id="pantry-used-value">— items</div>
+        <div class="muted-small" id="pantry-used-desc">Items moved from pantry to meals this week</div>
+        <div class="progress" style="margin-top:8px"><i id="pantry-used-bar" style="width:0%"></i></div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <main>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font-weight:800">Weekly intake — last 12 weeks</div>
+              <div class="muted-small">Estimated kcal from groceries & pantry usage</div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-swatch" style="background:linear-gradient(90deg,#0b61ff,#0a4bd6)"></div> Intake</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:linear-gradient(90deg,#16a34a,#34d399)"></div> Target</div>
+            </div>
+          </div>
+
+          <div class="chart-row" style="margin-top:12px">
+            <div class="chart-large">
+              <!-- SVG area placeholder for weekly series -->
+              <svg viewBox="0 0 900 220" preserveAspectRatio="none" style="width:100%;height:220px">
+                <defs>
+                  <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#0b61ff" stop-opacity="0.18"></stop>
+                    <stop offset="100%" stop-color="#0b61ff" stop-opacity="0"></stop>
+                  </linearGradient>
+                </defs>
+                <g stroke="rgba(12,20,30,0.04)" stroke-width="1">
+                  <line x1="0" y1="40" x2="900" y2="40" />
+                  <line x1="0" y1="80" x2="900" y2="80" />
+                  <line x1="0" y1="120" x2="900" y2="120" />
+                  <line x1="0" y1="160" x2="900" y2="160" />
+                </g>
+
+                <path d="M0,140 C75,120 150,100 225,80 C300,70 375,90 450,70 C525,60 600,90 675,80 C750,70 825,110 900,90 L900,220 L0,220 Z" fill="url(#g1)" opacity="0.95"></path>
+                <path d="M0,140 C75,120 150,100 225,80 C300,70 375,90 450,70 C525,60 600,90 675,80 C750,70 825,110 900,90" fill="none" stroke="#0b61ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                <path d="M0,120 L900,120" fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="6 6"></path>
+
+                <g fill="#0b61ff">
+                  <circle cx="0" cy="140" r="3" />
+                  <circle cx="150" cy="100" r="3" />
+                  <circle cx="300" cy="70" r="3" />
+                  <circle cx="450" cy="70" r="3" />
+                  <circle cx="600" cy="90" r="3" />
+                  <circle cx="750" cy="70" r="3" />
+                  <circle cx="900" cy="90" r="3" />
+                </g>
+              </svg>
+            </div>
+
+            <div style="width:220px;display:flex;flex-direction:column;gap:10px">
+              <div class="mini-chart">
+                <div class="num" id="mini-kcal">—</div>
+                <div class="lbl">This week kcal</div>
+              </div>
+              <div class="mini-chart">
+                <div class="num" id="mini-groceries">—</div>
+                <div class="lbl">Groceries</div>
+              </div>
+              <div class="mini-chart">
+                <div class="num" id="mini-pantry-used">—</div>
+                <div class="lbl">Pantry items used</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="macros">
+            <div class="macro">
+              <div class="title">Protein (week)</div>
+              <div class="muted-small"><span id="protein-macro-value">— g</span> • Weekly goal <span id="protein-macro-goal">— g</span></div>
+              <div class="bar"><i id="protein-bar" class="p" style="width:0%"></i></div>
+            </div>
+            <div class="macro">
+              <div class="title">Carbs (week)</div>
+              <div class="muted-small"><span id="carbs-macro-value">— g</span> • Weekly goal <span id="carbs-macro-goal">— g</span></div>
+              <div class="bar"><i id="carbs-bar" class="c" style="width:0%"></i></div>
+            </div>
+            <div class="macro">
+              <div class="title">Fat (week)</div>
+              <div class="muted-small"><span id="fat-macro-value">— g</span> • Weekly goal <span id="fat-macro-goal">— g</span></div>
+              <div class="bar"><i id="fat-bar" class="f" style="width:0%"></i></div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-weight:800">Recent grocery purchases</div>
+              <div class="muted-small">This week • source: store receipts</div>
+            </div>
+
+            <table aria-label="Recent groceries">
+              <thead>
+                <tr><th>Item</th><th>Qty</th><th>Price</th><th>Vendor</th></tr>
+              </thead>
+              <tbody id="recent-groceries-body">
+                <!-- populated from DB -->
+                <tr><td class="muted-small">No purchases this week</td><td>-</td><td>-</td><td>-</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="insights">
+            <div class="insight">
+              <div style="font-weight:700">Weekly summary</div>
+              <div class="muted-small" style="margin-top:6px" id="weekly-summary-text">Loading weekly summary…</div>
+            </div>
+            <div class="insight">
+              <div style="font-weight:700">Tip</div>
+              <div class="muted-small" style="margin-top:6px">Plan meals from pantry first to reduce waste — try a "pantry-only" dinner once per week.</div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+      <aside>
+        <div class="card goal">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-weight:800">Weekly goals</div>
+              <div class="muted-small">Your targets for the week</div>
+            </div>
+            <div class="muted-small">Progress</div>
+          </div>
+
+          <div style="margin-top:10px">
+            <div class="row"><div class="label">Groceries budget</div><div class="muted-small" id="budget-progress">— / —</div></div>
+            <div class="meter" style="margin-top:8px"><div id="budget-bar" style="height:10px;width:0%;background:linear-gradient(90deg,var(--accent),#0a4bd6);border-radius:999px"></div></div>
+
+            <div class="row" style="margin-top:10px"><div class="label">Protein (week)</div><div class="muted-small" id="protein-week-progress">— / — g</div></div>
+            <div class="meter" style="margin-top:8px"><div id="protein-week-bar-2" style="height:10px;width:0%;background:linear-gradient(90deg,#ff8a65,#ff6b6b);border-radius:999px"></div></div>
+
+            <div class="row" style="margin-top:10px"><div class="label">Pantry usage</div><div class="muted-small" id="pantry-usage-count">— items used</div></div>
+            <div class="meter" style="margin-top:8px"><div id="pantry-usage-bar-2" style="height:10px;width:0%;background:linear-gradient(90deg,#34d399,#10b981);border-radius:999px"></div></div>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:8px"><button class="btn">Adjust goals</button><button class="btn">Manage lists</button></div>
+        </div>
+
+        <div class="card">
+          <div style="font-weight:800">Pantry snapshot</div>
+          <div class="muted-small" style="margin-top:6px">Top items expiring soon</div>
+          <div style="margin-top:12px">
+            <div id="pantry-snapshot-list" style="display:flex;flex-direction:column;gap:8px">
+              <!-- populated from DB -->
+              <div class="meal-item"><div class="thumb">—</div><div><div style="font-weight:700">No pantry items</div><div class="muted-small">—</div></div></div>
+            </div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px"><button class="btn">Open pantry</button><button class="btn">Add inventory</button></div>
+        </div>
+
+        <div class="card">
+          <div style="font-weight:800">Upcoming grocery lists</div>
+          <div class="muted-small" style="margin-top:6px">Planned lists & quick actions</div>
+          <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px" id="upcoming-grocery-lists">
+            <!-- populated from profile.groceryLists -->
+            <div class="meal-item"><div class="thumb">🛒</div><div><div style="font-weight:700">No planned lists</div><div class="muted-small">—</div></div></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Data wiring: weekly rollups & minimal frontend data layer -->
+  <script type="module">
+    // This module wires the dashboard to your exact Firestore structure described in your schema:
+    // - profiles/{uid} (profile doc-level fields: pantryItems, customIngredients, nutritionGoals, defaultCurrency, groceryLists)
+    // - profiles/{uid}/spending/{autoId} (date (Timestamp), amountCents, vendor, items[])
+    // - profiles/{uid}/inventoryEvents/{autoId} (timestamp (Timestamp), delta, quantityBefore, quantityAfter, itemId, itemName, meta)
+    // - profiles/{uid}/budgets/{periodKey} (periodKey doc ID like "2025-08", targetCents, category)
+
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs,
+      getDoc,
+      doc,
+      Timestamp
+    } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+
+    // --- IMPORTANT: paste your firebase config object here ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    window.app = app; // keep compatibility with firebasedata.js loader
+
+    // Initialize auth so we can derive uid automatically from signed-in user
+    const auth = getAuth(app);
+
+    // Import your loader module (uses window.app to init itself)
+    import loader from './js/firebasedata.js';
+    await loader.ready;
+
+    const db = getFirestore(app);
+
+    // Utility: get week start (Monday) and end (Sunday) for a given date
+    function getWeekRange(date = new Date()) {
+      const d = new Date(date);
+      const day = (d.getDay() + 6) % 7; // 0=Monday
+      const monday = new Date(d);
+      monday.setDate(d.getDate() - day);
+      monday.setHours(0,0,0,0);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      sunday.setHours(23,59,59,999);
+      return { start: monday, end: sunday };
+    }
+
+    // Will be set from Firebase Auth on sign-in
+    let uid = null;
+
+    // Helper: format cents -> currency string
+    function formatCurrency(cents, currency = 'EUR'){
+      cents = Number(cents || 0);
+      try{ return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(cents/100); }catch(e){ return (cents/100).toFixed(2) + ' ' + (currency || '€'); }
+    }
+
+    // --- Core reads wired to your DB schema ---
+
+    // 1) Spending: profiles/{uid}/spending with date (Timestamp) and amountCents
+    async function getWeeklySpending(uid, startTs, endTs){
+      const colRef = collection(db, 'profiles', uid, 'spending');
+      const q = query(colRef, where('date', '>=', startTs), where('date', '<=', endTs));
+      const snap = await getDocs(q);
+      let totalCents = 0;
+      const rows = [];
+      snap.forEach(docSnap => {
+        const d = docSnap.data();
+        const cents = Number(d.amountCents || 0);
+        totalCents += cents;
+        rows.push({ id: docSnap.id, ...d });
+      });
+      rows.sort((a,b)=> (b.date?.toMillis?.()||0) - (a.date?.toMillis?.()||0));
+      return { totalCents, rows };
+    }
+
+    // 2) Inventory events: profiles/{uid}/inventoryEvents
+    async function getWeeklyInventoryEvents(uid, startTs, endTs){
+      const colRef = collection(db, 'profiles', uid, 'inventoryEvents');
+      const q = query(colRef, where('timestamp', '>=', startTs), where('timestamp', '<=', endTs));
+      const snap = await getDocs(q);
+      const events = [];
+      snap.forEach(docSnap=> events.push({ id: docSnap.id, ...docSnap.data() }));
+
+      // fetch profile doc which contains pantryItems & customIngredients (profile-level arrays per your schema)
+      let profile = loader.getProfile(uid);
+      if (!profile) profile = await loader.fetchDocument('profiles', uid);
+      const pantryItems = Array.isArray(profile?.pantryItems) ? profile.pantryItems : [];
+      const customIngredients = Array.isArray(profile?.customIngredients) ? profile.customIngredients : [];
+
+      let pantryUsedCount = 0;
+      let estimatedKcal = 0;
+      let estimatedProtein = 0;
+      let estimatedCarbs = 0;
+      let estimatedFat = 0;
+
+      events.forEach(ev => {
+        const delta = Number(ev.delta || 0);
+        const qty = Math.abs(delta) || 0;
+        const used = (delta < 0) || ((ev.quantityBefore != null && ev.quantityAfter != null) && (ev.quantityAfter < ev.quantityBefore));
+        if (used) pantryUsedCount += 1;
+
+        // find metadata in pantryItems or customIngredients
+        let meta = null;
+        if (ev.itemId) meta = pantryItems.find(p=>p.id === ev.itemId) || null;
+        if (!meta && ev.itemName) {
+          const name = (ev.itemName||'').toLowerCase();
+          meta = pantryItems.find(p=>p.name && p.name.toLowerCase() === name) || customIngredients.find(c=>c.name && c.name.toLowerCase() === name) || null;
+        }
+
+        const caloriesPerUnit = Number(meta?.calories || meta?.nutrition?.calories || 0);
+        const proteinPerUnit = Number(meta?.nutrition?.protein || meta?.protein || 0);
+        const carbsPerUnit = Number(meta?.nutrition?.carbs || meta?.carbs || 0);
+        const fatPerUnit = Number(meta?.nutrition?.fat || meta?.fat || 0);
+
+        if (caloriesPerUnit && qty) estimatedKcal += caloriesPerUnit * qty;
+        if (proteinPerUnit && qty) estimatedProtein += proteinPerUnit * qty;
+        if (carbsPerUnit && qty) estimatedCarbs += carbsPerUnit * qty;
+        if (fatPerUnit && qty) estimatedFat += fatPerUnit * qty;
+      });
+
+      return { events, pantryUsedCount, estimatedKcal, estimatedProtein, estimatedCarbs, estimatedFat };
+    }
+
+    // 3) Budgets: profiles/{uid}/budgets/{periodKey} (subcollection, fixed doc IDs like 2025-08)
+    async function getBudgetForPeriod(uid, periodKey){
+      try {
+        const docRef = doc(db, 'profiles', uid, 'budgets', periodKey);
+        const snap = await getDoc(docRef);
+        if (snap.exists()) return { id: snap.id, ...snap.data() };
+      } catch (e){ console.warn('Failed to read budget doc', e); }
+      return null;
+    }
+
+    // DOM helpers
+    function setText(id, text){ const el = document.getElementById(id); if(el) el.textContent = text; }
+    function setInnerHTML(id, html){ const el = document.getElementById(id); if(el) el.innerHTML = html; }
+    function setBarWidth(id, pct){ const el = document.getElementById(id); if(el) el.style.width = pct + '%'; }
+
+    // Main UI refresh
+    async function refreshUI(){
+      if (!uid){ console.warn('No authenticated user yet. Waiting for sign-in.'); return; }
+      const { start, end } = getWeekRange(new Date());
+      const startTs = Timestamp.fromDate(start);
+      const endTs = Timestamp.fromDate(end);
+
+      // Profile doc (contains pantryItems, customIngredients, nutritionGoals, defaultCurrency)
+      let profile = loader.getProfile(uid);
+      if (!profile) profile = await loader.fetchDocument('profiles', uid) || {};
+      const currency = profile.defaultCurrency || 'EUR';
+
+      // Spending (profiles/{uid}/spending)
+      const spending = await getWeeklySpending(uid, startTs, endTs);
+      const totalGroceriesCents = spending.totalCents || 0;
+      setText('mini-groceries', formatCurrency(totalGroceriesCents, currency));
+      setText('groceries-week-value', formatCurrency(totalGroceriesCents, currency));
+
+      // Budgets: read subcollection doc for the month periodKey (YYYY-MM)
+      const monthKey = start.toISOString().slice(0,7);
+      const budgetDoc = await getBudgetForPeriod(uid, monthKey);
+      const groceriesBudget = (budgetDoc && budgetDoc.targetCents) ? budgetDoc.targetCents : (profile.weeklyGroceriesBudgetCents || 0);
+      const budgetPct = (groceriesBudget > 0) ? Math.min(100, Math.round(totalGroceriesCents / groceriesBudget * 100)) : 0;
+      setText('groceries-week-remaining', groceriesBudget > 0 ? `Budget ${formatCurrency(groceriesBudget, currency)} • remaining ${formatCurrency(Math.max(0, groceriesBudget - totalGroceriesCents), currency)}` : 'No budget set');
+      setInnerHTML('budget-progress', groceriesBudget > 0 ? `${formatCurrency(totalGroceriesCents,currency)} / ${formatCurrency(groceriesBudget,currency)}` : '—');
+      const budgetBar = document.getElementById('budget-bar'); if (budgetBar) budgetBar.style.width = budgetPct + '%';
+
+      // Inventory events (pantry usage & estimated nutrition)
+      const inv = await getWeeklyInventoryEvents(uid, startTs, endTs);
+      setText('pantry-used-value', inv.pantryUsedCount + ' items');
+      setText('mini-pantry-used', inv.pantryUsedCount);
+
+      const kcal = Math.round(inv.estimatedKcal || 0);
+      setText('mini-kcal', kcal === 0 ? '—' : kcal);
+      setText('calories-week-value', kcal === 0 ? '— kcal' : (kcal + ' kcal'));
+
+      const weeklyCalGoal = (profile?.nutritionGoals && typeof profile.nutritionGoals.calories === 'number') ? profile.nutritionGoals.calories * 7 : null;
+      if (weeklyCalGoal){
+        const remaining = Math.max(0, weeklyCalGoal - kcal);
+        setText('calories-week-remaining', `Weekly target ${weeklyCalGoal} kcal • remaining ${remaining} kcal`);
+        const bar = document.getElementById('calories-week-bar'); if(bar) bar.style.width = Math.min(100, Math.round(kcal / weeklyCalGoal * 100)) + '%';
+      }
+
+      // macros
+      if (inv.estimatedProtein){
+        setText('protein-week-value', Math.round(inv.estimatedProtein) + ' g');
+        setText('protein-macro-value', Math.round(inv.estimatedProtein) + ' g');
+        const proteinGoal = profile?.nutritionGoals?.protein ? profile.nutritionGoals.protein * 7 : null;
+        if (proteinGoal){
+          const pct = Math.min(100, Math.round(inv.estimatedProtein / proteinGoal * 100));
+          const el = document.getElementById('protein-bar'); if(el) el.style.width = pct + '%';
+          setText('protein-macro-goal', proteinGoal + ' g');
+          setText('protein-week-progress', `${Math.round(inv.estimatedProtein)} / ${proteinGoal} g`);
+        }
+      }
+
+      if (inv.estimatedCarbs){
+        setText('carbs-macro-value', Math.round(inv.estimatedCarbs) + ' g');
+        const carbsGoal = profile?.nutritionGoals?.carbs ? profile.nutritionGoals.carbs * 7 : null;
+        const elc = document.getElementById('carbs-bar'); if (elc && carbsGoal) elc.style.width = Math.min(100, Math.round(inv.estimatedCarbs / carbsGoal * 100)) + '%';
+        if (carbsGoal) setText('carbs-macro-goal', carbsGoal + ' g');
+      }
+
+      if (inv.estimatedFat){
+        setText('fat-macro-value', Math.round(inv.estimatedFat) + ' g');
+        const fatGoal = profile?.nutritionGoals?.fats ? profile.nutritionGoals.fats * 7 : null;
+        const elf = document.getElementById('fat-bar'); if (elf && fatGoal) elf.style.width = Math.min(100, Math.round(inv.estimatedFat / fatGoal * 100)) + '%';
+        if (fatGoal) setText('fat-macro-goal', fatGoal + ' g');
+      }
+
+      // recent groceries table (use spending.rows)
+      const recentRows = spending.rows.slice(0,6);
+      const tbody = document.getElementById('recent-groceries-body');
+      if (tbody){
+        tbody.innerHTML = '';
+        if (recentRows.length === 0){
+          const tr = document.createElement('tr'); tr.innerHTML = `<td class="muted-small">No purchases this week</td><td>-</td><td>-</td><td>-</td>`; tbody.appendChild(tr);
+        } else {
+          recentRows.forEach(r=>{
+            const itemsDesc = (r.items && Array.isArray(r.items) && r.items.length>0) ? `${r.items.length} items` : '';
+            const price = r.amountCents ? formatCurrency(Number(r.amountCents), currency) : '—';
+            const vendor = r.vendor || (r.meta && r.meta.vendor) || '—';
+            const firstItem = (r.items && r.items[0]) ? (r.items[0].name || 'Item') : (r.itemName || 'Item');
+            const qty = (r.items && r.items[0] && r.items[0].qty) ? r.items[0].qty : (r.quantity || '—');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${firstItem}${itemsDesc? ' — ' + itemsDesc : ''}</td><td>${qty}</td><td>${price}</td><td>${vendor}</td>`;
+            tbody.appendChild(tr);
+          });
+        }
+      }
+
+      // pantry snapshot (profile.pantryItems array) — top 5 by expiry
+      const pantryItems = Array.isArray(profile?.pantryItems) ? profile.pantryItems : [];
+      const itemsWithExpiry = pantryItems.map(it=>({ ...it, expDate: it.expirationDate ? (it.expirationDate.toDate ? it.expirationDate.toDate() : new Date(it.expirationDate)) : null })).sort((a,b)=>{
+        if(!a.expDate) return 1; if(!b.expDate) return -1; return a.expDate - b.expDate;
+      }).slice(0,5);
+      const snapshotList = document.getElementById('pantry-snapshot-list');
+      if (snapshotList){
+        snapshotList.innerHTML = '';
+        if (itemsWithExpiry.length === 0){
+          snapshotList.innerHTML = `<div class="meal-item"><div class="thumb">—</div><div><div style="font-weight:700">No pantry items</div><div class="muted-small">—</div></div></div>`;
+        } else {
+          itemsWithExpiry.forEach(it=>{
+            const daysLeft = it.expDate ? Math.ceil((it.expDate - new Date())/(1000*60*60*24)) : null;
+            const itemRow = document.createElement('div'); itemRow.className = 'meal-item';
+            itemRow.innerHTML = `<div class="thumb">${it.thumb || '🍽️'}</div><div><div style="font-weight:700">${it.name}</div><div class="muted-small">Qty ${it.quantity || '—'}${daysLeft!=null? ' • Expires in ' + daysLeft + ' days' : ' • No expiry'}</div></div>`;
+            snapshotList.appendChild(itemRow);
+          });
+        }
+      }
+
+      // upcoming grocery lists (profile.groceryLists)
+      const listsContainer = document.getElementById('upcoming-grocery-lists');
+      if (listsContainer){
+        listsContainer.innerHTML = '';
+        const lists = Array.isArray(profile?.groceryLists) ? profile.groceryLists.slice(0,5) : [];
+        if (lists.length === 0){
+          listsContainer.innerHTML = `<div class="meal-item"><div class="thumb">🛒</div><div><div style="font-weight:700">No planned lists</div><div class="muted-small">—</div></div></div>`;
+        } else {
+          lists.forEach(l=>{
+            const updated = l.updatedAt ? (l.updatedAt.toDate ? l.updatedAt.toDate() : new Date(l.updatedAt)) : null;
+            const updatedTxt = updated ? `Updated ${Math.round((Date.now()-updated)/ (1000*60*60*24))} days ago` : '';
+            const item = document.createElement('div'); item.className = 'meal-item';
+            item.innerHTML = `<div class="thumb">🛒</div><div><div style="font-weight:700">${l.name}</div><div class="muted-small">${(Array.isArray(l.items)? l.items.length : 0)} items ${updatedTxt ? '• '+updatedTxt : ''}</div></div>`;
+            listsContainer.appendChild(item);
+          });
+        }
+      }
+
+      setText('weekly-summary-text', `Estimated ${kcal === 0 ? '—' : kcal + ' kcal'} from groceries • Pantry used ${inv.pantryUsedCount} items this week.`);
+    }
+
+    // Auth listener: derive uid from logged-in user automatically
+    onAuthStateChanged(auth, async (user) => {
+      if (user){ uid = user.uid; console.info('Signed in uid=', uid);
+        // Ensure profile is loaded into loader cache for faster access
+        try{ await loader.fetchDocument('profiles', uid); }catch(e){/*ignore*/ }
+        await refreshUI();
+      } else { uid = null; console.info('No user signed in.'); }
+    });
+
+    // Also refresh when loader reports updates to profiles collection
+    loader.onUpdate(payload => { if (!payload || !payload.profiles) return; if (uid && payload.profiles[uid]) refreshUI().catch(console.warn); });
+
+    // Expose refresh for debugging
+    window.__nutritionRefresh = refreshUI;
+  </script>
+
+  <!-- Keep the loader file available as a separate module too -->
+  <script type="module" src="./js/firebasedata.js"></script>
+</body>
+</html>
+
+
+
