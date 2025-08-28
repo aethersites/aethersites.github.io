@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redirecting…</title>
+
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: #fff;
+      font-family: 'Inter', sans-serif;
+      color: #000;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    :root{
+  /* tune to taste */
+  --leaf-1: #0ea5a4;    /* teal */
+  --leaf-2: #10b981;    /* green */
+  --spinner-size: 72px;
+  --leaf-w: 8px;
+  --leaf-h: 20px;
+  --radius: 22px;
+  --leaf-radius: 6px;
+
+  /* Core timing: total animation duration and computed step */
+  --spinner-duration: 1.44s;   /* total cycle length */
+  --leaves: 12;
+  --step: 0.12s;               /* = var(--spinner-duration) / var(--leaves) */
+}
+
+/* container */
+.spinner {
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+  position: relative;
+  margin: 0 auto;
+  display: block;
+  filter: drop-shadow(0 8px 18px rgba(16,185,129,0.07));
+}
+
+/* each leaf (petal) */
+.spinner__leaf {
+  --rot: 0deg;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--leaf-w);
+  height: var(--leaf-h);
+  border-radius: var(--leaf-radius);
+  background: linear-gradient(180deg, var(--leaf-2), var(--leaf-1));
+  transform-origin: center center;
+  transform: translate(-50%,-50%) rotate(var(--rot)) translateY(calc(-1 * var(--radius)));
+  opacity: 0.25;
+  box-shadow: 0 3px 8px rgba(6,95,70,0.06), inset 0 1px 0 rgba(255,255,255,0.06);
+  animation: leafFade var(--spinner-duration) linear infinite;
+}
+
+/* evenly distributed negative delays so timeline is continuous.
+   Note: first child uses -0s (no visible initial jump) */
+.spinner__leaf:nth-child(1)  { --rot:   0deg;  animation-delay: calc(var(--step) * -11); }
+.spinner__leaf:nth-child(2)  { --rot:  30deg;  animation-delay: calc(var(--step) * -10); }
+.spinner__leaf:nth-child(3)  { --rot:  60deg;  animation-delay: calc(var(--step) * -9);  }
+.spinner__leaf:nth-child(4)  { --rot:  90deg;  animation-delay: calc(var(--step) * -8);  }
+.spinner__leaf:nth-child(5)  { --rot: 120deg;  animation-delay: calc(var(--step) * -7);  }
+.spinner__leaf:nth-child(6)  { --rot: 150deg;  animation-delay: calc(var(--step) * -6);  }
+.spinner__leaf:nth-child(7)  { --rot: 180deg;  animation-delay: calc(var(--step) * -5);  }
+.spinner__leaf:nth-child(8)  { --rot: 210deg;  animation-delay: calc(var(--step) * -4);  }
+.spinner__leaf:nth-child(9)  { --rot: 240deg;  animation-delay: calc(var(--step) * -3);  }
+.spinner__leaf:nth-child(10) { --rot: 270deg;  animation-delay: calc(var(--step) * -2);  }
+.spinner__leaf:nth-child(11) { --rot: 300deg;  animation-delay: calc(var(--step) * -1);  }
+.spinner__leaf:nth-child(12) { --rot: 330deg;  animation-delay: calc(var(--step) * -0);  }
+
+/* smoother timing: peak at ~30% of each leaf's animation,
+   fades before and after to avoid dead space between cycles. */
+@keyframes leafFade {
+  0%, 60%, 100% {
+    opacity: 0.25;
+    transform: translate(-50%,-50%) rotate(var(--rot)) translateY(calc(-1 * var(--radius))) scale(0.92);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%,-50%) rotate(var(--rot)) translateY(calc(-1 * var(--radius))) scale(1.06);
+  }
+}
+
+/* accessibility: stop animation if user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .spinner__leaf {
+    animation: none;
+    opacity: 1;
+    transform: translate(-50%,-50%) rotate(var(--rot)) translateY(calc(-1 * var(--radius)));
+  }
+}
+
+
+    h1 {
+      font-weight: 600;
+      font-size: 1.5rem;
+      margin: 0 0 8px;
+    }
+
+    p {
+      font-weight: 400;
+      font-size: 1rem;
+      color: #6B7280;
+      margin: 0;
+    }
+  </style>
+
+  <script>
+    // Redirect after DOM loaded
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        window.location.href = '/coming-soon/';
+      }, 15000); // small delay for user to see spinner
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+      <div class="spinner" aria-hidden="true">
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+  <span class="spinner__leaf"></span>
+</div>
+    <h1>Redirecting…</h1>
+<p>If you are not redirected automatically,   <a href="/coming-soon/" style="color: #6B7280; text-decoration: underline;">click here</a>.
+  </div>
+</body>
+</html>
+
+
+
