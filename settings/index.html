@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Settings — Prototype (Apple-style)</title>
+  <style>
+    :root{
+      --bg:#f8fafb;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --border:rgba(15,23,42,0.06);
+      --accent:#111827;
+      --radius:18px;
+      --shadow: 0 6px 20px rgba(12,20,30,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--accent);
+      padding:40px 20px;
+    }
+
+    .stage{max-width:1100px;margin:0 auto}
+
+    /* Header */
+    header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+    header .title{line-height:1}
+    h1{font-size:28px;margin:0}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    .controls{display:flex;gap:12px;align-items:center}
+    .btn{border-radius:12px;padding:8px 14px;font-size:13px;border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow);cursor:pointer}
+    .btn.primary{background:var(--accent);color:white;border:none}
+    .btn.ghost{background:transparent;border:1px solid transparent;color:var(--muted)}
+
+    /* Tabs (visual only) */
+    .tabs{display:flex;gap:10px;background:transparent;border-radius:14px;padding:6px;margin-top:22px}
+    .tab{padding:10px 14px;border-radius:12px;font-size:14px;color:var(--muted);border:1px solid transparent}
+    .tab.active{background:var(--card);box-shadow:var(--shadow);color:var(--accent);border-color:var(--border)}
+
+    main{margin-top:18px}
+
+    /* Layout columns */
+    .layout{display:grid;grid-template-columns:1fr 360px;gap:20px}
+
+    .panel{background:var(--card);border-radius:16px;padding:18px;border:1px solid var(--border);box-shadow:var(--shadow)}
+    .panel h3{margin:0 0 8px}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* Section blocks */
+    .section{border-radius:12px;padding:14px;border:1px solid rgba(12,20,30,0.04);background:linear-gradient(180deg,#fff,#fcfdff);margin-bottom:14px}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .left{display:flex;flex-direction:column}
+    .label{font-weight:600}
+    .sub{font-size:13px;color:var(--muted);margin-top:4px}
+
+    /* Subscription grid */
+    .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .plan{border-radius:12px;padding:16px;border:1px solid var(--border);background:var(--card)}
+    .price{font-size:20px;font-weight:700}
+
+    /* Wallet */
+    .wallet-list{display:flex;flex-direction:column;gap:12px}
+    .provider{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;border:1px solid rgba(12,20,30,0.04);background:linear-gradient(180deg,#fff,#fbfbfd)}
+    .meta{display:flex;gap:12px;align-items:center}
+    .logo{width:44px;height:28px;border-radius:8px;background:linear-gradient(90deg,#fff,#f3f4f6);display:flex;align-items:center;justify-content:center;border:1px solid rgba(12,20,30,0.04);font-size:12px;color:var(--muted)}
+
+    /* Small helpers */
+    .note{font-size:13px;color:var(--muted);padding:12px;border-radius:10px;border:1px solid rgba(12,20,30,0.04);background:#fff}
+
+    /* Security / Notifications */
+    .settings-list{display:flex;flex-direction:column;gap:12px}
+    .setting{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;border:1px solid rgba(12,20,30,0.04);background:linear-gradient(180deg,#fff,#fcfcfd)}
+    .small{font-size:13px;color:var(--muted)}
+
+    /* Integrations list */
+    .integrations{display:grid;grid-template-columns:1fr;gap:10px}
+    .integration{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:8px;border:1px solid rgba(12,20,30,0.04);background:#fff}
+
+    /* Small helpers */
+    .chip{display:inline-block;padding:6px 10px;border-radius:999px;border:1px solid rgba(12,20,30,0.06);font-size:12px}
+
+    /* Responsive */
+    @media (max-width:980px){
+      .layout{grid-template-columns:1fr}
+      .plans{grid-template-columns:1fr}
+      .tabs{flex-wrap:wrap}
+    }
+
+    .plan.selected{border-color:#dbeafe;box-shadow:0 4px 12px rgba(59,130,246,0.08)}
+  </style>
+</head>
+<body>
+  <div class="stage">
+    <header>
+      <div class="title">
+        <h1>Settings</h1>
+        <p class="lead">System settings (subscription, wallet and other app settings)</p>
+      </div>
+      <div class="controls">
+      </div>
+    </header>
+
+
+    <main class="layout" style="margin-top:18px">
+      <div>
+        <!-- GENERAL -->
+        <div class="panel">
+          <h3>General</h3>
+          <div class="sub">Basic application preferences that affect behavior across the app.</div>
+
+          <div style="margin-top:12px">
+
+
+        <!-- SUBSCRIPTION -->
+        <div class="panel" style="margin-top:16px">
+          <h3>Subscription</h3>
+          <div class="sub">Manage plan tiers and billing preferences</div>
+
+          <div style="margin-top:12px" class="plans" id="plans">
+            <div class="plan" data-plan="free">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-weight:700">Free</div>
+                  <div class="small">Good for trying the product</div>
+                </div>
+                <div class="price">$0</div>
+              </div>
+              <ul class="small" style="margin-top:10px;line-height:1.6">
+                <li>Basic features</li>
+                <li>Email support</li>
+              </ul>
+              <div style="display:flex;justify-content:flex-end;margin-top:12px">
+                <button class="btn plan-btn" data-plan="free" aria-pressed="false">Choose</button>
+              </div>
+            </div>
+
+            <div class="plan" data-plan="pro">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-weight:700">Pro <span style="font-size:11px;color:#0f172a;background:#f1fdf4;padding:4px 8px;border-radius:999px;margin-left:8px;border:1px solid rgba(12,20,30,0.04)">Popular</span></div>
+                  <br>
+                  <div class="small">Creators and small teams</div>
+                </div>
+                <div class="price">$15</div>
+              </div>
+              <ul class="small" style="margin-top:10px;line-height:1.6">
+                <li>All Free features</li>
+                <li>Priority support</li>
+                <li>10 projects</li>
+              </ul>
+              <div style="display:flex;justify-content:flex-end;margin-top:12px">
+                <button class="btn primary plan-btn" data-plan="pro">Choose</button>
+              </div>
+            </div>
+
+            <div class="plan" data-plan="premium">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-weight:700">Premium</div>
+                  <div class="small">For businesses</div>
+                </div>
+                <div class="price">$32</div>
+              </div>
+              <ul class="small" style="margin-top:10px;line-height:1.6">
+                <li>Everything in Pro</li>
+                <li>Dedicated support</li>
+                <li>Advanced analytics</li>
+              </ul>
+              <div style="display:flex;justify-content:flex-end;margin-top:12px">
+                <button class="btn plan-btn" data-plan="premium">Choose</button>
+              </div>
+            </div>
+          </div>
+
+         
+            </div>
+          </div>
+
+        </div>
+
+        <!-- WALLET -->
+        <div class="panel" style="margin-top:16px; margin-bottom:30px">
+          <h3>Wallet</h3>
+          <div class="sub">Connect payment providers to accept payments</div>
+
+          <div style="margin-top:12px" class="wallet-list">
+            <div class="provider" data-provider="stripe">
+              <div class="meta">
+                <div class="logo">S</div>
+                <div>
+                  <div style="font-weight:700">Stripe</div>
+                  <div class="small">Accept card payments and payouts</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="small wallet-status" data-provider="stripe">Not connected</div>
+                <button class="btn wallet-connect" data-provider="stripe">Connect</button>
+              </div>
+            </div>
+
+            <div class="provider" data-provider="paypal">
+              <div class="meta">
+                <div class="logo">P</div>
+                <div>
+                  <div style="font-weight:700">PayPal</div>
+                  <div class="small">PayPal account payments</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="small wallet-status" data-provider="paypal">Not connected</div>
+                <button class="btn wallet-connect" data-provider="paypal">Connect</button>
+              </div>
+            </div>
+
+            <div class="note">These are UI-only connectors. To complete connections implement OAuth flows or provider SDKs on the backend.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <aside>
+   
+        <div class="panel" style="margin-top:16px">
+          <h3>Notifications</h3>
+          <div class="sub">Manage email and in-app notifications</div>
+
+          <div style="margin-top:12px" class="settings-list">
+            <div class="setting">
+              <div>
+                <div style="font-weight:700">Product updates</div>
+                <div class="small">Receive updates about new features</div>
+              </div>
+              <div class="small">
+                <button class="btn toggle" data-field="notificationsEnabled">—</button>
+              </div>
+            </div>
+
+            <div class="setting">
+              <div>
+                <div style="font-weight:700">Billing alerts</div>
+                <div class="small">Notifies on invoices and payment failures</div>
+              </div>
+              <div class="small">
+                <button class="btn toggle" data-field="notificationsEnabled">—</button>
+              </div>
+            </div>
+
+            <div class="setting">
+              <div>
+                <div style="font-weight:700">Security alerts</div>
+                <div class="small">Notify on suspicious login activity</div>
+              </div>
+              <div class="small">
+                <button class="btn toggle" data-field="notificationsEnabled">—</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+  </aside>
+
+    </main>
+  </div>
+
+  <!--
+    This script wires the UI to your existing `loader` API from firebasedata.js.
+    Assume you include firebasedata.js before this script tag and that loader
+    exposes the functions you described (loader.ready, loader.onAuth, etc.).
+  -->
+  <script type="module">
+  import loader from './js/firebasedata.js';
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+  await loader.init(firebaseConfig);
+  await loader.ready;
+  window.loader = loader;
+</script>
+
+  <script>
+  (function(){
+    // Defensive check — requires loader to be available on window
+    if (!window.loader) {
+      console.warn('loader not detected. Make sure firebasedata.js is included before this script.');
+      return;
+    }
+
+    // Utilities
+    const $ = (sel, ctx=document) => ctx.querySelector(sel);
+    const $$ = (sel, ctx=document) => Array.from(ctx.querySelectorAll(sel));
+
+    // Keep local state for current uid
+    let currentUid = null;
+    let currentUserDoc = null; // users/{uid}
+    let currentProfile = null; // profiles/{uid}
+
+    function setPlanSelected(plan) {
+      $$('.plan').forEach(el => {
+        if (el.dataset.plan === plan) el.classList.add('selected');
+        else el.classList.remove('selected');
+      });
+      // update buttons aria-pressed
+      $$('.plan-btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.plan === plan ? 'true' : 'false'));
+    }
+
+    function renderWalletStatus(userDoc) {
+      // Show 'Connected' if stripeCustomerId exists on users/{uid}
+      const stripeStatus = $('[data-provider="stripe"] .wallet-status');
+      const stripeBtn = $('[data-provider="stripe"] .wallet-connect');
+      if (!stripeStatus || !stripeBtn) return;
+      if (userDoc && userDoc.stripeCustomerId) {
+        stripeStatus.textContent = 'Connected';
+        stripeBtn.textContent = 'Manage';
+      } else {
+        stripeStatus.textContent = 'Not connected';
+        stripeBtn.textContent = 'Connect';
+      }
+    }
+
+    function renderNotifications(profile) {
+      if (!profile) return;
+      const toggles = $$('button.toggle');
+      toggles.forEach(btn => {
+        const field = btn.dataset.field;
+        // Our UI uses a single boolean `notificationsEnabled` — reflect that
+        const val = !!profile.notificationsEnabled;
+        btn.textContent = val ? 'On' : 'Off';
+        btn.dataset.value = val ? '1' : '0';
+      });
+    }
+
+    function applyProfileToUI(profile, userDoc) {
+      currentProfile = profile;
+      currentUserDoc = userDoc || currentUserDoc;
+
+      // subscription tier: prefer users/{uid}.subscriptionTier if present, else profile.subscriptionTier
+      const tier = (currentUserDoc && currentUserDoc.subscriptionTier) || (profile && profile.subscriptionTier) || 'free';
+      setPlanSelected(tier);
+
+      renderWalletStatus(currentUserDoc);
+
+      renderNotifications(profile);
+    }
+
+    async function initForUser(uid) {
+      currentUid = uid;
+      if (!uid) return;
+
+      // fetch current user doc and profile once
+      try {
+        const [userDoc, profile] = await Promise.all([
+          (typeof loader.getUser === 'function') ? loader.getUser(uid) : Promise.resolve(null),
+          (typeof loader.getProfile === 'function') ? loader.getProfile(uid) : Promise.resolve(null)
+        ]);
+
+        // call subscribeToProfile for realtime updates (if available)
+        if (typeof loader.subscribeToProfile === 'function') {
+          try { loader.subscribeToProfile(uid); } catch(e){ console.warn('subscribeToProfile failed', e); }
+        }
+
+        applyProfileToUI(profile, userDoc);
+      } catch (err) {
+        console.error('Failed to init user/profile', err);
+      }
+    }
+
+    // Wire UI interactions
+    // Subscription plan clicks
+    document.addEventListener('click', async (ev) => {
+      const btn = ev.target.closest('.plan-btn');
+      if (!btn) return;
+      const plan = btn.dataset.plan;
+      if (!plan || !currentUid) return;
+
+      // Optimistic UI update
+      setPlanSelected(plan);
+
+      // Try to write to users/{uid}.subscriptionTier if loader.setUserField exists
+      if (typeof loader.setUserField === 'function') {
+        try {
+          await loader.setUserField(currentUid, 'subscriptionTier', plan);
+        } catch (e) {
+          console.warn('setUserField failed, trying to write into profile instead', e);
+        }
+      }
+
+      // Always also write to profile for compatibility with the rest of app
+      if (typeof loader.setProfileField === 'function') {
+        try {
+          await loader.setProfileField(currentUid, 'subscriptionTier', plan);
+        } catch (e) {
+          console.error('setProfileField failed:', e);
+        }
+      } else if (typeof loader.setProfileFields === 'function') {
+        try {
+          await loader.setProfileFields(currentUid, { subscriptionTier: plan });
+        } catch(e){ console.error('setProfileFields failed:', e); }
+      } else {
+        console.warn('No setter available to persist subscriptionTier. Implement loader.setUserField or loader.setProfileField in firebasedata.js');
+      }
+    });
+
+    // Wallet connect clicks
+    document.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('.wallet-connect');
+      if (!btn) return;
+      const provider = btn.dataset.provider;
+      if (!provider) return;
+
+      // For security / backend flows you should open an OAuth flow from the backend.
+      // We'll call a hook if the app implements it; otherwise show a helpful message.
+      if (typeof window.onConnectProvider === 'function') {
+        window.onConnectProvider(provider, currentUid);
+      } else {
+        // Non-blocking: open a new page to your connect endpoint if you have one (OPTIONAL)
+        // window.open(`/connect/${provider}?uid=${currentUid}`, '_blank');
+        alert('To connect ' + provider + ' you must implement the OAuth/provider connect flow on your backend.\n\nImplement a backend route to start the flow and call that route here (or provide window.onConnectProvider).');
+      }
+    });
+
+    // Notification toggles
+    document.addEventListener('click', async (ev) => {
+      const btn = ev.target.closest('button.toggle');
+      if (!btn) return;
+      const field = btn.dataset.field;
+      if (!field || !currentUid) return;
+
+      // compute new value (profile value toggled)
+      const currently = !!(currentProfile && currentProfile[field]);
+      const next = !currently;
+
+      // optimistic update
+      btn.textContent = next ? 'On' : 'Off';
+      btn.dataset.value = next ? '1' : '0';
+
+      // Persist
+      if (typeof loader.setProfileField === 'function') {
+        try {
+          await loader.setProfileField(currentUid, field, next);
+        } catch(e){ console.error('Failed to setProfileField', e); }
+      } else if (typeof loader.setProfileFields === 'function') {
+        try {
+          await loader.setProfileFields(currentUid, { [field]: next });
+        } catch(e){ console.error('Failed to setProfileFields', e); }
+      } else {
+        console.warn('No profile setter available; implement loader.setProfileField or loader.setProfileFields');
+      }
+    });
+
+    // If you want to bind native inputs to profile fields, use loader.bindInput
+    // Example (uncomment if you add inputs to the DOM):
+    // const nameFirstInput = document.querySelector('input[name="name.first"]');
+    // if (nameFirstInput) loader.bindInput(nameFirstInput, currentUid, 'name.first');
+
+    // React to loader realtime/cache updates
+    if (typeof loader.onUpdate === 'function') {
+      loader.onUpdate((cache) => {
+        // cache might contain profiles and users; try to pick latest
+        try {
+          const profile = (currentUid && cache.profiles && cache.profiles[currentUid]) ? cache.profiles[currentUid] : null;
+          const userDoc = (currentUid && cache.users && cache.users[currentUid]) ? cache.users[currentUid] : null;
+          if (profile) currentProfile = profile;
+          if (userDoc) currentUserDoc = userDoc;
+          applyProfileToUI(profile || currentProfile, userDoc || currentUserDoc);
+        } catch (e) { /* non-fatal */ }
+      });
+    }
+
+    // React to auth changes
+    if (typeof loader.onAuth === 'function') {
+      loader.onAuth((user) => {
+        const uid = user ? user.uid : null;
+        initForUser(uid);
+      });
+    } else if (loader.currentUser) {
+      initForUser(loader.currentUser.uid);
+    } else if (loader.ready && typeof loader.ready.then === 'function') {
+      loader.ready.then(() => {
+        if (loader.currentUser) initForUser(loader.currentUser.uid);
+      });
+    }
+
+    // Clean up before unload
+    window.addEventListener('beforeunload', () => {
+      if (typeof loader.stopRealtime === 'function' && currentUid) {
+        try { loader.stopRealtime(currentUid); } catch(e){}
+      }
+    });
+
+  })();
+  </script>
+</body>
+</html>
+
+
+
