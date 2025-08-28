@@ -35,7 +35,7 @@ signupForm.addEventListener('submit', async (e) => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // --- Create user doc in "users" collection ---
+      // --- Create user doc in "users" collection ---
         await setDoc(doc(db, "users", user.uid), {
           uid: user.uid,
           email: user.email || "",
@@ -44,9 +44,21 @@ signupForm.addEventListener('submit', async (e) => {
           profilePicture: "",
           createdAt: serverTimestamp(),
           stripeCustomerId: "",
-          subscriptionTier: "free"
+          subscriptionTier: "free",
+        
+          // -- ADDED (minimal, appended) --
+          fullName: "",                   // convenience/derived
+          updatedAt: serverTimestamp(),   // track updates
+          address: "",                    // optional
+          avatarDataUrl: "",              // optional (base64 / data URL)
+          bio: "",                        // optional
+          dietTags: [],                   // array<string>
+          location: "",                   // optional
+          nutritionGoals: "",             // NOTE: string in users (different from profiles.nutritionGoals)
+          preferredDelivery: "",          // optional
+          units: "metric"                 // "metric" | "imperial"
         });
-
+        
         // --- Create profile doc in "profiles" collection ---
         await setDoc(doc(db, "profiles", user.uid), {
           nutritionGoals: {
@@ -62,9 +74,9 @@ signupForm.addEventListener('submit', async (e) => {
           aboutMe: "",
           preferredUnits: "metric",
           defaultServingSize: 1,      // number
-          defaultServingUnit: "g",      // optional but recommended
+          defaultServingUnit: "g",    // optional but recommended
           householdSize: 1,
-
+        
           groceryLists: [],
           pantryItems: [],
           customIngredients: [],
@@ -72,7 +84,13 @@ signupForm.addEventListener('submit', async (e) => {
           spendingHistory: [],
           calorieHistory: [],
           aiSuggestionsEnabled: true,
-          notificationsEnabled: true
+          notificationsEnabled: true,
+        
+          // -- ADDED (minimal, appended) --
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          lastSyncedAt: null,           // nullable timestamp
+          defaultCurrency: "USD"        // default currency (change as needed)
         });
 
         // Only show success + redirect after Firestore writes succeed
