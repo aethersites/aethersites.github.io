@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coming Soon · GrocerAI</title>
+  <meta name="description" content="This page is under development. GrocerAI is crafting something new for you." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='black' d='M16 2c1.7 0 3 1.3 3 3s-1.3 3-3 3-3-1.3-3-3 1.3-3 3-3zm-9 9.5c0-1.4 1.1-2.5 2.5-2.5h13c1.4 0 2.5 1.1 2.5 2.5v10c0 3-2.5 5.5-5.5 5.5h-7c-3 0-5.5-2.5-5.5-5.5v-10z'/%3E%3C/svg%3E" />
+  <style>
+    /* Typography & base */
+    :root {
+      --bg: #0b0b0c;
+      --surface: rgba(255,255,255,0.08);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.6);
+      --accent: #7ab6ff; /* subtle Apple-like blue */
+      --ring: rgba(122, 182, 255, 0.55);
+      --shadow: rgba(0,0,0,0.5);
+      --radius: 24px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #fbfbfd;
+        --surface: rgba(0,0,0,0.05);
+        --text: rgba(0,0,0,0.85);
+        --muted: rgba(0,0,0,0.6);
+        --accent: #17A34B; /* Apple link blue */
+        --ring: #f1fdf4;
+        --shadow: rgba(0,0,0,0.08);
+      }
+    }
+
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 80% -10%, #f1fdf4, transparent 60%),
+                  radial-gradient(800px 600px at -10% 20%, #edfff9, transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Top navigation */
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 20px clamp(16px, 4vw, 40px);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+    .brand svg { filter: drop-shadow(0 6px 18px var(--shadow)); }
+    .brand span { font-weight: 600; letter-spacing: -0.02em; font-size: 18px; }
+    .nav .pill { padding: 8px 12px; border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 12px; border: 1px solid rgba(255,255,255,0.08); }
+    @media (prefers-color-scheme: light) {
+      .nav .pill { border-color: rgba(0,0,0,0.06); }
+    }
+
+    /* Main card */
+    .wrap { display:grid; place-items:center; min-height: calc(100% - 115px); padding: clamp(16px, 4vw, 56px); }
+    .card {
+      width: min(920px, 92vw); border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+      border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: saturate(140%) blur(10px);
+      box-shadow: 0 40px 80px -20px var(--shadow);
+      overflow: clip; position: relative;
+    }
+    @media (prefers-color-scheme: light) {
+      .card { background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.64)); border-color: rgba(0,0,0,0.06); }
+    }
+
+    .ribbon { position:absolute; inset: 0; pointer-events: none; opacity: .8; }
+    .ribbon::before, .ribbon::after {
+      content: ""; position: absolute; filter: blur(32px); opacity:.6;
+      background: radial-gradient(280px 120px at 10% 0%, rgba(0,113,227,.35), transparent 70%);
+    }
+    .ribbon::after { right: -10%; top:-20%; transform: rotate(25deg); background: radial-gradient(300px 140px at 90% 0%, rgba(255,105,180,.28), transparent 70%); }
+
+    .content { position: relative; padding: clamp(28px, 6vw, 64px); text-align: center; }
+
+    .iconWrap { display:inline-grid; place-items:center; width:94px; height:94px; margin: 8px auto 18px; border-radius: 28px; background: var(--surface); border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+    }
+    @media (prefers-color-scheme: light) {
+      .iconWrap { border-color: rgba(0,0,0,0.06); box-shadow: inset 0 1px 0 rgba(255,255,255,.6); }
+    }
+    .iconWrap svg { width:44px; height:44px; }
+
+    h1 { font-size: clamp(28px, 4.4vw, 48px); line-height: 1.06; letter-spacing: -0.02em; margin: 10px 0 12px; }
+    .feature { color: var(--text); font-weight: 700; }
+    p.lead { margin: 0 auto; max-width: 46ch; color: var(--muted); font-size: clamp(16px, 2.1vw, 18px); line-height: 1.5; }
+
+    /* Progress */
+    @media (prefers-color-scheme: light) { .progressTrack { background: rgba(0,0,0,0.08); } }
+    .progressBar { height: 100%; width: 36%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), rgba(255,255,255,0.9)); box-shadow: 0 0 0 1px var(--ring) inset; position: relative; }
+    .progressBar::after { content:""; position:absolute; inset:0; background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.7) 50%, transparent 100%); animation: shimmer 2.2s infinite; }
+    @keyframes shimmer { 0% { transform: translateX(-0%); } 100% { transform: translateX(100%); } }
+
+    .hint { color: var(--muted); font-size: 13px; }
+
+    /* Actions */
+    .actions { display:flex; gap:12px; justify-content:center; align-items:center; margin-top: 22px; flex-wrap: wrap; }
+    .btn { --btn-fg: white; --btn-bg: var(--accent); padding: 12px 16px; border-radius: 14px; border: 0; font-weight: 600; letter-spacing: .01em; cursor: pointer; text-decoration: none; color: var(--btn-fg);   background: linear-gradient(120deg, #17A34B, #12B981); box-shadow: 0 6px 18px -6px var(--ring); }
+    .btn:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+    .btn.secondary { --btn-fg: var(--text); --btn-bg: transparent; border: 1px solid rgba(255,255,255,0.16); box-shadow: none; backdrop-filter: blur(6px) saturate(140%); }
+    @media (prefers-color-scheme: light) { .btn.secondary { border-color: rgba(0,0,0,0.08); } }
+
+    /* Footer */
+    .foot { display:flex; justify-content: space-between; align-items:center; gap: 12px; padding: 16px clamp(20px, 4vw, 28px); border-top: 1px solid rgba(255,255,255,0.12); color: var(--muted); font-size: 13px; }
+    @media (max-width: 640px) { .foot { flex-direction: column; gap: 6px; } }
+    @media (prefers-color-scheme: light) { .foot { border-color: rgba(0,0,0,0.06); } }
+
+    .status { display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; background: var(--surface); border: 1px solid rgba(255,255,255,0.14); }
+    @media (prefers-color-scheme: light) { .status { border-color: rgba(0,0,0,0.06); } }
+    .status i { width:8px; height:8px; display:inline-block; border-radius:999px; background: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
+.iconWrap img {
+  max-width: 80%;
+  height: auto;
+  display: block;
+}
+.spin {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  animation: spin 20s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .progressBar::after { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  
+  <main class="wrap" role="main">
+  <section class="card" aria-labelledby="title">
+    <div class="ribbon" aria-hidden="true"></div>
+    <div class="content">
+      <div class="iconWrap" aria-hidden="true">
+        <!-- replace SVG with your image -->
+        <img src="https://cdn-icons-png.flaticon.com/512/5859/5859499.png" alt="" class="spin"/>
+        
+      </div>
+      <h1 id="title">
+          <span class="feature" id="featureName" aria-live="polite">This feature</span> is under development
+          <br>
+          
+        </h1>
+        <p class="lead">We're crafting something thoughtful for your grocery recipes. Check back soon for a polished experience tailored to you.</p>
+
+        <div class="progressTrack" aria-hidden="true">
+          <div class="progressBar" style="--progress:56%"></div>
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="/">Back to Home</a>
+        </div>
+      </div>
+      
+
+  <script>
+    // Set current year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Optional: Use ?feature= in the URL to personalize the headline
+    const params = new URLSearchParams(location.search);
+    const name = params.get('feature');
+    if (name) {
+      const el = document.getElementById('featureName');
+      el.textContent = `${name}`;
+    }
+  </script>
+</body>
+</html>
