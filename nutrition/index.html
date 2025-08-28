@@ -278,306 +278,284 @@
     </div>
   </div>
 
-  <!-- Data wiring: weekly rollups & minimal frontend data layer -->
-  <script type="module">
-    // This module wires the dashboard to your exact Firestore structure described in your schema:
-    // - profiles/{uid} (profile doc-level fields: pantryItems, customIngredients, nutritionGoals, defaultCurrency, groceryLists)
-    // - profiles/{uid}/spending/{autoId} (date (Timestamp), amountCents, vendor, items[])
-    // - profiles/{uid}/inventoryEvents/{autoId} (timestamp (Timestamp), delta, quantityBefore, quantityAfter, itemId, itemName, meta)
-    // - profiles/{uid}/budgets/{periodKey} (periodKey doc ID like "2025-08", targetCents, category)
 
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
-    import {
-      getFirestore,
-      collection,
-      query,
-      where,
-      getDocs,
-      getDoc,
-      doc,
-      Timestamp
-    } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
+<script type="module">
+ import loader from './js/firebasedata.js';
 
-    // --- IMPORTANT: paste your firebase config object here ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+  // --- IMPORTANT: paste your firebase config object here ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
     authDomain: "goodplates-7ae36.firebaseapp.com",
     projectId: "goodplates-7ae36",
     storageBucket: "goodplates-7ae36.firebasestorage.app",
     messagingSenderId: "541149626283",
     appId: "1:541149626283:web:928888f0b42cda49b7dcee",
     measurementId: "G-HKMSHM726J"
-    };
+  };
 
-    const app = initializeApp(firebaseConfig);
-    window.app = app; // keep compatibility with firebasedata.js loader
+  // Import Firestore modular functions (v12)
+  import {
+    collection, doc, query, where, getDocs, getDoc, Timestamp
+  } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
-    // Initialize auth so we can derive uid automatically from signed-in user
-    const auth = getAuth(app);
+  // Initialize loader with config, wait until ready
+  await loader.init(firebaseConfig);
+  await loader.ready;
 
-    // Import your loader module (uses window.app to init itself)
-    import loader from './js/firebasedata.js';
-    await loader.ready;
+  // Use db and auth from loader
+  const db = loader.db;
 
-    const db = getFirestore(app);
+  // Utility: get week start (Monday) and end (Sunday) for a given date
+  function getWeekRange(date = new Date()) {
+    const d = new Date(date);
+    const day = (d.getDay() + 6) % 7; // 0=Monday
+    const monday = new Date(d);
+    monday.setDate(d.getDate() - day);
+    monday.setHours(0,0,0,0);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    sunday.setHours(23,59,59,999);
+    return { start: monday, end: sunday };
+  }
 
-    // Utility: get week start (Monday) and end (Sunday) for a given date
-    function getWeekRange(date = new Date()) {
-      const d = new Date(date);
-      const day = (d.getDay() + 6) % 7; // 0=Monday
-      const monday = new Date(d);
-      monday.setDate(d.getDate() - day);
-      monday.setHours(0,0,0,0);
-      const sunday = new Date(monday);
-      sunday.setDate(monday.getDate() + 6);
-      sunday.setHours(23,59,59,999);
-      return { start: monday, end: sunday };
-    }
+  // Helper: format cents -> currency string
+  function formatCurrency(cents, currency = 'EUR'){
+    cents = Number(cents || 0);
+    try{ return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(cents/100); }catch(e){ return (cents/100).toFixed(2) + ' ' + (currency || '€'); }
+  }
 
-    // Will be set from Firebase Auth on sign-in
-    let uid = null;
+  // DOM helpers
+  function setText(id, text){ const el = document.getElementById(id); if(el) el.textContent = text; }
+  function setInnerHTML(id, html){ const el = document.getElementById(id); if(el) el.innerHTML = html; }
+  function setBarWidth(id, pct){ const el = document.getElementById(id); if(el) el.style.width = pct + '%'; }
 
-    // Helper: format cents -> currency string
-    function formatCurrency(cents, currency = 'EUR'){
-      cents = Number(cents || 0);
-      try{ return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(cents/100); }catch(e){ return (cents/100).toFixed(2) + ' ' + (currency || '€'); }
-    }
+  // 1) Spending: profiles/{uid}/spending with date (Timestamp) and amountCents
+  async function getWeeklySpending(uid, startTs, endTs){
+    const colRef = collection(db, 'profiles', uid, 'spending');
+    const q = query(colRef, where('date', '>=', startTs), where('date', '<=', endTs));
+    const snap = await getDocs(q);
+    let totalCents = 0;
+    const rows = [];
+    snap.forEach(docSnap => {
+      const d = docSnap.data();
+      const cents = Number(d.amountCents || 0);
+      totalCents += cents;
+      rows.push({ id: docSnap.id, ...d });
+    });
+    rows.sort((a,b)=> (b.date?.toMillis?.()||0) - (a.date?.toMillis?.()||0));
+    return { totalCents, rows };
+  }
 
-    // --- Core reads wired to your DB schema ---
+  // 2) Inventory events: profiles/{uid}/inventoryEvents
+  async function getWeeklyInventoryEvents(uid, startTs, endTs){
+    const colRef = collection(db, 'profiles', uid, 'inventoryEvents');
+    const q = query(colRef, where('timestamp', '>=', startTs), where('timestamp', '<=', endTs));
+    const snap = await getDocs(q);
+    const events = [];
+    snap.forEach(docSnap => events.push({ id: docSnap.id, ...docSnap.data() }));
 
-    // 1) Spending: profiles/{uid}/spending with date (Timestamp) and amountCents
-    async function getWeeklySpending(uid, startTs, endTs){
-      const colRef = collection(db, 'profiles', uid, 'spending');
-      const q = query(colRef, where('date', '>=', startTs), where('date', '<=', endTs));
-      const snap = await getDocs(q);
-      let totalCents = 0;
-      const rows = [];
-      snap.forEach(docSnap => {
-        const d = docSnap.data();
-        const cents = Number(d.amountCents || 0);
-        totalCents += cents;
-        rows.push({ id: docSnap.id, ...d });
-      });
-      rows.sort((a,b)=> (b.date?.toMillis?.()||0) - (a.date?.toMillis?.()||0));
-      return { totalCents, rows };
-    }
+    // fetch profile doc which contains pantryItems & customIngredients (profile-level arrays per your schema)
+    let profile = loader.getProfile(uid);
+    if (!profile) profile = await loader.fetchDocument('profiles', uid);
+    const pantryItems = Array.isArray(profile?.pantryItems) ? profile.pantryItems : [];
+    const customIngredients = Array.isArray(profile?.customIngredients) ? profile.customIngredients : [];
 
-    // 2) Inventory events: profiles/{uid}/inventoryEvents
-    async function getWeeklyInventoryEvents(uid, startTs, endTs){
-      const colRef = collection(db, 'profiles', uid, 'inventoryEvents');
-      const q = query(colRef, where('timestamp', '>=', startTs), where('timestamp', '<=', endTs));
-      const snap = await getDocs(q);
-      const events = [];
-      snap.forEach(docSnap=> events.push({ id: docSnap.id, ...docSnap.data() }));
+    let pantryUsedCount = 0;
+    let estimatedKcal = 0;
+    let estimatedProtein = 0;
+    let estimatedCarbs = 0;
+    let estimatedFat = 0;
 
-      // fetch profile doc which contains pantryItems & customIngredients (profile-level arrays per your schema)
-      let profile = loader.getProfile(uid);
-      if (!profile) profile = await loader.fetchDocument('profiles', uid);
-      const pantryItems = Array.isArray(profile?.pantryItems) ? profile.pantryItems : [];
-      const customIngredients = Array.isArray(profile?.customIngredients) ? profile.customIngredients : [];
+    events.forEach(ev => {
+      const delta = Number(ev.delta || 0);
+      const qty = Math.abs(delta) || 0;
+      const used = (delta < 0) || ((ev.quantityBefore != null && ev.quantityAfter != null) && (ev.quantityAfter < ev.quantityBefore));
+      if (used) pantryUsedCount += 1;
 
-      let pantryUsedCount = 0;
-      let estimatedKcal = 0;
-      let estimatedProtein = 0;
-      let estimatedCarbs = 0;
-      let estimatedFat = 0;
-
-      events.forEach(ev => {
-        const delta = Number(ev.delta || 0);
-        const qty = Math.abs(delta) || 0;
-        const used = (delta < 0) || ((ev.quantityBefore != null && ev.quantityAfter != null) && (ev.quantityAfter < ev.quantityBefore));
-        if (used) pantryUsedCount += 1;
-
-        // find metadata in pantryItems or customIngredients
-        let meta = null;
-        if (ev.itemId) meta = pantryItems.find(p=>p.id === ev.itemId) || null;
-        if (!meta && ev.itemName) {
-          const name = (ev.itemName||'').toLowerCase();
-          meta = pantryItems.find(p=>p.name && p.name.toLowerCase() === name) || customIngredients.find(c=>c.name && c.name.toLowerCase() === name) || null;
-        }
-
-        const caloriesPerUnit = Number(meta?.calories || meta?.nutrition?.calories || 0);
-        const proteinPerUnit = Number(meta?.nutrition?.protein || meta?.protein || 0);
-        const carbsPerUnit = Number(meta?.nutrition?.carbs || meta?.carbs || 0);
-        const fatPerUnit = Number(meta?.nutrition?.fat || meta?.fat || 0);
-
-        if (caloriesPerUnit && qty) estimatedKcal += caloriesPerUnit * qty;
-        if (proteinPerUnit && qty) estimatedProtein += proteinPerUnit * qty;
-        if (carbsPerUnit && qty) estimatedCarbs += carbsPerUnit * qty;
-        if (fatPerUnit && qty) estimatedFat += fatPerUnit * qty;
-      });
-
-      return { events, pantryUsedCount, estimatedKcal, estimatedProtein, estimatedCarbs, estimatedFat };
-    }
-
-    // 3) Budgets: profiles/{uid}/budgets/{periodKey} (subcollection, fixed doc IDs like 2025-08)
-    async function getBudgetForPeriod(uid, periodKey){
-      try {
-        const docRef = doc(db, 'profiles', uid, 'budgets', periodKey);
-        const snap = await getDoc(docRef);
-        if (snap.exists()) return { id: snap.id, ...snap.data() };
-      } catch (e){ console.warn('Failed to read budget doc', e); }
-      return null;
-    }
-
-    // DOM helpers
-    function setText(id, text){ const el = document.getElementById(id); if(el) el.textContent = text; }
-    function setInnerHTML(id, html){ const el = document.getElementById(id); if(el) el.innerHTML = html; }
-    function setBarWidth(id, pct){ const el = document.getElementById(id); if(el) el.style.width = pct + '%'; }
-
-    // Main UI refresh
-    async function refreshUI(){
-      if (!uid){ console.warn('No authenticated user yet. Waiting for sign-in.'); return; }
-      const { start, end } = getWeekRange(new Date());
-      const startTs = Timestamp.fromDate(start);
-      const endTs = Timestamp.fromDate(end);
-
-      // Profile doc (contains pantryItems, customIngredients, nutritionGoals, defaultCurrency)
-      let profile = loader.getProfile(uid);
-      if (!profile) profile = await loader.fetchDocument('profiles', uid) || {};
-      const currency = profile.defaultCurrency || 'EUR';
-
-      // Spending (profiles/{uid}/spending)
-      const spending = await getWeeklySpending(uid, startTs, endTs);
-      const totalGroceriesCents = spending.totalCents || 0;
-      setText('mini-groceries', formatCurrency(totalGroceriesCents, currency));
-      setText('groceries-week-value', formatCurrency(totalGroceriesCents, currency));
-
-      // Budgets: read subcollection doc for the month periodKey (YYYY-MM)
-      const monthKey = start.toISOString().slice(0,7);
-      const budgetDoc = await getBudgetForPeriod(uid, monthKey);
-      const groceriesBudget = (budgetDoc && budgetDoc.targetCents) ? budgetDoc.targetCents : (profile.weeklyGroceriesBudgetCents || 0);
-      const budgetPct = (groceriesBudget > 0) ? Math.min(100, Math.round(totalGroceriesCents / groceriesBudget * 100)) : 0;
-      setText('groceries-week-remaining', groceriesBudget > 0 ? `Budget ${formatCurrency(groceriesBudget, currency)} • remaining ${formatCurrency(Math.max(0, groceriesBudget - totalGroceriesCents), currency)}` : 'No budget set');
-      setInnerHTML('budget-progress', groceriesBudget > 0 ? `${formatCurrency(totalGroceriesCents,currency)} / ${formatCurrency(groceriesBudget,currency)}` : '—');
-      const budgetBar = document.getElementById('budget-bar'); if (budgetBar) budgetBar.style.width = budgetPct + '%';
-
-      // Inventory events (pantry usage & estimated nutrition)
-      const inv = await getWeeklyInventoryEvents(uid, startTs, endTs);
-      setText('pantry-used-value', inv.pantryUsedCount + ' items');
-      setText('mini-pantry-used', inv.pantryUsedCount);
-
-      const kcal = Math.round(inv.estimatedKcal || 0);
-      setText('mini-kcal', kcal === 0 ? '—' : kcal);
-      setText('calories-week-value', kcal === 0 ? '— kcal' : (kcal + ' kcal'));
-
-      const weeklyCalGoal = (profile?.nutritionGoals && typeof profile.nutritionGoals.calories === 'number') ? profile.nutritionGoals.calories * 7 : null;
-      if (weeklyCalGoal){
-        const remaining = Math.max(0, weeklyCalGoal - kcal);
-        setText('calories-week-remaining', `Weekly target ${weeklyCalGoal} kcal • remaining ${remaining} kcal`);
-        const bar = document.getElementById('calories-week-bar'); if(bar) bar.style.width = Math.min(100, Math.round(kcal / weeklyCalGoal * 100)) + '%';
+      // find metadata in pantryItems or customIngredients
+      let meta = null;
+      if (ev.itemId) meta = pantryItems.find(p=>p.id === ev.itemId) || null;
+      if (!meta && ev.itemName) {
+        const name = (ev.itemName||'').toLowerCase();
+        meta = pantryItems.find(p=>p.name && p.name.toLowerCase() === name) || customIngredients.find(c=>c.name && c.name.toLowerCase() === name) || null;
       }
 
-      // macros
-      if (inv.estimatedProtein){
-        setText('protein-week-value', Math.round(inv.estimatedProtein) + ' g');
-        setText('protein-macro-value', Math.round(inv.estimatedProtein) + ' g');
-        const proteinGoal = profile?.nutritionGoals?.protein ? profile.nutritionGoals.protein * 7 : null;
-        if (proteinGoal){
-          const pct = Math.min(100, Math.round(inv.estimatedProtein / proteinGoal * 100));
-          const el = document.getElementById('protein-bar'); if(el) el.style.width = pct + '%';
-          setText('protein-macro-goal', proteinGoal + ' g');
-          setText('protein-week-progress', `${Math.round(inv.estimatedProtein)} / ${proteinGoal} g`);
-        }
-      }
+      const caloriesPerUnit = Number(meta?.calories || meta?.nutrition?.calories || 0);
+      const proteinPerUnit = Number(meta?.nutrition?.protein || meta?.protein || 0);
+      const carbsPerUnit = Number(meta?.nutrition?.carbs || meta?.carbs || 0);
+      const fatPerUnit = Number(meta?.nutrition?.fat || meta?.fat || 0);
 
-      if (inv.estimatedCarbs){
-        setText('carbs-macro-value', Math.round(inv.estimatedCarbs) + ' g');
-        const carbsGoal = profile?.nutritionGoals?.carbs ? profile.nutritionGoals.carbs * 7 : null;
-        const elc = document.getElementById('carbs-bar'); if (elc && carbsGoal) elc.style.width = Math.min(100, Math.round(inv.estimatedCarbs / carbsGoal * 100)) + '%';
-        if (carbsGoal) setText('carbs-macro-goal', carbsGoal + ' g');
-      }
-
-      if (inv.estimatedFat){
-        setText('fat-macro-value', Math.round(inv.estimatedFat) + ' g');
-        const fatGoal = profile?.nutritionGoals?.fats ? profile.nutritionGoals.fats * 7 : null;
-        const elf = document.getElementById('fat-bar'); if (elf && fatGoal) elf.style.width = Math.min(100, Math.round(inv.estimatedFat / fatGoal * 100)) + '%';
-        if (fatGoal) setText('fat-macro-goal', fatGoal + ' g');
-      }
-
-      // recent groceries table (use spending.rows)
-      const recentRows = spending.rows.slice(0,6);
-      const tbody = document.getElementById('recent-groceries-body');
-      if (tbody){
-        tbody.innerHTML = '';
-        if (recentRows.length === 0){
-          const tr = document.createElement('tr'); tr.innerHTML = `<td class="muted-small">No purchases this week</td><td>-</td><td>-</td><td>-</td>`; tbody.appendChild(tr);
-        } else {
-          recentRows.forEach(r=>{
-            const itemsDesc = (r.items && Array.isArray(r.items) && r.items.length>0) ? `${r.items.length} items` : '';
-            const price = r.amountCents ? formatCurrency(Number(r.amountCents), currency) : '—';
-            const vendor = r.vendor || (r.meta && r.meta.vendor) || '—';
-            const firstItem = (r.items && r.items[0]) ? (r.items[0].name || 'Item') : (r.itemName || 'Item');
-            const qty = (r.items && r.items[0] && r.items[0].qty) ? r.items[0].qty : (r.quantity || '—');
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${firstItem}${itemsDesc? ' — ' + itemsDesc : ''}</td><td>${qty}</td><td>${price}</td><td>${vendor}</td>`;
-            tbody.appendChild(tr);
-          });
-        }
-      }
-
-      // pantry snapshot (profile.pantryItems array) — top 5 by expiry
-      const pantryItems = Array.isArray(profile?.pantryItems) ? profile.pantryItems : [];
-      const itemsWithExpiry = pantryItems.map(it=>({ ...it, expDate: it.expirationDate ? (it.expirationDate.toDate ? it.expirationDate.toDate() : new Date(it.expirationDate)) : null })).sort((a,b)=>{
-        if(!a.expDate) return 1; if(!b.expDate) return -1; return a.expDate - b.expDate;
-      }).slice(0,5);
-      const snapshotList = document.getElementById('pantry-snapshot-list');
-      if (snapshotList){
-        snapshotList.innerHTML = '';
-        if (itemsWithExpiry.length === 0){
-          snapshotList.innerHTML = `<div class="meal-item"><div class="thumb">—</div><div><div style="font-weight:700">No pantry items</div><div class="muted-small">—</div></div></div>`;
-        } else {
-          itemsWithExpiry.forEach(it=>{
-            const daysLeft = it.expDate ? Math.ceil((it.expDate - new Date())/(1000*60*60*24)) : null;
-            const itemRow = document.createElement('div'); itemRow.className = 'meal-item';
-            itemRow.innerHTML = `<div class="thumb">${it.thumb || '🍽️'}</div><div><div style="font-weight:700">${it.name}</div><div class="muted-small">Qty ${it.quantity || '—'}${daysLeft!=null? ' • Expires in ' + daysLeft + ' days' : ' • No expiry'}</div></div>`;
-            snapshotList.appendChild(itemRow);
-          });
-        }
-      }
-
-      // upcoming grocery lists (profile.groceryLists)
-      const listsContainer = document.getElementById('upcoming-grocery-lists');
-      if (listsContainer){
-        listsContainer.innerHTML = '';
-        const lists = Array.isArray(profile?.groceryLists) ? profile.groceryLists.slice(0,5) : [];
-        if (lists.length === 0){
-          listsContainer.innerHTML = `<div class="meal-item"><div class="thumb">🛒</div><div><div style="font-weight:700">No planned lists</div><div class="muted-small">—</div></div></div>`;
-        } else {
-          lists.forEach(l=>{
-            const updated = l.updatedAt ? (l.updatedAt.toDate ? l.updatedAt.toDate() : new Date(l.updatedAt)) : null;
-            const updatedTxt = updated ? `Updated ${Math.round((Date.now()-updated)/ (1000*60*60*24))} days ago` : '';
-            const item = document.createElement('div'); item.className = 'meal-item';
-            item.innerHTML = `<div class="thumb">🛒</div><div><div style="font-weight:700">${l.name}</div><div class="muted-small">${(Array.isArray(l.items)? l.items.length : 0)} items ${updatedTxt ? '• '+updatedTxt : ''}</div></div>`;
-            listsContainer.appendChild(item);
-          });
-        }
-      }
-
-      setText('weekly-summary-text', `Estimated ${kcal === 0 ? '—' : kcal + ' kcal'} from groceries • Pantry used ${inv.pantryUsedCount} items this week.`);
-    }
-
-    // Auth listener: derive uid from logged-in user automatically
-    onAuthStateChanged(auth, async (user) => {
-      if (user){ uid = user.uid; console.info('Signed in uid=', uid);
-        // Ensure profile is loaded into loader cache for faster access
-        try{ await loader.fetchDocument('profiles', uid); }catch(e){/*ignore*/ }
-        await refreshUI();
-      } else { uid = null; console.info('No user signed in.'); }
+      if (caloriesPerUnit && qty) estimatedKcal += caloriesPerUnit * qty;
+      if (proteinPerUnit && qty) estimatedProtein += proteinPerUnit * qty;
+      if (carbsPerUnit && qty) estimatedCarbs += carbsPerUnit * qty;
+      if (fatPerUnit && qty) estimatedFat += fatPerUnit * qty;
     });
 
-    // Also refresh when loader reports updates to profiles collection
-    loader.onUpdate(payload => { if (!payload || !payload.profiles) return; if (uid && payload.profiles[uid]) refreshUI().catch(console.warn); });
+    return { events, pantryUsedCount, estimatedKcal, estimatedProtein, estimatedCarbs, estimatedFat };
+  }
 
-    // Expose refresh for debugging
-    window.__nutritionRefresh = refreshUI;
-  </script>
+  // 3) Budgets: profiles/{uid}/budgets/{periodKey} (subcollection, fixed doc IDs like 2025-08)
+  async function getBudgetForPeriod(uid, periodKey){
+    try {
+      const docRef = doc(db, 'profiles', uid, 'budgets', periodKey);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) return { id: snap.id, ...snap.data() };
+    } catch (e){ console.warn('Failed to read budget doc', e); }
+    return null;
+  }
 
-  <!-- Keep the loader file available as a separate module too -->
-  <script type="module" src="./js/firebasedata.js"></script>
+  // Main UI refresh
+  async function refreshUI(){
+    const user = loader.currentUser;
+    if (!user){ console.warn('No authenticated user yet. Waiting for sign-in.'); return; }
+    const uid = user.uid;
+    const { start, end } = getWeekRange(new Date());
+    const startTs = Timestamp.fromDate(start);
+    const endTs = Timestamp.fromDate(end);
+
+    // Profile doc (contains pantryItems, customIngredients, nutritionGoals, defaultCurrency)
+    let profile = loader.getProfile(uid);
+    if (!profile) profile = await loader.fetchDocument('profiles', uid) || {};
+    const currency = profile.defaultCurrency || 'EUR';
+
+    // Spending (profiles/{uid}/spending)
+    const spending = await getWeeklySpending(uid, startTs, endTs);
+    const totalGroceriesCents = spending.totalCents || 0;
+    setText('mini-groceries', formatCurrency(totalGroceriesCents, currency));
+    setText('groceries-week-value', formatCurrency(totalGroceriesCents, currency));
+
+    // Budgets: read subcollection doc for the month periodKey (YYYY-MM)
+    const monthKey = start.toISOString().slice(0,7);
+    const budgetDoc = await getBudgetForPeriod(uid, monthKey);
+    const groceriesBudget = (budgetDoc && budgetDoc.targetCents) ? budgetDoc.targetCents : (profile.weeklyGroceriesBudgetCents || 0);
+    const budgetPct = (groceriesBudget > 0) ? Math.min(100, Math.round(totalGroceriesCents / groceriesBudget * 100)) : 0;
+    setText('groceries-week-remaining', groceriesBudget > 0 ? `Budget ${formatCurrency(groceriesBudget, currency)} • remaining ${formatCurrency(Math.max(0, groceriesBudget - totalGroceriesCents), currency)}` : 'No budget set');
+    setInnerHTML('budget-progress', groceriesBudget > 0 ? `${formatCurrency(totalGroceriesCents,currency)} / ${formatCurrency(groceriesBudget,currency)}` : '—');
+    const budgetBar = document.getElementById('budget-bar'); if (budgetBar) budgetBar.style.width = budgetPct + '%';
+
+    // Inventory events (pantry usage & estimated nutrition)
+    const inv = await getWeeklyInventoryEvents(uid, startTs, endTs);
+    setText('pantry-used-value', inv.pantryUsedCount + ' items');
+    setText('mini-pantry-used', inv.pantryUsedCount);
+
+    const kcal = Math.round(inv.estimatedKcal || 0);
+    setText('mini-kcal', kcal === 0 ? '—' : kcal);
+    setText('calories-week-value', kcal === 0 ? '— kcal' : (kcal + ' kcal'));
+
+    const weeklyCalGoal = (profile?.nutritionGoals && typeof profile.nutritionGoals.calories === 'number') ? profile.nutritionGoals.calories * 7 : null;
+    if (weeklyCalGoal){
+      const remaining = Math.max(0, weeklyCalGoal - kcal);
+      setText('calories-week-remaining', `Weekly target ${weeklyCalGoal} kcal • remaining ${remaining} kcal`);
+      const bar = document.getElementById('calories-week-bar'); if(bar) bar.style.width = Math.min(100, Math.round(kcal / weeklyCalGoal * 100)) + '%';
+    }
+
+    // macros
+    if (inv.estimatedProtein){
+      setText('protein-week-value', Math.round(inv.estimatedProtein) + ' g');
+      setText('protein-macro-value', Math.round(inv.estimatedProtein) + ' g');
+      const proteinGoal = profile?.nutritionGoals?.protein ? profile.nutritionGoals.protein * 7 : null;
+      if (proteinGoal){
+        const pct = Math.min(100, Math.round(inv.estimatedProtein / proteinGoal * 100));
+        const el = document.getElementById('protein-bar'); if(el) el.style.width = pct + '%';
+        setText('protein-macro-goal', proteinGoal + ' g');
+        setText('protein-week-progress', `${Math.round(inv.estimatedProtein)} / ${proteinGoal} g`);
+      }
+    }
+
+    if (inv.estimatedCarbs){
+      setText('carbs-macro-value', Math.round(inv.estimatedCarbs) + ' g');
+      const carbsGoal = profile?.nutritionGoals?.carbs ? profile.nutritionGoals.carbs * 7 : null;
+      const elc = document.getElementById('carbs-bar'); if (elc && carbsGoal) elc.style.width = Math.min(100, Math.round(inv.estimatedCarbs / carbsGoal * 100)) + '%';
+      if (carbsGoal) setText('carbs-macro-goal', carbsGoal + ' g');
+    }
+
+    if (inv.estimatedFat){
+      setText('fat-macro-value', Math.round(inv.estimatedFat) + ' g');
+      const fatGoal = profile?.nutritionGoals?.fats ? profile.nutritionGoals.fats * 7 : null;
+      const elf = document.getElementById('fat-bar'); if (elf && fatGoal) elf.style.width = Math.min(100, Math.round(inv.estimatedFat / fatGoal * 100)) + '%';
+      if (fatGoal) setText('fat-macro-goal', fatGoal + ' g');
+    }
+
+    // recent groceries table (use spending.rows)
+    const recentRows = spending.rows.slice(0,6);
+    const tbody = document.getElementById('recent-groceries-body');
+    if (tbody){
+      tbody.innerHTML = '';
+      if (recentRows.length === 0){
+        const tr = document.createElement('tr'); tr.innerHTML = `<td class="muted-small">No purchases this week</td><td>-</td><td>-</td><td>-</td>`; tbody.appendChild(tr);
+      } else {
+        recentRows.forEach(r=>{
+          const itemsDesc = (r.items && Array.isArray(r.items) && r.items.length>0) ? `${r.items.length} items` : '';
+          const price = r.amountCents ? formatCurrency(Number(r.amountCents), currency) : '—';
+          const vendor = r.vendor || (r.meta && r.meta.vendor) || '—';
+          const firstItem = (r.items && r.items[0]) ? (r.items[0].name || 'Item') : (r.itemName || 'Item');
+          const qty = (r.items && r.items[0] && r.items[0].qty) ? r.items[0].qty : (r.quantity || '—');
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${firstItem}${itemsDesc? ' — ' + itemsDesc : ''}</td><td>${qty}</td><td>${price}</td><td>${vendor}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    // pantry snapshot (profile.pantryItems array) — top 5 by expiry
+    const pantryItems = Array.isArray(profile?.pantryItems) ? profile.pantryItems : [];
+    const itemsWithExpiry = pantryItems.map(it=>({ ...it, expDate: it.expirationDate ? (it.expirationDate.toDate ? it.expirationDate.toDate() : new Date(it.expirationDate)) : null })).sort((a,b)=>{
+      if(!a.expDate) return 1; if(!b.expDate) return -1; return a.expDate - b.expDate;
+    }).slice(0,5);
+    const snapshotList = document.getElementById('pantry-snapshot-list');
+    if (snapshotList){
+      snapshotList.innerHTML = '';
+      if (itemsWithExpiry.length === 0){
+        snapshotList.innerHTML = `<div class="meal-item"><div class="thumb">—</div><div><div style="font-weight:700">No pantry items</div><div class="muted-small">—</div></div></div>`;
+      } else {
+        itemsWithExpiry.forEach(it=>{
+          const daysLeft = it.expDate ? Math.ceil((it.expDate - new Date())/(1000*60*60*24)) : null;
+          const itemRow = document.createElement('div'); itemRow.className = 'meal-item';
+          itemRow.innerHTML = `<div class="thumb">${it.thumb || '🍽️'}</div><div><div style="font-weight:700">${it.name}</div><div class="muted-small">Qty ${it.quantity || '—'}${daysLeft!=null? ' • Expires in ' + daysLeft + ' days' : ' • No expiry'}</div></div>`;
+          snapshotList.appendChild(itemRow);
+        });
+      }
+    }
+
+    // upcoming grocery lists (profile.groceryLists)
+    const listsContainer = document.getElementById('upcoming-grocery-lists');
+    if (listsContainer){
+      listsContainer.innerHTML = '';
+      const lists = Array.isArray(profile?.groceryLists) ? profile.groceryLists.slice(0,5) : [];
+      if (lists.length === 0){
+        listsContainer.innerHTML = `<div class="meal-item"><div class="thumb">🛒</div><div><div style="font-weight:700">No planned lists</div><div class="muted-small">—</div></div></div>`;
+      } else {
+        lists.forEach(l=>{
+          const updated = l.updatedAt ? (l.updatedAt.toDate ? l.updatedAt.toDate() : new Date(l.updatedAt)) : null;
+          const updatedTxt = updated ? `Updated ${Math.round((Date.now()-updated)/ (1000*60*60*24))} days ago` : '';
+          const item = document.createElement('div'); item.className = 'meal-item';
+          item.innerHTML = `<div class="thumb">🛒</div><div><div style="font-weight:700">${l.name}</div><div class="muted-small">${(Array.isArray(l.items)? l.items.length : 0)} items ${updatedTxt ? '• '+updatedTxt : ''}</div></div>`;
+          listsContainer.appendChild(item);
+        });
+      }
+    }
+
+    setText('weekly-summary-text', `Estimated ${kcal === 0 ? '—' : kcal + ' kcal'} from groceries • Pantry used ${inv.pantryUsedCount} items this week.`);
+  }
+
+  // Auth listener: derive uid from loader.currentUser
+  loader.onAuth(async (user) => {
+    if (user){ await refreshUI(); }
+    else { /* Optionally show "not signed in" UI */ }
+  });
+
+  // Also refresh when loader reports updates to profiles collection
+  loader.onUpdate(payload => {
+    const user = loader.currentUser;
+    if (!payload || !payload.profiles) return;
+    if (user && payload.profiles[user.uid]) refreshUI().catch(console.warn);
+  });
+
+  // Expose refresh for debugging
+  window.__nutritionRefresh = refreshUI;
+</script>
+
 </body>
 </html>
-
 
 
