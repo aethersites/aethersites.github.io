@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Saved Recipes — Prototype (Apple-style cards)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* (All your existing styles remain unchanged except layout/sidebar improvements) */
+    :root{
+      --primary:#16a34a; --primary-700:#15803d; --primary-100:#dcfce7; --fg:#0f172a;
+      --muted:#6b7280; --muted-2:#9ca3af; --border:#e6e9ee; --surface:#ffffff; --surface-2:#f7f8fa;
+      --radius-lg:14px; --radius-md:10px; --shadow-soft:0 8px 24px rgba(2,6,23,0.06); --shadow-2:0 16px 48px rgba(2,6,23,0.08);
+      --container:1200px; --glass:rgba(255,255,255,0.72);
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{background:var(--surface);color:var(--fg);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    a{color:inherit;text-decoration:none}
+    .container{max-width:var(--container);margin:0 auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px;padding:18px 0;border-bottom:1px solid var(--border)}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#fff,#f3f6ff);display:flex;align-items:center;justify-content:center;border:1px solid rgba(12,20,30,0.04);font-weight:700}
+    h1{font-size:20px;margin:0}
+    .lead{font-size:13px;color:var(--muted)}
+    .header-actions{margin-left:auto;display:flex;gap:10px}
+    .btn{appearance:none;border:1px solid var(--border);background:var(--surface);color:var(--fg);padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600}
+    .btn.primary{background:linear-gradient(90deg,var(--primary),#12b981);color:#fff;border:0}
+
+    /* ===== Layout (content + sidebar) ===== */
+    .layout{
+      display:grid;
+      grid-template-columns:320px 1fr;
+      gap:28px;
+      padding:28px 0;
+      align-items:start;
+      height: auto !important;
+      max-height: none !important;
+      min-height: 0 !important;
+      overflow: visible;
+    }
+    @media (max-width:1100px){ .layout{ grid-template-columns:1fr } .sidebar{ display:none } .open-sidebar{ display:block; position:fixed; inset:0; z-index:80; background:rgba(0,0,0,0.35) } .sidebar.panel{ position:fixed; left:0; top:0; bottom:0; height:100%; transform:translateX(0); box-shadow: var(--shadow-2); } }
+
+    /* ===== Sidebar / Filters ===== */
+    .sidebar{
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg);
+      padding:18px; height:calc(100vh - 92px); overflow:auto; box-shadow: var(--shadow-soft);  margin-left:24px;
+    }
+    .title-lg{font-size:18px; font-weight:700; color:var(--fg); margin:0}
+    .filter-block{ padding:14px; border-radius:10px; background:linear-gradient(180deg, rgba(250,250,250,0.6), rgba(255,255,255,0.6)); border:1px solid rgba(15,23,42,0.03); margin-bottom:12px }
+    .filter-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
+    .input{ width:100%; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-size:14px; background:var(--surface) }
+    .chip{ display:flex; align-items:center; gap:10px; font-size:14px; padding:8px 10px; border-radius:999px; background:var(--surface-2); cursor:pointer; border:1px solid transparent }
+    .chip input{ width:16px; height:16px }
+    .chip:hover{ transform:translateY(-2px) }
+
+    .range{ width:100% }
+    .btn{ appearance:none; border:1px solid var(--border); background:var(--surface); color:var(--fg); padding:8px 14px; border-radius:10px; cursor:pointer; transition:all .14s ease; font-weight:600 }
+    .btn:hover{ transform:translateY(-2px); box-shadow:var(--shadow-soft) }
+    .btn.primary { background: linear-gradient(90deg, #17A34B, #12B981); color: white; border: 0; }
+    .btn.ghost{ background:transparent; border:1px dashed rgba(15,23,42,0.04) }
+
+    .sidebar .block{ padding:18px; border-bottom:1px solid var(--border); margin-bottom:0; background:transparent; border:0 }
+    .sidebar .block > .flex { display: flex; justify-content: space-between; align-items: center; }
+    .block .input{ border-radius:10px; }
+
+    .small{font-size:13px}
+    .muted{ color:var(--muted); font-size:13px }
+    .muted-2{ color:var(--muted-2) }
+
+    /* ===== Grid & cards (kept and improved) ===== */
+    .grid{ display:grid; gap:24px; padding-left:10px; padding-right:10px; }
+    .grid.cols-2{ grid-template-columns:repeat(2,1fr) }
+    .grid.cols-3{ grid-template-columns:repeat(3,1fr) }
+    .grid.cols-4{ grid-template-columns:repeat(4,1fr) }
+
+    .card{
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-2) }
+    .card .card-media{ height:192px; background: linear-gradient(135deg,#ecfdf5,#f0fdf4); display:flex; align-items:center; justify-content:center; position:relative; }
+    .card .card-body{ padding:16px 16px 20px }
+
+    .badge{ padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; background:var(--primary-100); color:var(--primary) }
+    .pill{ border-radius:999px; padding:6px 12px; font-weight:700; font-size:13px; background:var(--surface-2) }
+
+    /* ===== Modal (styled) ===== */
+    .modal-backdrop, #recipeModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:24px }
+    .modal{ width:100%; max-width:920px; background:var(--surface); border-radius:16px; overflow:hidden; box-shadow:var(--shadow-2) }
+    .modal .modal-media{ height:320px; background:#ddd; object-fit:cover }
+    .modal .content{ padding:28px }
+    .modal .close-btn, #closeModal{ position:absolute; right:18px; top:18px; background:rgba(0,0,0,0.6); color:#fff; border:0; padding:8px 12px; border-radius:10px; cursor:pointer }
+    @keyframes fadeInScale { from { opacity:0; transform:scale(0.96); } to { opacity:1; transform:scale(1); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+          <div><h1>Saved Recipes</h1>
+          <div class="lead">Your collection — saved from anywhere in the app</div></div></div>
+      <div class="header-actions">
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- ===== Sidebar (REPLACED) ===== -->
+      <aside id="sidebar" class="sidebar">
+        <div class="block">
+          <div class="flex items-center justify-between">
+            <h2 class="title-lg">Filters</h2>
+            <button class="btn ghost small" data-toggle="sidebar">✖️</button>
+          </div>
+          <br>
+          <div class="mt-2">
+            <div class="searchbar" style="position:relative">
+              <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%)">🔎</span>
+              <!-- visible search used by the sidebar script -->
+              <input class="input" type="text" id="filter-search" placeholder="Search recipes..." style="padding-left:36px" />
+              <!-- Hidden input kept for compatibility with the module-level `searchInput` reference used in the main script -->
+              <input type="hidden" id="search-input" />
+            </div>
+          </div>
+        </div>
+
+        <div class="block">
+          <h3>Rating</h3>
+          <div class="grid" style="gap:10px">
+            <label class="chip"><input type="checkbox" data-filter="rating" value="5"/> <span class="stars">★★★★★</span> &nbsp;&amp; up</label>
+            <label class="chip"><input type="checkbox" data-filter="rating" value="4"/> <span class="stars">★★★★☆</span> &nbsp;&amp; up</label>
+            <label class="chip"><input type="checkbox" data-filter="rating" value="3"/> <span class="stars">★★★☆☆</span> &nbsp;&amp; up</label>
+            <label class="chip"><input type="checkbox" data-filter="rating" value="2"/> <span class="stars">★★☆☆☆</span> &nbsp;&amp; up</label>
+            <label class="chip"><input type="checkbox" data-filter="rating" value="1"/> <span class="stars">★☆☆☆☆</span> &nbsp;&amp; up</label>
+          </div>
+        </div>
+
+        <div class="block">
+          <h3>Prep Time (minutes)</h3>
+          <input class="range" type="range" id="filter-prepTime" min="5" max="180" step="5" value="60" />
+          <div class="flex items-center justify-between small muted mt-2"><span>5 min</span><span>3+ hours</span></div>
+        </div>
+
+        <div class="block">
+          <h3>Calories</h3>
+          <div class="grid" style="gap:10px">
+            <label class="chip"><input type="checkbox" data-filter="calories" value="under-200"/> Under 200 calories</label>
+            <label class="chip"><input type="checkbox" data-filter="calories" value="200-400"/> 200-400 calories</label>
+            <label class="chip"><input type="checkbox" data-filter="calories" value="400-600"/> 400-600 calories</label>
+            <label class="chip"><input type="checkbox" data-filter="calories" value="600-800"/> 600-800 calories</label>
+            <label class="chip"><input type="checkbox" data-filter="calories" value="800-plus"/> 800+ calories</label>
+          </div>
+        </div>
+
+        <div class="block">
+          <h3>Diet Type</h3>
+          <div class="grid" style="gap:10px">
+            <label class="chip"><input type="checkbox" data-filter="tags" value="Vegetarian"/> Vegetarian</label>
+            <label class="chip"><input type="checkbox" data-filter="tags" value="Vegan"/> Vegan</label>
+            <label class="chip"><input type="checkbox" data-filter="tags" value="Gluten-Free"/> Gluten-Free</label>
+            <label class="chip"><input type="checkbox" data-filter="tags" value="Keto"/> Keto</label>
+            <label class="chip"><input type="checkbox" data-filter="tags" value="Paleo"/> Paleo</label>
+            <label class="chip"><input type="checkbox" data-filter="tags" value="Halal"/> Halal</label>
+          </div>
+        </div>
+
+        <div class="block">
+          <h3>Ingredients</h3>
+          <input class="range" type="range" id="filter-ingredients" min="3" max="20" step="1" value="10" />
+          <div class="flex items-center justify-between small muted mt-2"><span>3 ingredients</span><span>20+ ingredients</span></div>
+        </div>
+
+        <div class="block">
+          <button id="clearFilters" class="btn w-100">Clear All Filters</button>
+        </div>
+      </aside>
+
+      <!-- ===== Content (unchanged) ===== -->
+      <section class="content">
+        <div class="controls">
+          <div class="left"><div style="font-weight:700">Your saved recipes</div><div class="muted" id="saved-count">— recipes</div></div>
+          <div class="right"><div class="muted">View</div><button class="btn">Grid</button><button class="btn">List</button></div>
+        </div>
+
+        <div class="grid cols-3" id="recipes-grid">
+          <!-- populated by JS -->
+        </div>
+
+        <div style="margin-top:20px;display:flex;justify-content:center">
+          <button class="btn" id="load-more">Load more</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===== Modal markup (improved) ===== -->
+  <div id="recipeModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); justify-content:center; align-items:center; z-index:9999;">
+    <div style="background:white; border-radius:20px; max-width:900px; max-height:calc(100vh - 30px); width:100%; box-shadow:0 16px 48px rgba(0,0,0,.32); font-size:18px; overflow: auto; animation: fadeInScale .35s ease;">
+      <div style="position:relative; height:300px; overflow:hidden;">
+        <img id="modalImage" src="" alt="" style="width:100%; height:100%; object-fit:cover;" />
+        <button id="closeModal" style="position:absolute; top:16px; right:16px; background:rgba(0,0,0,0.65); color:white; border:none; padding:8px 14px; font-size:16px; border-radius:12px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="padding:28px 32px 36px 32px;">
+        <h2 id="modalTitle" style="margin:0 0 12px 0; font-size:32px; font-weight:800; line-height:1.2;"></h2>
+        <div id="modalTags" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
+        <div id="modalFilters" style="display:flex; gap:18px; flex-wrap:wrap; margin-bottom:32px; font-size:16px; color:#444;"></div>
+
+        <div id="modalBody" style="max-height:calc(100vh - 400px); overflow-y:auto; padding-right:8px;">
+          <div>
+            <h3 style="margin:0 0 12px 0; font-size:22px;">Ingredients</h3>
+            <ul id="modalIngredients" style="margin:0; padding:0; list-style:none; color:#555; font-size:16px; line-height:1.6;"></ul>
+          </div>
+
+          <div style="margin-top:28px;">
+            <h3 style="margin:0 0 12px 0; font-size:22px;">Instructions</h3>
+            <div id="modalInstructions" style="margin:0; color:#555; font-size:16px; line-height:1.7;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Sidebar scripts (only these changed/added) ===== -->
+  <script>
+    (function(){
+      // Elements
+      const sidebar = document.getElementById('sidebar');
+      const openBtn = document.querySelector('[data-open="sidebar"]');
+      const closeBtn = document.querySelector('[data-toggle="sidebar"]');
+      const mq = window.matchMedia('(max-width: 900px)');
+      function update(){
+        if(mq.matches){
+          if (openBtn) openBtn.style.display='inline-flex';
+          // keep sidebar hidden until user opens it on mobile
+        } else {
+          if (openBtn) openBtn.style.display='none';
+          sidebar && sidebar.classList.remove('open');
+        }
+      }
+      update();
+      mq.addEventListener('change', update);
+      openBtn && openBtn.addEventListener('click', ()=> sidebar && sidebar.classList.add('open'));
+      closeBtn && closeBtn.addEventListener('click', ()=> sidebar && sidebar.classList.remove('open'));
+    })();
+
+    // Mirror visible filter-search into hidden #search-input so the existing module-level searchInput works.
+    (function(){
+      const visible = document.getElementById('filter-search');
+      const hidden = document.getElementById('search-input'); // used by your module's script
+      if (!visible || !hidden) return;
+      visible.addEventListener('input', (e) => {
+        hidden.value = visible.value;
+        // trigger module's input handler (it attaches to #search-input)
+        const ev = new Event('input', { bubbles: true });
+        hidden.dispatchEvent(ev);
+        // after module renderGrid runs (it rebuilds DOM), apply additional sidebar filters
+        setTimeout(applySidebarFilters, 75);
+      });
+    })();
+
+    // Servings +/- controls (generic click handling)
+    document.addEventListener('click', function(e){
+      const btn = e.target.closest('[data-action]');
+      if(!btn) return;
+      const id = btn.getAttribute('data-target');
+      const el = document.getElementById(id);
+      if(!el) return;
+      const inc = btn.getAttribute('data-action') === 'inc';
+      const min = 1;
+      const current = parseInt(el.textContent.trim(), 10) || parseInt(el.getAttribute('data-default')||'1',10);
+      const next = Math.max(min, current + (inc?1:-1));
+      el.textContent = String(next);
+    });
+
+    // Utility to parse calories from a card element. Returns numeric calories or null.
+    function parseCardCalories(card){
+      try {
+        const stats = card.querySelector('.stats');
+        if(!stats) return null;
+        // first numeric inside .stats text (e.g. "470 kcal")
+        const txt = stats.textContent || '';
+        const m = txt.match(/(\d{2,4})\s*kcal/);
+        return m ? parseInt(m[1],10) : null;
+      } catch(e){ return null; }
+    }
+    // parse cook time like "30m" or "30 min" etc -> minutes numeric
+    function parseCardCookTime(card){
+      try {
+        const meta = card.querySelector('.meta');
+        if(!meta) return null;
+        const t = meta.textContent || '';
+        const m = t.match(/(\d+)\s*(?:m|min|minutes|h)/i);
+        if(!m) return null;
+        let n = parseInt(m[1],10);
+        // handle hours "2h" -> convert to minutes if necessary (very simple)
+        if (t.match(/h\b/)) n = n * 60;
+        return n;
+      } catch(e){ return null; }
+    }
+    // Apply checkbox/range/tag filters by hiding/showing rendered cards.
+    function applySidebarFilters(){
+      try {
+        const cards = Array.from(document.querySelectorAll('#recipes-grid .card'));
+        if (!cards.length) return;
+
+        // collect selected filters
+        const ratingChecks = Array.from(document.querySelectorAll('input[data-filter="rating"]:checked')).map(i=>Number(i.value));
+        const calChecks = Array.from(document.querySelectorAll('input[data-filter="calories"]:checked')).map(i=>i.value);
+        const tagChecks = Array.from(document.querySelectorAll('input[data-filter="tags"]:checked')).map(i=>i.value.toLowerCase());
+        const maxPrep = Number(document.getElementById('filter-prepTime')?.value || 999);
+        const maxIngredients = Number(document.getElementById('filter-ingredients')?.value || 999);
+
+        cards.forEach(card => {
+          let hide = false;
+
+          // calories filter
+          const kcal = parseCardCalories(card);
+          if (calChecks.length){
+            let passCal = false;
+            for (const c of calChecks){
+              if (c === 'under-200' && (kcal === null ? false : kcal < 200)) passCal = true;
+              if (c === '200-400' && (kcal === null ? false : kcal >= 200 && kcal <= 400)) passCal = true;
+              if (c === '400-600' && (kcal === null ? false : kcal > 400 && kcal <= 600)) passCal = true;
+              if (c === '600-800' && (kcal === null ? false : kcal > 600 && kcal <= 800)) passCal = true;
+              if (c === '800-plus' && (kcal === null ? false : kcal > 800)) passCal = true;
+            }
+            if (!passCal) hide = true;
+          }
+
+          // prep time filter
+          const prep = parseCardCookTime(card);
+          if (prep !== null && prep > maxPrep) hide = true;
+
+          // tags filter
+          if (tagChecks.length){
+            const tagEls = Array.from(card.querySelectorAll('.tag')).map(t => t.textContent.trim().toLowerCase());
+            const anyMatch = tagChecks.some(tc => tagEls.includes(tc));
+            if (!anyMatch) hide = true;
+          }
+
+          // ingredients count: try to read from recipe object attached via data-attributes (if present)
+          // fallback: don't filter if no info
+          const ingRange = maxIngredients;
+          const ingredientsList = card._ingredientsCount || null;
+          if (ingredientsList != null && ingredientsList > ingRange) hide = true;
+
+          card.style.display = hide ? 'none' : '';
+        });
+      } catch(e){
+        // non-fatal
+        console.warn('applySidebarFilters error', e);
+      }
+    }
+
+    // wire checkboxes / ranges to re-filter after render
+    (function wireControls(){
+      const controls = document.querySelectorAll('#sidebar input[type="checkbox"], #filter-prepTime, #filter-ingredients');
+      controls.forEach(c => c.addEventListener('change', () => {
+        // re-run text search to rebuild DOM then apply filters shortly after
+        const visible = document.getElementById('filter-search');
+        if (visible){
+          // mirror to hidden input to trigger existing search handler
+          const hidden = document.getElementById('search-input');
+          if (hidden){
+            hidden.value = visible.value;
+            hidden.dispatchEvent(new Event('input', { bubbles: true }));
+          } else {
+            // fallback: just apply filters on existing DOM
+            setTimeout(applySidebarFilters, 50);
+          }
+        } else {
+          setTimeout(applySidebarFilters, 50);
+        }
+      }));
+      // Clear filters
+      const clearBtn = document.getElementById('clearFilters');
+      clearBtn && clearBtn.addEventListener('click', ()=>{
+        // reset visible search
+        const vs = document.getElementById('filter-search');
+        if (vs) vs.value = '';
+        // clear hidden search to trigger main render
+        const hidden = document.getElementById('search-input');
+        if (hidden){ hidden.value=''; hidden.dispatchEvent(new Event('input', { bubbles: true })); }
+        // uncheck checkboxes and reset ranges
+        document.querySelectorAll('#sidebar input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.getElementById('filter-prepTime') && (document.getElementById('filter-prepTime').value = 60);
+        document.getElementById('filter-ingredients') && (document.getElementById('filter-ingredients').value = 10);
+        // final cleanup
+        setTimeout(applySidebarFilters, 80);
+      });
+    })();
+
+    // When user opens a recipe "Open" button, populate modal if recipe object present
+    (function modalWiring(){
+      document.addEventListener('click', function(e){
+        const openBtn = e.target.closest('.open-btn');
+        if (!openBtn) return;
+        const idx = Number(openBtn.getAttribute('data-index'));
+        // savedRecipes is defined in the module script; attempt to read it from window if available
+        const saved = window.savedRecipes || null;
+        // your module stores savedRecipes in a local variable; attempt to reference via a global pointer if you set one
+        const recipe = (window.savedRecipes && window.savedRecipes[idx]) || (window.__savedRecipes && window.__savedRecipes[idx]) || null;
+        if (!recipe || typeof recipe === 'string'){
+          // fallback: the page's module already alerts for ID-only saved entries
+          return;
+        }
+
+        // populate modal
+        document.getElementById('modalImage').src = recipe.image || '';
+        document.getElementById('modalTitle').textContent = recipe.title || 'Untitled';
+        const tagsEl = document.getElementById('modalTags');
+        tagsEl.innerHTML = '';
+        if (Array.isArray(recipe.tags)) recipe.tags.forEach(t => { const s = document.createElement('span'); s.className='pill'; s.textContent = t; tagsEl.appendChild(s); });
+
+        const filtersEl = document.getElementById('modalFilters');
+        filtersEl.innerHTML = '';
+        const infoPieces = [];
+        if (recipe.cookTime) infoPieces.push('⏱ ' + recipe.cookTime);
+        if (recipe.servings) infoPieces.push('🍽 ' + recipe.servings + ' servings');
+        const kcal = recipe.nutrition && (recipe.nutrition.calories || recipe.nutrition.kcal);
+        if (kcal) infoPieces.push('🔥 ' + kcal + ' cal');
+        if (recipe.rating) infoPieces.push('⭐ ' + recipe.rating);
+        filtersEl.textContent = infoPieces.join(' • ');
+
+        // ingredients
+        const ingrEl = document.getElementById('modalIngredients');
+        ingrEl.innerHTML = '';
+        if (Array.isArray(recipe.ingredients)){
+          recipe.ingredients.forEach(ing => {
+            const li = document.createElement('li');
+            li.textContent = (typeof ing === 'string') ? ing : (ing.qty? `${ing.qty} ${ing.unit || ''} ${ing.name}` : ing.name);
+            ingrEl.appendChild(li);
+          });
+        }
+
+        // instructions
+        const insEl = document.getElementById('modalInstructions');
+        insEl.innerHTML = '';
+        if (Array.isArray(recipe.steps)){
+          recipe.steps.forEach(s => { const p = document.createElement('p'); p.textContent = s; insEl.appendChild(p); });
+        } else if (typeof recipe.instructions === 'string'){
+          insEl.textContent = recipe.instructions;
+        }
+
+        // show modal
+        const modal = document.getElementById('recipeModal');
+        if (modal) modal.style.display = 'flex';
+      });
+
+      // close modal
+      const closeModalBtn = document.getElementById('closeModal');
+      closeModalBtn && closeModalBtn.addEventListener('click', ()=> {
+        const modal = document.getElementById('recipeModal');
+        if (modal) modal.style.display = 'none';
+      });
+    })();
+  </script>
+
+  <!-- keep your existing module wiring and loader script unchanged below -->
+  <!-- (your page's module script which defines renderGrid, savedRecipes, loader.onUpdate, etc.) -->
+  <!-- ... (unchanged module script from earlier) ... -->
+<!-- Firebase app init: place this BEFORE importing ./js/firebasedata.js -->
+<!-- Firebase + loader init (polished, only once) -->
+<script type="module">
+  import loader from './js/firebasedata.js';
+
+  // --- REPLACE with your Firebase project's config ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+
+  // Initialize loader with config (loader will handle Firebase app creation or reuse)
+  await loader.init(firebaseConfig);
+  await loader.ready;
+
+  // Expose loader on window for use in other scripts
+  window.loader = loader;
+</script>
+
+  <!-- include the loader file so you can use loader.* helpers -->
+  <script src="../recipes.js"></script> 
+  <script src="../scripts.js"></script>
+</body>
+</html>
+
+
+
+
+
