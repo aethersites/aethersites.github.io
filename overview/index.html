@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard — Grocery & Pantry (Apple-style Prototype)</title>
+  <style>
+    :root{
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --muted: #657080;
+      --accent: #0f172a;
+      --glass: rgba(255,255,255,0.6);
+      --radius: 18px;
+      --soft-shadow: 0 8px 26px rgba(12,20,30,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+      --thin-shadow: 0 6px 18px rgba(12,20,30,0.04);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#fff);color:var(--accent);padding:36px}
+    .stage{max-width:1200px;margin:0 auto}
+
+    header{display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;gap:16px;align-items:center}
+    .logo{width:54px;height:54px;border-radius:12px;background:linear-gradient(135deg,#fff,#f3f6ff);display:flex;align-items:center;justify-content:center;border:1px solid rgba(12,20,30,0.04);font-weight:700}
+    h1{font-size:22px;margin:0}
+    .search{flex:1;margin-left:12px}
+    .search input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(12,20,30,0.06);background:linear-gradient(180deg,#fff,#fbfcff);box-shadow:var(--thin-shadow)}
+    .actions{display:flex;gap:10px}
+    .btn{padding:8px 12px;border-radius:12px;border:1px solid rgba(12,20,30,0.06);background:var(--card);box-shadow:var(--thin-shadow);cursor:pointer;font-size:13px}
+    .btn.primary{background:linear-gradient(180deg,#0b61ff,#0a4bd6);color:white;border:none}
+
+    /* reordered top counters columns (4) */
+    .top-counters{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:22px}
+    .counter{background:var(--card);padding:18px;border-radius:16px;border:1px solid rgba(12,20,30,0.04);box-shadow:var(--soft-shadow);display:flex;flex-direction:column;gap:10px}
+    .counter .label{font-size:13px;color:var(--muted)}
+    .counter .value{font-size:20px;font-weight:700}
+    .counter .meta{font-size:12px;color:var(--muted)}
+
+    .layout{display:grid;grid-template-columns:2fr 360px;gap:18px;margin-top:18px}
+
+    /* Main column */
+    .main-col{display:flex;flex-direction:column;gap:18px}
+
+    .card{background:var(--card);border-radius:16px;padding:16px;border:1px solid rgba(12,20,30,0.04);box-shadow:var(--soft-shadow)}
+
+    /* Grocery + pantry lists layout */
+    .lists-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    .list-block{background:linear-gradient(180deg,#fff,#fcfdff);padding:12px;border-radius:12px;border:1px solid rgba(12,20,30,0.04)}
+    .grocery-head{display:flex;align-items:center;justify-content:space-between}
+    .grocery-list{margin-top:8px;display:grid;gap:10px}
+    .item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;border:1px solid rgba(12,20,30,0.04);background:linear-gradient(180deg,#fff,#fcfdff)}
+    .item input[type=checkbox]{width:18px;height:18px;border-radius:4px}
+    .item .title{font-weight:600}
+    .item .meta{margin-left:auto;color:var(--muted);font-size:13px}
+
+    .category{font-size:13px;color:var(--muted);margin-top:8px}
+
+    /* Pantry summary (kept as-is below) */
+    .pantry-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+    .pantry-card{padding:12px;border-radius:12px;border:1px solid rgba(12,20,30,0.04);background:linear-gradient(180deg,#fff,#fbfbfd);text-align:center}
+    .pantry-card .num{font-weight:700;font-size:18px}
+    .pantry-card .desc{font-size:13px;color:var(--muted);margin-top:6px}
+
+    /* Nutrition card */
+    .nutrition{display:flex;gap:12px;align-items:stretch}
+    .donut-wrapper{width:160px;height:160px;border-radius:999px;display:flex;align-items:center;justify-content:center;box-shadow:var(--thin-shadow);position:relative}
+    .donut-wrapper .center{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:700;width:96px;height:96px;border-radius:999px;background:var(--card)}
+    .donut-canvas{width:160px;height:160px}
+
+    .macros{flex:1;padding:12px}
+    .macro-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0}
+    .bar{height:8px;border-radius:999px;background:linear-gradient(90deg,#eee,#f4f7fb);overflow:hidden;margin-left:10px;flex:1}
+    .bar > i{display:block;height:100%;border-radius:999px}
+    .p {background:#ff8a65;width:62%}
+    .c {background:#64b5f6;width:42%}
+    .f {background:#ffd54f;width:28%}
+
+    /* Meals/History */
+    .meals{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+    .meal{padding:12px;border-radius:12px;border:1px solid rgba(12,20,30,0.04);background:#fff}
+    .meal .small{color:var(--muted);font-size:13px}
+
+    /* Right column */
+    aside{display:flex;flex-direction:column;gap:18px}
+    .quick-stats{display:grid;gap:10px}
+    .stat{padding:12px;border-radius:12px;background:linear-gradient(180deg,#fff,#fcfdff);border:1px solid rgba(12,20,30,0.04);text-align:center}
+    .stat .num{font-weight:800;font-size:20px}
+    .stat .label{font-size:13px;color:var(--muted)}
+
+    .list-small{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+    .small-row{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;border:1px solid rgba(12,20,30,0.04);background:#fff}
+
+    /* Responsive adjustments */
+    @media (max-width:980px){
+      .layout{grid-template-columns:1fr}
+      .lists-row{grid-template-columns:1fr}
+      .pantry-grid{grid-template-columns:repeat(2,1fr)}
+      .meals{grid-template-columns:1fr}
+      .top-counters{grid-template-columns:repeat(2,1fr)}
+    }
+    /* small helper */
+    .muted { color: var(--muted); font-size:13px; }
+  </style>
+</head>
+<body>
+
+    <!-- Top counters re-ordered: calories this week, calorie goal, spending this week, budget goal -->
+    <div class="top-counters">
+      <div class="counter">
+        <div class="label">Calories this week</div>
+        <div id="caloriesThisWeek" class="value">—</div>
+        <div id="caloriesThisWeekMeta" class="meta">tracked across meals</div>
+      </div>
+
+      <div class="counter">
+        <div class="label">Calorie goal</div>
+        <div id="calorieGoal" class="value">—</div>
+        <div id="calorieMeta" class="meta">daily target</div>
+      </div>
+
+      <div class="counter">
+        <div class="label">Spending this week</div>
+        <div id="budgetSpentThisWeek" class="value">—</div>
+        <div id="spendingMeta" class="meta">groceries</div>
+      </div>
+
+      <div class="counter">
+        <div class="label">Budget goal</div>
+        <div id="budgetGoalDisplay" class="value">—</div>
+        <div id="budgetGoalMeta" class="meta">weekly</div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="main-col">
+
+        <!-- Combined card holding Grocery + Pantry side-by-side -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-weight:700">Lists</div>
+              <div class="small">Groceries and pantry — quick check & mark</div>
+            </div>
+            <div class="small">Plan for your next shop</div>
+          </div>
+
+          <!-- Two matching lists side-by-side -->
+          <div class="lists-row">
+            <!-- Grocery column -->
+            <div class="list-block" id="groceryBlock">
+              <div class="grocery-head" style="padding-bottom:6px">
+                <div>
+                  <div style="font-weight:700">Grocery list</div>
+                  <div id="grocerySummary" class="category">—</div>
+                </div>
+                <div class="small">Items to buy</div>
+              </div>
+
+              <div id="groceryList" class="grocery-list">
+                <!-- populated from profile.groceryLists[0].items -->
+              </div>
+
+              <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+                <div id="checkedCount" class="small">Checked: 0 / 0</div>
+                <div style="margin-left:auto;display:flex;gap:8px">
+                  <button id="clearChecked" class="btn">Clear checked</button>
+                  <button id="markBought" class="btn primary">Mark all bought</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pantry column (matching formatting) -->
+            <div class="list-block" id="pantryBlock">
+              <div class="grocery-head" style="padding-bottom:6px">
+                <div>
+                  <div style="font-weight:700">Pantry list</div>
+                  <div id="pantrySummary" class="category">—</div>
+                </div>
+                <div class="small">Household & staples</div>
+              </div>
+
+              <div id="pantryList" class="grocery-list">
+                <!-- populated from profile.pantryItems -->
+              </div>
+
+              <div style="margin-top:12px;display:flex;gap:10px;align-items:center">
+                <div id="pantryCheckedCount" class="small">Checked: 0 / 0</div>
+                <div style="margin-left:auto;display:flex;gap:8px">
+                  <button id="clearPantryChecked" class="btn">Clear checked</button>
+                  <button id="markPantryBought" class="btn primary">Mark all bought</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nutrition card unchanged except kept in place -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-weight:700">Nutrition</div>
+              <div class="small">This week's consumption vs goals</div>
+            </div>
+            <div class="small">This week</div>
+          </div>
+
+          <div style="margin-top:12px" class="nutrition">
+            <div class="donut-wrapper">
+              <canvas id="macroDoughnut" class="donut-canvas" width="160" height="160" aria-label="Macronutrient distribution"></canvas>
+              <div id="doughnutCenter" class="center" style="text-align:center">
+                <div id="centerCalories" style="font-size:18px">—</div>
+                <div style="font-size:12px;color:var(--muted);font-weight:600">kcal this week</div>
+              </div>
+            </div>
+
+            <div class="macros">
+              <div class="macro-row"><div style="width:120px">Protein <span id="proteinGrams" class="small">—</span></div><div class="bar"><i id="pBar" class="p" style="width:62%"></i></div></div>
+              <div class="macro-row"><div style="width:120px">Carbs <span id="carbsGrams" class="small">—</span></div><div class="bar"><i id="cBar" class="c" style="width:42%"></i></div></div>
+              <div class="macro-row"><div style="width:120px">Fat <span id="fatGrams" class="small">—</span></div><div class="bar"><i id="fBar" class="f" style="width:28%"></i></div></div>
+
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <div class="btn">Log meal</div>
+                <div class="btn">Adjust goals</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="meals">
+            <div class="meal"><div style="font-weight:700">Breakfast</div><div id="mealBreakfast" class="small">—</div></div>
+            <div class="meal"><div style="font-weight:700">Lunch</div><div id="mealLunch" class="small">—</div></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <aside>
+        <div class="card">
+          <div style="font-weight:700">Quick stats</div>
+          <div class="small">At-a-glance numbers</div>
+
+          <div class="quick-stats" style="margin-top:12px">
+            <div class="stat"><div id="mealsLoggedNum" class="num">—</div><div class="label">Meals logged</div></div>
+            <div class="stat"><div id="spentTodayNum" class="num">—</div><div class="label">Spent today</div></div>
+            <div class="stat"><div id="pantryLowNum" class="num">—</div><div class="label">Pantry items low</div></div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div class="small">Upcoming recipes</div>
+            <div class="list-small">
+              <div class="small-row"><div>Stir-fry</div><div class="small">2x ingredients missing</div></div>
+              <div class="small-row"><div>Tomato soup</div><div class="small">Ready</div></div>
+              <div class="small-row"><div>Sandwiches</div><div class="small">1x missing</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Budget over time -->
+        <div class="card">
+          <div style="font-weight:700">Budget over time</div>
+          <div class="small">Groceries spent in recent weeks</div>
+          <div style="margin-top:12px">
+            <canvas id="budgetChart" width="320" height="180" aria-label="Budget over time"></canvas>
+          </div>
+          <div style="margin-top:10px" class="muted">Horizontal line shows weekly budget goal</div>
+        </div>
+
+      </aside>
+    </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Module: initialize Firebase + wire UI to profiles/{uid} using your firebasedata.js loader -->
+ <script type="module">
+  import {
+    collection, doc, query, where, getDocs, getDoc, Timestamp
+  } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+  import loader from './js/firebasedata.js';
+
+  // ---------- Replace this with your real Firebase config ----------
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+  // ----------------------------------------------------------------
+
+  // Initialize loader with config and wait for ready
+  await loader.init(firebaseConfig);
+  await loader.ready;
+
+  // Utility: currency formatting
+  function formatCurrency(value, currency = 'USD') {
+    try { return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value); }
+    catch (e) { return '$' + Number(value || 0).toFixed(2); }
+  }
+  function toDate(ts) {
+    if (!ts) return null;
+    if (typeof ts.toDate === 'function') return ts.toDate();
+    if (ts.seconds) return new Date(ts.seconds * 1000);
+    const d = new Date(ts);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function weekRange(now = new Date()) {
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    const start = new Date(end);
+    start.setDate(end.getDate() - 6);
+    start.setHours(0,0,0,0);
+    return { start, end };
+  }
+  function sumEntriesInRange(entries = [], dateField = 'date', start, end, extractor = (e)=>amountFromSpendingEntry(e)) {
+    if (!Array.isArray(entries)) return 0;
+    return entries.reduce((acc, e) => {
+      const d = toDate(e[dateField]);
+      if (!d) return acc;
+      if (d >= start && d <= end) return acc + extractor(e);
+      return acc;
+    }, 0);
+  }
+  function amountFromSpendingEntry(entry) {
+    if (!entry) return 0;
+    if (typeof entry.amount === 'number') return Number(entry.amount || 0);
+    if (typeof entry.amountCents === 'number') return Number(entry.amountCents || 0) / 100;
+    const n = Number(entry.amount || entry.amountCents || 0);
+    return isNaN(n) ? 0 : n;
+  }
+
+  // Chart.js setup
+  let macroChart = null, budgetChart = null;
+  function initCharts() {
+    const ctxM = document.getElementById('macroDoughnut').getContext('2d');
+    macroChart = new Chart(ctxM, {
+      type: 'doughnut',
+      data: { labels: ['Protein (kcal)', 'Carbs (kcal)', 'Fats (kcal)'],
+        datasets: [{ data: [0,0,0], backgroundColor: ['#ff8a65', '#64b5f6', '#ffd54f'] }]
+      },
+      options: { responsive: true, cutout: '62%', plugins: { legend: { display: false } } }
+    });
+    const ctxB = document.getElementById('budgetChart').getContext('2d');
+    budgetChart = new Chart(ctxB, {
+      type: 'line',
+      data: { labels: ['5w ago','4w ago','3w ago','2w ago','Last week','This week'],
+        datasets: [
+          { label: 'Groceries spent', data: [0,0,0,0,0,0], tension: 0.24, borderColor: '#0b61ff' },
+          { label: 'Weekly budget', data: [0,0,0,0,0,0], borderDash: [6,6], borderColor: '#0a4bd6' }
+        ]
+      },
+      options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: v => '$'+v } } }, plugins: { legend: { display: false } } }
+    });
+  }
+
+  function renderListItems(containerEl, items = []) {
+    containerEl.innerHTML = '';
+    items.forEach((it, idx) => {
+      const row = document.createElement('div'); row.className = 'item';
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.dataset.idx = idx;
+      const title = document.createElement('div'); title.className = 'title';
+      let qty = (it.quantity !== undefined && it.quantity !== null) ? ` (${it.quantity})` : '';
+      title.textContent = (it.name || it.itemName || it.title || 'Unnamed') + qty;
+      const meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = it.category || it.currency || '';
+      row.appendChild(cb); row.appendChild(title); row.appendChild(meta);
+      containerEl.appendChild(row);
+    });
+  }
+  function wireCheckControls(listContainerId, checkedCounterId, clearBtnId, markBtnId) {
+    const list = document.getElementById(listContainerId);
+    const checkedEl = document.getElementById(checkedCounterId);
+    const clearBtn = document.getElementById(clearBtnId);
+    const markBtn = document.getElementById(markBtnId);
+    function update() {
+      const items = list.querySelectorAll('.item');
+      const total = items.length;
+      const checked = list.querySelectorAll('input[type="checkbox"]:checked').length;
+      checkedEl.textContent = `Checked: ${checked} / ${total}`;
+    }
+    list.addEventListener('change', (e) => {
+      if (e.target && e.target.matches('input[type="checkbox"]')) update();
+    });
+    clearBtn.addEventListener('click', () => {
+      list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+      update();
+    });
+    markBtn.addEventListener('click', () => {
+      list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+      update();
+    });
+    update();
+    return update;
+  }
+  const updateGroceryChecked = wireCheckControls('groceryList','checkedCount','clearChecked','markBought');
+  const updatePantryChecked = wireCheckControls('pantryList','pantryCheckedCount','clearPantryChecked','markPantryBought');
+
+  // UI wiring after profile/user loaded
+  function applyProfileToUI(uid, userDoc, profileDoc) {
+    const currency = (profileDoc && profileDoc.defaultCurrency) || (userDoc && userDoc.currency) || 'USD';
+    const { start, end } = weekRange();
+    const goals = (profileDoc && profileDoc.nutritionGoals) || { calories: 0, protein: 0, carbs: 0, fats: 0 };
+    const caloriesDaily = Number(goals.calories || 0);
+    const protein = Number(goals.protein || 0);
+    const carbs = Number(goals.carbs || 0);
+    const fats = Number(goals.fats || 0);
+
+    const calorieHistory = Array.isArray(profileDoc?.calorieHistory) ? profileDoc.calorieHistory : [];
+    const caloriesThisWeekSum = calorieHistory.reduce((acc, e) => {
+      const d = toDate(e.date || e.timestamp || e.day);
+      if (!d) return acc;
+      if (d >= start && d <= end) return acc + Number(e.caloriesConsumed || e.calories || 0);
+      return acc;
+    }, 0);
+
+    const spendingHistory = Array.isArray(profileDoc?.spendingHistory) ? profileDoc.spendingHistory : [];
+    const spendingThisWeek = sumEntriesInRange(spendingHistory, 'date', start, end);
+
+    let budgetGoal = 0;
+    if (Array.isArray(profileDoc?.budgets) && profileDoc.budgets.length) {
+      const b = profileDoc.budgets.find(x => x.targetCents || x.target) || profileDoc.budgets[0];
+      budgetGoal = (b.targetCents ? (b.targetCents/100) : (b.target || 0));
+    } else if (profileDoc?.budgetGoal) {
+      budgetGoal = Number(profileDoc.budgetGoal || 0);
+    }
+
+    let groceryItems = [];
+    if (Array.isArray(profileDoc?.groceryLists) && profileDoc.groceryLists.length) {
+      const primary = profileDoc.groceryLists[0];
+      groceryItems = Array.isArray(primary.items) ? primary.items : [];
+      const name = primary.name || 'Primary';
+      document.getElementById('grocerySummary').textContent = (name ? name + ' • ' : '') + groceryItems.length + ' items';
+    } else {
+      document.getElementById('grocerySummary').textContent = '0 items';
+    }
+
+    const pantryItems = Array.isArray(profileDoc?.pantryItems) ? profileDoc.pantryItems : [];
+    document.getElementById('pantrySummary').textContent = pantryItems.length + ' items';
+
+    document.getElementById('mealsLoggedNum').textContent = String(calorieHistory.length || 0);
+
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+    const todayEnd = new Date(); todayEnd.setHours(23,59,59,999);
+    const spentToday = sumEntriesInRange(spendingHistory, 'date', todayStart, todayEnd);
+    document.getElementById('spentTodayNum').textContent = formatCurrency(spentToday, currency);
+
+    const lowCount = pantryItems.reduce((acc, it) => {
+      if (it.quantity !== undefined && it.quantity !== null) {
+        if (Number(it.quantity) <= (it.lowThreshold || 1)) return acc + 1;
+      }
+      return acc;
+    }, 0);
+    document.getElementById('pantryLowNum').textContent = lowCount > 0 ? String(lowCount) : '0';
+
+    document.getElementById('caloriesThisWeek').textContent = caloriesThisWeekSum.toLocaleString() + ' kcal';
+    document.getElementById('centerCalories').textContent = caloriesThisWeekSum.toLocaleString();
+    document.getElementById('calorieGoal').textContent = caloriesDaily.toLocaleString() + ' kcal';
+    document.getElementById('proteinGrams').textContent = protein + 'g';
+    document.getElementById('carbsGrams').textContent = carbs + 'g';
+    document.getElementById('fatGrams').textContent = fats + 'g';
+
+    const proteinCalories = protein * 4;
+    const carbsCalories = carbs * 4;
+    const fatsCalories = fats * 9;
+    if (macroChart) {
+      macroChart.data.datasets[0].data = [proteinCalories, carbsCalories, fatsCalories];
+      macroChart.update();
+    }
+    const totalK = proteinCalories + carbsCalories + fatsCalories || 1;
+    document.getElementById('pBar').style.width = Math.round((proteinCalories/totalK)*100) + '%';
+    document.getElementById('cBar').style.width = Math.round((carbsCalories/totalK)*100) + '%';
+    document.getElementById('fBar').style.width = Math.round((fatsCalories/totalK)*100) + '%';
+
+    document.getElementById('budgetSpentThisWeek').textContent = formatCurrency(spendingThisWeek, currency);
+    document.getElementById('budgetGoalDisplay').textContent = formatCurrency(budgetGoal, currency);
+
+    (function updateBudgetChart() {
+      if (!budgetChart) return;
+      const labels = [];
+      const values = [];
+      const now = new Date();
+      const weekEnds = [];
+      for (let i = 5; i >= 0; i--) {
+        const wEnd = new Date(now);
+        wEnd.setHours(23,59,59,999);
+        wEnd.setDate(wEnd.getDate() - (7 * i));
+        weekEnds.push(wEnd);
+      }
+      for (let i = 0; i < weekEnds.length; i++) {
+        const endI = weekEnds[i];
+        const startI = new Date(endI);
+        startI.setDate(endI.getDate() - 6);
+        startI.setHours(0,0,0,0);
+        const s = sumEntriesInRange(spendingHistory, 'date', startI, endI);
+        labels.push(i === weekEnds.length - 1 ? 'This week' : `${(weekEnds.length-1-i)}w ago`);
+        values.push(Number(s.toFixed(2)));
+      }
+      budgetChart.data.labels = labels;
+      budgetChart.data.datasets[0].data = values;
+      budgetChart.data.datasets[1].data = new Array(values.length).fill(Number(budgetGoal || 0));
+      budgetChart.update();
+    })();
+
+    renderListItems(document.getElementById('groceryList'), groceryItems);
+    renderListItems(document.getElementById('pantryList'), pantryItems);
+    updateGroceryChecked();
+    updatePantryChecked();
+
+    const recentMeals = (calorieHistory || []).slice().sort((a,b)=> (toDate(b.date)?.getTime()||0) - (toDate(a.date)?.getTime()||0));
+    const breakfast = recentMeals[0];
+    const lunch = recentMeals[1];
+    document.getElementById('mealBreakfast').textContent = breakfast ? (breakfast.summary || `${(breakfast.caloriesConsumed || breakfast.calories || 0)} kcal`) : '—';
+    document.getElementById('mealLunch').textContent = lunch ? (lunch.summary || `${(lunch.caloriesConsumed || lunch.calories || 0)} kcal`) : '—';
+  }
+
+  initCharts();
+
+  // Use loader's onAuth for profile wiring
+  loader.onAuth(async (user) => {
+    if (!user) {
+      console.log('signed out — UI will show empty placeholders');
+      return;
+    }
+    const uid = user.uid;
+    try {
+      await loader.initWithAuth(loader.app, { autoSubscribeCurrentUser: true });
+    } catch (e) {
+      try { await loader.init(loader.app); } catch (err) { console.error(err); }
+    }
+    let userDoc = loader.getUser(uid);
+    if (!userDoc) userDoc = await loader.fetchDocument(loader.opts.usersCollection, uid) || null;
+    loader.subscribeToProfile(uid);
+    const applyNow = () => {
+      const profileDoc = loader.getProfile(uid);
+      applyProfileToUI(uid, userDoc, profileDoc || {});
+    };
+    applyNow();
+    loader.onUpdate(() => {
+      const prof = loader.getProfile(uid);
+      const usr = loader.getUser(uid) || userDoc;
+      if (prof || usr) applyProfileToUI(uid, usr, prof || {});
+    });
+  });
+
+  window.__dashboardHelpers = { applyProfileToUI, loader };
+</script>
+
+</body>
+</html>
+
+
+
