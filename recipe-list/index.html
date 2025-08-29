@@ -554,6 +554,80 @@
   
     <!-- ===== end modal ===== -->
   
+<!-- Add this script tag AFTER your existing recipe rendering and Firebase scripts -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+import { getFirestore, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+// ---- Firebase Config ----
+const firebaseConfig = {
+  apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+  authDomain: "goodplates-7ae36.firebaseapp.com",
+  projectId: "goodplates-7ae36",
+  storageBucket: "goodplates-7ae36.firebasestorage.app",
+  messagingSenderId: "541149626283",
+  appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+  measurementId: "G-HKMSHM726J"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+let currentUser = null;
+// Get the logged-in user
+onAuthStateChanged(auth, user => { currentUser = user; });
+
+// ---- Add Save Button to Each Card ----
+// This function should be used to render each recipe card in your grid
+// (Call this instead of/in addition to your existing render logic)
+function renderRecipes(recipes) {
+  const recipeGrid = document.getElementById('recipeGrid');
+  recipeGrid.innerHTML = '';
+  recipes.forEach(recipe => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-media">
+        <img src="${recipe.image}" alt="${recipe.title}" style="width:100%;height:100%;object-fit:cover;" />
+      </div>
+      <div class="card-body">
+        <h3 style="margin:0 0 8px 0;font-size:19px;font-weight:700;">${recipe.title}</h3>
+        <div class="muted small mb-1">⭐ ${recipe.rating} | ⏱ ${recipe.time} min | 🔥 ${recipe.calories} cal</div>
+        <div style="margin-bottom:8px;">
+          ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join(' ')}
+        </div>
+        <button class="btn small save-btn" data-id="${recipe.id}">Save</button>
+      </div>
+    `;
+    recipeGrid.appendChild(card);
+  });
+}
+
+// ---- Listen for Save Button Clicks ----
+document.addEventListener('click', async function(e) {
+  const btn = e.target.closest('.save-btn');
+  if (!btn) return;
+  const recipeId = btn.getAttribute('data-id');
+  if (!currentUser) {
+    alert("You need to be logged in to save recipes.");
+    return;
+  }
+  // Save recipe ID to user's savedRecipes array
+  const profileRef = doc(db, "profiles", currentUser.uid);
+  try {
+    await updateDoc(profileRef, {
+      savedRecipes: arrayUnion(recipeId)
+    });
+    btn.textContent = "Saved!";
+    btn.disabled = true;
+  } catch (err) {
+    alert("Error saving recipe: " + err.message);
+  }
+});
+</script>
+    
+    
     <script src="../recipes.js"></script>
     <script src="../scripts.js"></script>
     <div id="footer"></div>
