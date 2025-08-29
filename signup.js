@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebas
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 // <-- Add Firestore import right after the auth import
 import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, serverTimestamp, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
@@ -15,8 +16,125 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-// <-- Initialize Firestore here
 const db = getFirestore(app);
+
+// Minimal helper so you don't repeat yourself
+async function createUserDocs(user) {
+    // --- Create user doc in "users" collection ---
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      email: user.email || "",
+      name: { first: "", last: "" },
+      phone: "",
+      profilePicture: "",
+      createdAt: serverTimestamp(),
+      stripeCustomerId: "",
+      subscriptionTier: "free",
+
+      // -- ADDED (minimal, appended) --
+      fullName: "",
+      updatedAt: serverTimestamp(),
+      address: "",
+      avatarDataUrl: "",
+      bio: "",
+      dietTags: [],
+      location: "",
+      nutritionGoalsNote: "",
+      preferredDelivery: "",
+      units: "metric"
+    });
+
+    // --- Create profile doc in "profiles" collection ---
+    await setDoc(doc(db, "profiles", user.uid), {
+      nutritionGoals: {
+        calories: 2000,
+        protein: 50,
+        carbs: 250,
+        fats: 70
+      },
+      nutritionInfo: {
+        allergies: [],
+        dietaryType: ""
+      },
+      aboutMe: "",
+      preferredUnits: "metric",
+      defaultServingSize: 1,
+      defaultServingUnit: "g",
+      householdSize: 1,
+
+      groceryLists: [],
+      pantryItems: [],
+      customIngredients: [],
+      savedRecipes: [],
+      spendingHistory: [],
+      calorieHistory: [],
+      aiSuggestionsEnabled: true,
+      notificationsEnabled: true,
+
+      // -- ADDED (minimal, appended) --
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      lastSyncedAt: null,
+      defaultCurrency: "USD"
+    });
+}
+// budgets/{periodKey}
+await setDoc(doc(db, "profiles", user.uid, "budgets", "2025-08"), {
+  periodKey: "2025-08",
+  category: "groceries",
+  targetCents: 50000,
+  warnThresholdPct: 80,
+  lastUpdated: serverTimestamp()
+});
+
+// stats_daily/{dayKey}
+await setDoc(doc(db, "profiles", user.uid, "stats_daily", "2025-08-29"), {
+  dayKey: "2025-08-29",
+  totalSpentCents: 1000,
+  grocerySpentCents: 800,
+  pantryAdjustCents: 200,
+  eventCount: 2,
+  lastUpdated: serverTimestamp()
+});
+
+// stats_monthly/{monthKey}
+await setDoc(doc(db, "profiles", user.uid, "stats_monthly", "2025-08"), {
+  monthKey: "2025-08",
+  totalSpentCents: 31000,
+  grocerySpentCents: 25000,
+  eventCount: 12,
+  lastUpdated: serverTimestamp()
+});
+
+// inventoryEvents/{autoId}
+await addDoc(collection(db, "profiles", user.uid, "inventoryEvents"), {
+  itemId: "item123",
+  itemName: "Milk",
+  action: "added",
+  from: null,
+  to: "fridge",
+  delta: 1,
+  quantityBefore: 0,
+  quantityAfter: 1,
+  priceCents: 0,
+  currency: "USD",
+  timestamp: serverTimestamp(),
+  dayKey: "2025-08-29",
+  monthKey: "2025-08",
+  meta: { vendor: "StoreX", note: "Bought on sale" }
+});
+
+// spending/{autoId}
+await addDoc(collection(db, "profiles", user.uid, "spending"), {
+  date: serverTimestamp(),
+  amountCents: 0,
+  currency: "",
+  vendor: "",
+  items: [
+    { itemId: "item123", name: "Milk", qty: 1, priceCents: 400, notes: "" },
+    { itemId: "item456", name: "Bread", qty: 2, priceCents: 400, notes: "Whole wheat" }
+  ]
+});
 
 const signupForm = document.getElementById('signupForm');
 signupForm.addEventListener('submit', async (e) => {
@@ -31,73 +149,14 @@ signupForm.addEventListener('submit', async (e) => {
     document.getElementById('signupPasswordError').classList.remove('show');
 
     try {
-        // capture the user credential so we have the created user's UID
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-      // --- Create user doc in "users" collection ---
-        await setDoc(doc(db, "users", user.uid), {
-          uid: user.uid,
-          email: user.email || "",
-          name: { first: "", last: "" },
-          phone: "",
-          profilePicture: "",
-          createdAt: serverTimestamp(),
-          stripeCustomerId: "",
-          subscriptionTier: "free",
-        
-          // -- ADDED (minimal, appended) --
-          fullName: "",                   // convenience/derived
-          updatedAt: serverTimestamp(),   // track updates
-          address: "",                    // optional
-          avatarDataUrl: "",              // optional (base64 / data URL)
-          bio: "",                        // optional
-          dietTags: [],                   // array<string>
-          location: "",                   // optional
-          nutritionGoals: "",             // NOTE: string in users (different from profiles.nutritionGoals)
-          preferredDelivery: "",          // optional
-          units: "metric"                 // "metric" | "imperial"
-        });
-        
-        // --- Create profile doc in "profiles" collection ---
-        await setDoc(doc(db, "profiles", user.uid), {
-          nutritionGoals: {
-            calories: 2000,
-            protein: 50,
-            carbs: 250,
-            fats: 70
-          },
-          nutritionInfo: {
-            allergies: [],
-            dietaryType: ""
-          },
-          aboutMe: "",
-          preferredUnits: "metric",
-          defaultServingSize: 1,      // number
-          defaultServingUnit: "g",    // optional but recommended
-          householdSize: 1,
-        
-          groceryLists: [],
-          pantryItems: [],
-          customIngredients: [],
-          savedRecipes: [],
-          spendingHistory: [],
-          calorieHistory: [],
-          aiSuggestionsEnabled: true,
-          notificationsEnabled: true,
-        
-          // -- ADDED (minimal, appended) --
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          lastSyncedAt: null,           // nullable timestamp
-          defaultCurrency: "USD"        // default currency (change as needed)
-        });
+        await createUserDocs(user);
 
-        // Only show success + redirect after Firestore writes succeed
         document.getElementById('signupSuccessMessage').classList.add('show');
         setTimeout(() => window.location.href = '/dashboard/', 2000);
     } catch (error) {
-        // This catch will handle both auth and Firestore errors
         if (error.code && error.code.includes('email')) {
             document.getElementById('signupEmailError').textContent = error.message;
             document.getElementById('signupEmailError').classList.add('show');
@@ -105,9 +164,32 @@ signupForm.addEventListener('submit', async (e) => {
             document.getElementById('signupPasswordError').textContent = error.message;
             document.getElementById('signupPasswordError').classList.add('show');
         } else {
-            // generic error fallback
             document.getElementById('signupEmailError').textContent = error.message || String(error);
             document.getElementById('signupEmailError').classList.add('show');
         }
     }
 });
+
+// --- Google Sign In ---
+const googleBtn = document.getElementById('googleButton');
+if (googleBtn) {
+    googleBtn.addEventListener('click', async () => {
+        // Clear previous errors
+        document.getElementById('signupEmailError').textContent = '';
+        document.getElementById('signupPasswordError').textContent = '';
+        document.getElementById('signupEmailError').classList.remove('show');
+        document.getElementById('signupPasswordError').classList.remove('show');
+        try {
+            const provider = new GoogleAuthProvider();
+            const userCredential = await signInWithPopup(auth, provider);
+            const user = userCredential.user;
+            await createUserDocs(user);
+
+            document.getElementById('signupSuccessMessage').classList.add('show');
+            setTimeout(() => window.location.href = '/dashboard/', 2000);
+        } catch (error) {
+            document.getElementById('signupEmailError').textContent = error.message || String(error);
+            document.getElementById('signupEmailError').classList.add('show');
+        }
+    });
+}
