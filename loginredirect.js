@@ -7,13 +7,13 @@ import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "redacted", // <-- REPLACE with your real config
-  authDomain: "your-app.firebaseapp.com",
-  projectId: "your-app",
-  storageBucket: "your-app.appspot.com",
-  messagingSenderId: "your-messagingSenderId",
-  appId: "your-appId",
-  measurementId: "your-measurementId"
+  apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
 };
 
 // Initialize Firebase
