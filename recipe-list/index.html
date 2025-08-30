@@ -182,7 +182,23 @@
   
       .badge{ padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; background:var(--primary-100); color:var(--primary) }
       .pill{ border-radius:999px; padding:6px 12px; font-weight:700; font-size:13px; background:var(--surface-2) }
-  
+        .save-btn {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.85);
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 2;
+        transition: background 0.15s;
+      }
       /* ===== Modal (styled) ===== */
       .modal-backdrop, #recipeModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:24px }
       .modal{ width:100%; max-width:920px; background:var(--surface); border-radius:16px; overflow:hidden; box-shadow:var(--shadow-2) }
