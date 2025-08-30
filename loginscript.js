@@ -270,7 +270,8 @@ import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, sig
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 // Providers
