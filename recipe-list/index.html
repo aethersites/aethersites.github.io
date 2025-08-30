@@ -567,7 +567,39 @@
       }
       
     </style>
-  
+
+    <!-- auth detect login -->
+    <script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+
+  // Safe Firebase initialization
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Login detection and redirect
+  onAuthStateChanged(auth, (user) => {
+    console.log("Auth state changed. User is:", user);
+    if (!user) {
+      if (!window.location.pathname.startsWith("/login-form")) {
+        window.location.replace("/login-form/");
+      }
+    } else {
+      window.currentUser = user;
+    }
+  });
+</script>
+    
     <!-- ===== end modal ===== -->
   <script type="module" src="../loginredirect.js"></script>
     <script src="../recipes.js"></script>
