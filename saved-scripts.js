@@ -9,6 +9,26 @@ document.addEventListener("DOMContentLoaded", () => {
   const modalTags = document.getElementById("modalTags");
   const modalFilters = document.getElementById("modalFilters");
 
+  // tiny helper: mark buttons for recipes already saved locally
+  function markSavedButtons() {
+    const saved = window.savedRecipes || new Set();
+    document.querySelectorAll('.save-btn').forEach(btn => {
+      const id = String(btn.getAttribute('data-id'));
+      if (saved.has(id)) {
+        btn.textContent = "Saved!";
+        btn.disabled = true;
+      } else {
+        // restore default icon/text if not saved
+        if (!btn.disabled) {
+          btn.innerHTML = `<svg width="22" height="22" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>`;
+          btn.disabled = false;
+        }
+      }
+    });
+  }
+
   // Render all recipe cards
   function renderRecipes(list) {
     recipeGrid.innerHTML = "";
@@ -41,6 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
       recipeGrid.appendChild(card);
     });
+
+    // Immediately mark saved buttons if savedRecipes already loaded
+    markSavedButtons();
   }
 
   // initial render via filters (if applyFilters exists)
@@ -50,6 +73,12 @@ document.addEventListener("DOMContentLoaded", () => {
     renderRecipes(window.recipes);
     document.getElementById('totalRecipes').textContent = (window.recipes || []).length;
   }
+
+  // If auth script finishes later, update saved buttons when user-ready fires
+  document.addEventListener('user-ready', () => {
+    // window.savedRecipes should be populated by auth script
+    markSavedButtons();
+  });
 
   // Open modal with recipe details
   recipeGrid.addEventListener("click", e => {
@@ -95,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
   recipeGrid.addEventListener('click', async function(e) {
     const btn = e.target.closest('.save-btn');
     if (!btn) return;
-    const recipeId = btn.getAttribute('data-id');
+    const recipeId = String(btn.getAttribute('data-id'));
 
     // encapsulate save logic so we can run it immediately or after user-ready
     const doSave = async () => {
@@ -117,6 +146,11 @@ document.addEventListener("DOMContentLoaded", () => {
         await updateDoc(profileRef, {
           savedRecipes: arrayUnion(recipeId)
         });
+
+        // Keep local cache in sync so UI stays correct
+        if (!window.savedRecipes) window.savedRecipes = new Set();
+        window.savedRecipes.add(recipeId);
+
         btn.textContent = "Saved!";
         btn.disabled = true;
       } catch (err) {
