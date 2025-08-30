@@ -166,51 +166,23 @@
       .muted{ color:var(--muted); font-size:13px }
       .muted-2{ color:var(--muted-2) }
   
-     /* ===== Grid & cards (kept and improved) ===== */
-.grid{ display:grid; gap:24px; padding-left:10px; padding-right:10px; }
-.grid.cols-2{ grid-template-columns:repeat(2,1fr) }
-.grid.cols-3{ grid-template-columns:repeat(3,1fr) }
-.grid.cols-4{ grid-template-columns:repeat(4,1fr) }
-
-.card{
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;
-  transition:transform .18s ease, box-shadow .18s ease;
-  position:relative;
-}
-.card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-2) }
-.card .card-media{ height:192px; background: linear-gradient(135deg,#ecfdf5,#f0fdf4); display:flex; align-items:center; justify-content:center; position:relative; }
-.card .card-body{ padding:16px 16px 20px }
-
-.badge{ padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; background:var(--primary-100); color:var(--primary) }
-.pill{ border-radius:999px; padding:6px 12px; font-weight:700; font-size:13px; background:var(--surface-2) }
-
-/* === Save Button (top right corner, circular icon) === */
-.save-btn {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.85);
-  border: 1px solid var(--border);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 2;
-  transition: background 0.15s;
-}
-.save-btn:active {
-  background: var(--primary-100);
-}
-.save-btn.saved svg {
-  stroke: var(--primary);
-}
-.save-btn svg {
-  pointer-events: none;
-}
+      /* ===== Grid & cards (kept and improved) ===== */
+      .grid{ display:grid; gap:24px; padding-left:10px; padding-right:10px; }
+      .grid.cols-2{ grid-template-columns:repeat(2,1fr) }
+      .grid.cols-3{ grid-template-columns:repeat(3,1fr) }
+      .grid.cols-4{ grid-template-columns:repeat(4,1fr) }
+  
+      .card{
+        background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;
+        transition:transform .18s ease, box-shadow .18s ease;
+      }
+      .card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-2) }
+      .card .card-media{ height:192px; background: linear-gradient(135deg,#ecfdf5,#f0fdf4); display:flex; align-items:center; justify-content:center; position:relative; }
+      .card .card-body{ padding:16px 16px 20px }
+  
+      .badge{ padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; background:var(--primary-100); color:var(--primary) }
+      .pill{ border-radius:999px; padding:6px 12px; font-weight:700; font-size:13px; background:var(--surface-2) }
+  
       /* ===== Modal (styled) ===== */
       .modal-backdrop, #recipeModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:24px }
       .modal{ width:100%; max-width:920px; background:var(--surface); border-radius:16px; overflow:hidden; box-shadow:var(--shadow-2) }
@@ -581,58 +553,6 @@
     </style>
   
     <!-- ===== end modal ===== -->
-  
-<!-- Add this script tag AFTER your existing recipe rendering and Firebase scripts -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-import { getFirestore, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-
-// ---- Firebase Config ----
-const firebaseConfig = {
-  apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-  authDomain: "goodplates-7ae36.firebaseapp.com",
-  projectId: "goodplates-7ae36",
-  storageBucket: "goodplates-7ae36.firebasestorage.app",
-  messagingSenderId: "541149626283",
-  appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-  measurementId: "G-HKMSHM726J"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-
-let currentUser = null;
-// Get the logged-in user
-onAuthStateChanged(auth, user => { currentUser = user; });
-
-// ---- Add Save Button to Each Card ----
-// This function should be used to render each recipe card in your grid
-// (Call this instead of/in addition to your existing render logic)
-// ---- Render Recipe Cards (without Save Button) ----
-// This function should be used to render each recipe card in your grid.
-// The save button logic should be handled separately in your JS.
-      function renderRecipes(recipes) {
-        const recipeGrid = document.getElementById('recipeGrid');
-        recipeGrid.innerHTML = '';
-        recipes.forEach(recipe => {
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <div class="card-media" style="position:relative;">
-              <img src="${recipe.image}" alt="${recipe.title}" style="width:100%;height:100%;object-fit:cover;" />
-            </div>
-            <div class="card-body">
-              <h3 style="margin:0 0 8px 0;font-size:19px;font-weight:700;">${recipe.title}</h3>
-              <div class="muted small mb-1">⭐ ${recipe.rating} | ⏱ ${recipe.time} min | 🔥 ${recipe.calories} cal</div>
-              <div style="margin-bottom:8px;">
-                ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join(' ')}
-              </div>
-            </div>
-          `;
-          recipeGrid.appendChild(card);
-        });
-      }
   
     <script src="../recipes.js"></script>
     <script src="../scripts.js"></script>
