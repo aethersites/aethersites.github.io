@@ -568,13 +568,107 @@
     </style>
 
    <!-- auth detect login (replaced) -->
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    arrayUnion
+  } 
+    from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
+  };
+
+  // Safe Firebase initialization
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // expose minimal helpers for non-module scripts (keeps changes small)
+  window.db = db;
+  window.__fireHelpers = { doc, getDoc, setDoc, updateDoc, arrayUnion };
+
+  // Login detection and redirect + load savedRecipes
+  onAuthStateChanged(auth, async (user) => {
+    console.log("Auth state changed. User is:", user);
+
+    if (!user) {
+      // Not logged in: redirect (preserve your original behavior)
+      if (!window.location.pathname.startsWith("/login-form")) {
+        window.location.replace("/login-form/");
+        return;
+      } else {
+        // still dispatch user-ready so page scripts run (but no user)
+        window.currentUser = null;
+        window.savedRecipes = new Set();
+        document.dispatchEvent(new CustomEvent("user-ready", { detail: { user: null } }));
+        return;
+      }
+    }
+
+    // Logged in
+    window.currentUser = user;
+
+    // Ensure profile doc exists and load savedRecipes into window.savedRecipes (strings)
+    try {
+      const profileRef = doc(db, "profiles", user.uid);
+      const snap = await getDoc(profileRef);
+      if (!snap.exists()) {
+        // create an empty savedRecipes array
+        await setDoc(profileRef, { savedRecipes: [] }, { merge: true });
+        window.savedRecipes = new Set();
+      } else {
+        const data = snap.data() || {};
+        const arr = Array.isArray(data.savedRecipes) ? data.savedRecipes : [];
+        // normalize to strings for consistent comparisons
+        window.savedRecipes = new Set(arr.map(String));
+      }
+
+      // helper to add a saved recipe (keeps local set in sync)
+      window.addSavedRecipe = async (recipeId) => {
+        const rid = String(recipeId);
+        // prevent duplicate writes locally
+        if (window.savedRecipes && window.savedRecipes.has(rid)) return true;
+        try {
+          await updateDoc(profileRef, {
+            savedRecipes: arrayUnion(rid)
+          });
+          window.savedRecipes.add(rid);
+          return true;
+        } catch (err) {
+          console.error("addSavedRecipe error:", err);
+          throw err;
+        }
+      };
+    } catch (err) {
+      console.error("Error ensuring/loading profile:", err);
+      // fallback: at least provide the set so UI can show unsaved state
+      window.savedRecipes = new Set();
+      window.addSavedRecipe = async () => { throw new Error("Firestore unavailable"); };
+    }
+
+    // notify other scripts
+    document.dispatchEvent(new CustomEvent("user-ready", { detail: { user } }));
+  });
+</script>
+
 
     
 <!-- 1) recipes data (must come first so window.recipes exists) -->
 <script src="../recipes.js"></script>
 
-<!-- 2) auth module (type=module) - initializes firebase + window.db + window.savedRecipes -->
-<script type="module" src="../auth-detect.js"></script>
 
 <!-- 3) saved-scripts (non-module) - UI + save handlers that use window.* from auth script -->
 <script src="../saved-scripts.js"></script>
