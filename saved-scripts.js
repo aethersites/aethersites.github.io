@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  
   const recipeGrid = document.getElementById("recipeGrid");
   const modal = document.getElementById("recipeModal");
   const closeModal = document.getElementById("closeModal");
@@ -19,11 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
       card.innerHTML = `
         <div class="card-media">
           <img src="${r.image}" alt="${r.title}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
-                  <button class="save-btn" data-id="${r.id}" title="Save recipe" style="position:absolute;top:14px;right:14px;">
-          <svg width="22" height="22" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
-            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-          </svg>
-        </button>
+          <button class="save-btn" data-id="${r.id}" title="Save recipe" style="position:absolute;top:14px;right:14px;">
+            <svg width="22" height="22" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
         </div>
         <div class="card-body">
           <div class="flex items-center justify-between">
@@ -44,33 +43,41 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  applyFilters();
+  // initial render via filters (if applyFilters exists)
+  if (typeof applyFilters === "function") {
+    applyFilters();
+  } else if (window.recipes) {
+    renderRecipes(window.recipes);
+    document.getElementById('totalRecipes').textContent = (window.recipes || []).length;
+  }
 
-  
   // Open modal with recipe details
   recipeGrid.addEventListener("click", e => {
-    if (e.target.matches("button[data-id]")) {
-      const id = parseInt(e.target.dataset.id, 10);
-      const r = recipes.find(x => x.id === id);
-      if (!r) return;
-      modalTitle.textContent = r.title;
-      modalImage.src = r.image;
-      // Ingredients with checkboxes
-    modalIngredients.innerHTML = r.ingredients
-  .map(i => `
-    <li>
-      <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-        <input type="checkbox" style="transform:scale(1.2);" />
-        <span>${i}</span>
-      </label>
-    </li>
-  `).join("");
+    // If click is inside save button, ignore here (save handled separately)
+    if (e.target.closest('.save-btn')) return;
 
-   // Instructions as plain paragraphs (no numbers)
-   const steps = r.instructions.split("<br>").filter(s => s.trim());
+    const btn = e.target.closest("button[data-id]");
+    if (!btn) return;
+
+    const id = parseInt(btn.dataset.id, 10);
+    const r = (window.recipes || []).find(x => x.id === id);
+    if (!r) return;
+
+    modalTitle.textContent = r.title;
+    modalImage.src = r.image;
+    modalIngredients.innerHTML = r.ingredients
+      .map(i => `
+        <li>
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" style="transform:scale(1.2);" />
+            <span>${i}</span>
+          </label>
+        </li>
+      `).join("");
+
+    const steps = (r.instructions || "").split("<br>").filter(s => s.trim());
     modalInstructions.innerHTML = steps.map(s => `<p>${s.trim()}</p>`).join("");
 
-  
     modalTags.innerHTML = r.tags.map((t, i) =>
       `<span class="tag tag-${i+1}">${t}</span>`
     ).join("");
@@ -81,46 +88,62 @@ document.addEventListener("DOMContentLoaded", () => {
       | 🔥 ${r.calories} cal 
       | ⭐ ${r.rating}
     `;
-      modal.style.display = "flex";
-    }
+    modal.style.display = "flex";
   });
-  
-    // ---- Listen for Save Button Clicks ----
-    recipeGrid.addEventListener('click', async function(e) {
-      const btn = e.target.closest('.save-btn');
-      if (!btn) return;
-      const recipeId = btn.getAttribute('data-id');
+
+  // ---- Listen for Save Button Clicks ----
+  recipeGrid.addEventListener('click', async function(e) {
+    const btn = e.target.closest('.save-btn');
+    if (!btn) return;
+    const recipeId = btn.getAttribute('data-id');
+
+    // encapsulate save logic so we can run it immediately or after user-ready
+    const doSave = async () => {
       if (typeof currentUser === "undefined" || !currentUser) {
         alert("You need to be logged in to save recipes.");
         return;
       }
-      // Save recipe ID to user's savedRecipes array
-      const profileRef = doc(db, "profiles", currentUser.uid);
+
+      const db = window.db;
+      const { doc, updateDoc, arrayUnion } = window.__fireHelpers || {};
+
+      if (!db || !doc || !updateDoc || !arrayUnion) {
+        alert("Saving is temporarily unavailable.");
+        return;
+      }
+
       try {
+        const profileRef = doc(db, "profiles", currentUser.uid);
         await updateDoc(profileRef, {
           savedRecipes: arrayUnion(recipeId)
         });
         btn.textContent = "Saved!";
         btn.disabled = true;
       } catch (err) {
-        alert("Error saving recipe: " + err.message);
+        console.error("Error saving recipe:", err);
+        alert("Error saving recipe: " + (err.message || err));
       }
-    });
-  
-  // Close modal
-  closeModal.addEventListener("click", () => modal.style.display = "none");
-  modal.addEventListener("click", e => {
-    if (e.target === modal) modal.style.display = "none";
-    
+    };
+
+    // If auth/firestore already ready, run; otherwise wait for user-ready once.
+    if (window.db && window.currentUser !== undefined) {
+      await doSave();
+    } else {
+      document.addEventListener('user-ready', async () => { await doSave(); }, { once: true });
+    }
   });
 
-  
-  // 🔥 NEW: Filtering logic
+  // Close modal
+  if (closeModal) closeModal.addEventListener("click", () => modal.style.display = "none");
+  modal.addEventListener("click", e => { if (e.target === modal) modal.style.display = "none"; });
+
+  // (rest of your existing filtering code kept intact)
   function applyFilters() {
-    let filtered = [...recipes];
+    let filtered = [...(window.recipes || [])];
 
     // Search
-    const searchVal = document.getElementById("filter-search").value.toLowerCase();
+    const searchEl = document.getElementById("filter-search");
+    const searchVal = (searchEl && searchEl.value) ? searchEl.value.toLowerCase() : "";
     if (searchVal) {
       filtered = filtered.filter(r =>
         r.title.toLowerCase().includes(searchVal) ||
@@ -150,47 +173,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Tags (Diet Type)
-  const tagChecks = [...document.querySelectorAll('input[data-filter="tags"]:checked')].map(i => i.value);
-  if (tagChecks.length > 0) {
-    filtered = filtered.filter(r => tagChecks.some(tag => r.tags.includes(tag)));
-  }
+    const tagChecks = [...document.querySelectorAll('input[data-filter="tags"]:checked')].map(i => i.value);
+    if (tagChecks.length > 0) {
+      filtered = filtered.filter(r => tagChecks.some(tag => r.tags.includes(tag)));
+    }
 
     // Prep time
-    const prepLimit = Number(document.getElementById("filter-prepTime").value);
+    const prepEl = document.getElementById("filter-prepTime");
+    const prepLimit = prepEl ? Number(prepEl.value) : Infinity;
     filtered = filtered.filter(r => r.time <= prepLimit);
 
     // Ingredients
-    const ingLimit = Number(document.getElementById("filter-ingredients").value);
+    const ingEl = document.getElementById("filter-ingredients");
+    const ingLimit = ingEl ? Number(ingEl.value) : Infinity;
     filtered = filtered.filter(r => r.ingredients.length <= ingLimit);
 
     // Render results
- renderRecipes(filtered);
-    document.getElementById('totalRecipes').textContent = filtered.length;
-    
+    renderRecipes(filtered);
+    const totalEl = document.getElementById('totalRecipes');
+    if (totalEl) totalEl.textContent = filtered.length;
   }
 
-  // 🔥 NEW: Attach listeners
+  // Attach listeners
   const allFilterInputs = document.querySelectorAll("#sidebar input");
   allFilterInputs.forEach(input => input.addEventListener("change", applyFilters));
-  document.getElementById("filter-prepTime").addEventListener("input", applyFilters);
-  document.getElementById("filter-ingredients").addEventListener("input", applyFilters);
-  document.getElementById("filter-search").addEventListener("input", applyFilters);
+  const prepEl = document.getElementById("filter-prepTime");
+  if (prepEl) prepEl.addEventListener("input", applyFilters);
+  const ingEl = document.getElementById("filter-ingredients");
+  if (ingEl) ingEl.addEventListener("input", applyFilters);
+  const searchEl = document.getElementById("filter-search");
+  if (searchEl) searchEl.addEventListener("input", applyFilters);
 
-  // 🔥 NEW: Clear filters button
-// Clear filters button
-  document.getElementById("clearFilters").addEventListener("click", () => {
-  // clear checkboxes
-  document.querySelectorAll("#sidebar input[type=checkbox]").forEach(cb => cb.checked = false);
-  
-  // reset ranges to defaults
-  document.getElementById("filter-prepTime").value = 60;
-  document.getElementById("filter-ingredients").value = 10;
-  
-  // clear search
-  document.getElementById("filter-search").value = "";
-  
-  // reapply filters
-  applyFilters();
-  });
-
+  // Clear filters button
+  const clearBtn = document.getElementById("clearFilters");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      document.querySelectorAll("#sidebar input[type=checkbox]").forEach(cb => cb.checked = false);
+      if (prepEl) prepEl.value = 60;
+      if (ingEl) ingEl.value = 10;
+      if (searchEl) searchEl.value = "";
+      applyFilters();
+    });
+  }
 });
