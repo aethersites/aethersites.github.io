@@ -166,23 +166,51 @@
       .muted{ color:var(--muted); font-size:13px }
       .muted-2{ color:var(--muted-2) }
   
-      /* ===== Grid & cards (kept and improved) ===== */
-      .grid{ display:grid; gap:24px; padding-left:10px; padding-right:10px; }
-      .grid.cols-2{ grid-template-columns:repeat(2,1fr) }
-      .grid.cols-3{ grid-template-columns:repeat(3,1fr) }
-      .grid.cols-4{ grid-template-columns:repeat(4,1fr) }
-  
-      .card{
-        background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;
-        transition:transform .18s ease, box-shadow .18s ease;
-      }
-      .card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-2) }
-      .card .card-media{ height:192px; background: linear-gradient(135deg,#ecfdf5,#f0fdf4); display:flex; align-items:center; justify-content:center; position:relative; }
-      .card .card-body{ padding:16px 16px 20px }
-  
-      .badge{ padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; background:var(--primary-100); color:var(--primary) }
-      .pill{ border-radius:999px; padding:6px 12px; font-weight:700; font-size:13px; background:var(--surface-2) }
-  
+     /* ===== Grid & cards (kept and improved) ===== */
+.grid{ display:grid; gap:24px; padding-left:10px; padding-right:10px; }
+.grid.cols-2{ grid-template-columns:repeat(2,1fr) }
+.grid.cols-3{ grid-template-columns:repeat(3,1fr) }
+.grid.cols-4{ grid-template-columns:repeat(4,1fr) }
+
+.card{
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); overflow:hidden;
+  transition:transform .18s ease, box-shadow .18s ease;
+  position:relative;
+}
+.card:hover{ transform:translateY(-6px); box-shadow:var(--shadow-2) }
+.card .card-media{ height:192px; background: linear-gradient(135deg,#ecfdf5,#f0fdf4); display:flex; align-items:center; justify-content:center; position:relative; }
+.card .card-body{ padding:16px 16px 20px }
+
+.badge{ padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; background:var(--primary-100); color:var(--primary) }
+.pill{ border-radius:999px; padding:6px 12px; font-weight:700; font-size:13px; background:var(--surface-2) }
+
+/* === Save Button (top right corner, circular icon) === */
+.save-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.85);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.15s;
+}
+.save-btn:active {
+  background: var(--primary-100);
+}
+.save-btn.saved svg {
+  stroke: var(--primary);
+}
+.save-btn svg {
+  pointer-events: none;
+}
       /* ===== Modal (styled) ===== */
       .modal-backdrop, #recipeModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center; padding:24px }
       .modal{ width:100%; max-width:920px; background:var(--surface); border-radius:16px; overflow:hidden; box-shadow:var(--shadow-2) }
