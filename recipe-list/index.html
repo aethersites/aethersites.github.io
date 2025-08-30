@@ -616,16 +616,20 @@ function renderRecipes(recipes) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <div class="card-media">
-        <img src="${recipe.image}" alt="${recipe.title}" style="width:100%;height:100%;object-fit:cover;" />
-      </div>
-      <div class="card-body">
+        <div class="card-media" style="position:relative;">
+          <img src="${recipe.image}" alt="${recipe.title}" style="width:100%;height:100%;object-fit:cover;" />
+          <button class="save-btn" data-id="${recipe.id}" title="Save recipe">
+            <svg width="22" height="22" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+            </svg>
+          </button>
+        </div>
+        <div class="card-body">
         <h3 style="margin:0 0 8px 0;font-size:19px;font-weight:700;">${recipe.title}</h3>
         <div class="muted small mb-1">⭐ ${recipe.rating} | ⏱ ${recipe.time} min | 🔥 ${recipe.calories} cal</div>
         <div style="margin-bottom:8px;">
           ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join(' ')}
         </div>
-        <button class="btn small save-btn" data-id="${recipe.id}">Save</button>
       </div>
     `;
     recipeGrid.appendChild(card);
