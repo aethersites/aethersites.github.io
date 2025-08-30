@@ -484,7 +484,73 @@
   // Expose loader on window for use in other scripts
   window.loader = loader;
 </script>
+<!-- Add this script after your main loader and Firebase initialization -->
+<script type="module">
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
+const db = window.loader.firestore || getFirestore(); // use loader or direct
+const auth = window.loader.auth || getAuth();
+
+const recipesGrid = document.getElementById('recipes-grid');
+const savedCount = document.getElementById('saved-count');
+
+function renderSavedRecipes(recipes) {
+  recipesGrid.innerHTML = '';
+  savedCount.textContent = `— ${recipes.length} recipes`;
+  recipes.forEach((recipe, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-media" style="position:relative;">
+        <img src="${recipe.image || ''}" alt="${recipe.title || 'Recipe'}" style="width:100%;height:100%;object-fit:cover;" />
+      </div>
+      <div class="card-body">
+        <h3 style="margin:0 0 8px 0;font-size:19px;font-weight:700;">${recipe.title || 'Untitled'}</h3>
+        <div class="muted small mb-1 stats">⭐ ${recipe.rating ?? ''} | ⏱ ${recipe.cookTime ?? ''} min | 🔥 ${recipe.nutrition?.calories ?? recipe.nutrition?.kcal ?? ''} cal</div>
+        <div style="margin-bottom:8px;">
+          ${(recipe.tags || []).map(tag => `<span class="tag">${tag}</span>`).join(' ')}
+        </div>
+        <button class="btn small open-btn" data-index="${i}">Open</button>
+      </div>
+    `;
+    card._ingredientsCount = recipe.ingredients ? recipe.ingredients.length : null;
+    recipesGrid.appendChild(card);
+  });
+  window.savedRecipes = recipes; // for modal wiring
+}
+
+async function fetchSavedRecipesForUser(uid) {
+  const profileRef = doc(db, "profiles", uid);
+  const profileSnap = await getDoc(profileRef);
+  if (!profileSnap.exists()) return [];
+  const savedIds = profileSnap.data().savedRecipes || [];
+  if (!savedIds.length) return [];
+
+  // Fetch full recipe data for each saved recipeId
+  const recipePromises = savedIds.map(async (id) => {
+    const recipeRef = doc(db, "recipes", id);
+    const snap = await getDoc(recipeRef);
+    return snap.exists() ? { ...snap.data(), id } : null;
+  });
+  const recipes = (await Promise.all(recipePromises)).filter(Boolean);
+  return recipes;
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    recipesGrid.innerHTML = "<div class='muted' style='padding:32px;'>Please log in to view your saved recipes.</div>";
+    savedCount.textContent = '';
+    return;
+  }
+  const recipes = await fetchSavedRecipesForUser(user.uid);
+  renderSavedRecipes(recipes);
+  setTimeout(() => {
+    if (window.applySidebarFilters) applySidebarFilters();
+  }, 200);
+});
+</script>
+  
   <!-- include the loader file so you can use loader.* helpers -->
   <script src="../recipes.js"></script> 
   <script src="../scripts.js"></script>
