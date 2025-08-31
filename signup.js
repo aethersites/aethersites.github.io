@@ -1,9 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+// <-- Add Firestore import right after the auth import
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import { getFirestore, doc, setDoc, serverTimestamp, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
-   apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
     authDomain: "goodplates-7ae36.firebaseapp.com",
     projectId: "goodplates-7ae36",
     storageBucket: "goodplates-7ae36.firebasestorage.app",
@@ -12,8 +14,7 @@ const firebaseConfig = {
     measurementId: "G-HKMSHM726J"
 };
 
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
@@ -21,128 +22,119 @@ const db = getFirestore(app);
 async function createUserDocs(user) {
     // --- Create user doc in "users" collection ---
     await setDoc(doc(db, "users", user.uid), {
-  uid: user.uid,
-  email: "",
-  name: { first: "", last: "" },
-  phone: "",
-  profilePicture: "",
-  createdAt: serverTimestamp(),
-  stripeCustomerId: "",
-  subscriptionTier: "",
-  fullName: "",
-  updatedAt: serverTimestamp(),
-  address: "",
-  avatarDataUrl: "",
-  bio: "",
-  dietTags: [],
-  location: "",
-  nutritionGoalsNote: "",
-  preferredDelivery: "",
-  units: ""
-});
+      uid: user.uid,
+      email: user.email || "",
+      name: { first: "", last: "" },
+      phone: "",
+      profilePicture: "",
+      createdAt: serverTimestamp(),
+      stripeCustomerId: "",
+      subscriptionTier: "free",
 
-// --- Create profile doc in "profiles" collection ---
-await setDoc(doc(db, "profiles", user.uid), {
-  nutritionGoals: {
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fats: 0
-  },
-  nutritionInfo: {
-    allergies: [],
-    dietaryType: ""
-  },
-  aboutMe: "",
-  preferredUnits: "",
-  defaultServingSize: 0,
-  defaultServingUnit: "",
-  householdSize: 0,
-  groceryLists: [],
-  pantryItems: [],
-  customIngredients: [],
-  savedRecipes: [],
-  spendingHistory: [],
-  calorieHistory: [],
-  aiSuggestionsEnabled: true,
-  notificationsEnabled: true,
-  createdAt: serverTimestamp(),
-  updatedAt: serverTimestamp(),
-  lastSyncedAt: null,
-  defaultCurrency: ""
-});
+      // -- ADDED (minimal, appended) --
+      fullName: "",
+      updatedAt: serverTimestamp(),
+      address: "",
+      avatarDataUrl: "",
+      bio: "",
+      dietTags: [],
+      location: "",
+      nutritionGoalsNote: "",
+      preferredDelivery: "",
+      units: "metric"
+    });
 
-// --- Subcollections: example data ---
+    // --- Create profile doc in "profiles" collection ---
+    await setDoc(doc(db, "profiles", user.uid), {
+      nutritionGoals: {
+        calories: 2000,
+        protein: 50,
+        carbs: 250,
+        fats: 70
+      },
+      nutritionInfo: {
+        allergies: [],
+        dietaryType: ""
+      },
+      aboutMe: "",
+      preferredUnits: "metric",
+      defaultServingSize: 1,
+      defaultServingUnit: "g",
+      householdSize: 1,
+
+      groceryLists: [],
+      pantryItems: [],
+      customIngredients: [],
+      savedRecipes: [],
+      spendingHistory: [],
+      calorieHistory: [],
+      aiSuggestionsEnabled: true,
+      notificationsEnabled: true,
+
+      // -- ADDED (minimal, appended) --
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      lastSyncedAt: null,
+      defaultCurrency: "USD"
+    });
+}
+// budgets/{periodKey}
 await setDoc(doc(db, "profiles", user.uid, "budgets", "2025-08"), {
-  periodKey: "",
-  category: "",
-  targetCents: 0,
-  warnThresholdPct: 0,
+  periodKey: "2025-08",
+  category: "groceries",
+  targetCents: 50000,
+  warnThresholdPct: 80,
   lastUpdated: serverTimestamp()
 });
 
+// stats_daily/{dayKey}
 await setDoc(doc(db, "profiles", user.uid, "stats_daily", "2025-08-29"), {
-  dayKey: "",
-  totalSpentCents: 0,
-  grocerySpentCents: 0,
-  pantryAdjustCents: 0,
-  eventCount: 0,
+  dayKey: "2025-08-29",
+  totalSpentCents: 1000,
+  grocerySpentCents: 800,
+  pantryAdjustCents: 200,
+  eventCount: 2,
   lastUpdated: serverTimestamp()
 });
 
+// stats_monthly/{monthKey}
 await setDoc(doc(db, "profiles", user.uid, "stats_monthly", "2025-08"), {
-  monthKey: "",
-  totalSpentCents: 0,
-  grocerySpentCents: 0,
-  eventCount: 0,
+  monthKey: "2025-08",
+  totalSpentCents: 31000,
+  grocerySpentCents: 25000,
+  eventCount: 12,
   lastUpdated: serverTimestamp()
 });
 
+// inventoryEvents/{autoId}
 await addDoc(collection(db, "profiles", user.uid, "inventoryEvents"), {
-  itemId: "",
-  itemName: "",
-  action: "",
+  itemId: "item123",
+  itemName: "Milk",
+  action: "added",
   from: null,
-  to: "",
-  delta: 0,
+  to: "fridge",
+  delta: 1,
   quantityBefore: 0,
-  quantityAfter: 0,
+  quantityAfter: 1,
   priceCents: 0,
-  currency: "",
+  currency: "USD",
   timestamp: serverTimestamp(),
-  dayKey: "",
-  monthKey: "",
-  meta: { vendor: "", note: "" }
+  dayKey: "2025-08-29",
+  monthKey: "2025-08",
+  meta: { vendor: "StoreX", note: "Bought on sale" }
 });
 
+// spending/{autoId}
 await addDoc(collection(db, "profiles", user.uid, "spending"), {
   date: serverTimestamp(),
   amountCents: 0,
   currency: "",
   vendor: "",
   items: [
-    { itemId: "", name: "", qty: 0, priceCents: 0, notes: "" },
-    { itemId: "", name: "", qty: 0, priceCents: 0, notes: "" }
+    { itemId: "item123", name: "Milk", qty: 1, priceCents: 400, notes: "" },
+    { itemId: "item456", name: "Bread", qty: 2, priceCents: 400, notes: "Whole wheat" }
   ]
 });
-
-// --- Subcollections: recipe example data ---
-await setDoc(doc(db, "recipes", "abc123"), {
-  title: "",
-  image: "",
-  tags: [],
-  rating: 0,
-  cookTime: 0,
-  nutrition: { calories: 0, kcal: 0 },
-  servings: 0,
-  ingredients: [],
-  steps: [],
-  cuisine: "",
-  mealtype: "",
-  updatedAt: serverTimestamp()
-});
-   
-}
 
 const signupForm = document.getElementById('signupForm');
 signupForm.addEventListener('submit', async (e) => {
@@ -182,6 +174,7 @@ signupForm.addEventListener('submit', async (e) => {
 const googleBtn = document.getElementById('googleButton');
 if (googleBtn) {
     googleBtn.addEventListener('click', async () => {
+        // Clear previous errors
         document.getElementById('signupEmailError').textContent = '';
         document.getElementById('signupPasswordError').textContent = '';
         document.getElementById('signupEmailError').classList.remove('show');
