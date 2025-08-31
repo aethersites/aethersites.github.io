@@ -19,6 +19,11 @@ document.addEventListener("DOMContentLoaded", () => {
       card.innerHTML = `
         <div class="card-media">
           <img src="${r.image}" alt="${r.title}" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;" />
+                  <button class="save-btn" data-id="${r.id}" title="Save recipe" style="position:absolute;top:14px;right:14px;">
+          <svg width="22" height="22" fill="none" stroke="#15803d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+        </button>
         </div>
         <div class="card-body">
           <div class="flex items-center justify-between">
@@ -79,11 +84,34 @@ document.addEventListener("DOMContentLoaded", () => {
       modal.style.display = "flex";
     }
   });
-
+  
+    // ---- Listen for Save Button Clicks ----
+    recipeGrid.addEventListener('click', async function(e) {
+      const btn = e.target.closest('.save-btn');
+      if (!btn) return;
+      const recipeId = btn.getAttribute('data-id');
+      if (typeof currentUser === "undefined" || !currentUser) {
+        alert("You need to be logged in to save recipes.");
+        return;
+      }
+      // Save recipe ID to user's savedRecipes array
+      const profileRef = doc(db, "profiles", currentUser.uid);
+      try {
+        await updateDoc(profileRef, {
+          savedRecipes: arrayUnion(recipeId)
+        });
+        btn.textContent = "Saved!";
+        btn.disabled = true;
+      } catch (err) {
+        alert("Error saving recipe: " + err.message);
+      }
+    });
+  
   // Close modal
   closeModal.addEventListener("click", () => modal.style.display = "none");
   modal.addEventListener("click", e => {
     if (e.target === modal) modal.style.display = "none";
+    
   });
 
   
