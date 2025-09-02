@@ -1,26 +1,943 @@
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+  <title>Groceries & Pantry</title>
+  
+  <style>
+    :root{
+      --page-bg: #ffffff;
+      --panel-bg: #ffffff;
+      --muted: #6b7280;
+      --border: #e6e6e6;
+      --accent: #1f8a3d;
+      --radius-lg: 18px;
+      --radius: 10px;
+      --input-h: 40px;
+      --gap: 18px;
+      --max-width: 1100px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; background:var(--page-bg); font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{padding:28px; color:#0b1220; -webkit-font-smoothing:antialiased; display:flex; justify-content:center;}
+
+    .canvas { width:100%; max-width:var(--max-width); border-radius:var(--radius-lg); background:var(--panel-bg); padding:28px; }
+    .page-heading { text-align:center; margin:0 0 10px; }
+    .page-heading h1 { margin:0; font-size:28px; font-weight:800; }
+    .page-heading p { margin:8px 0 0; color:var(--muted); }
+    .settings-gear { position:relative; float:right; transform:translateY(-54px); opacity:.6; }
+
+    .sitebar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:6px; }
+    .brand { font-weight:700; font-size:18px; color:#111827 }
+    .auth-actions { display:flex; gap:8px; align-items:center; color:var(--muted); font-size:13px }
+
+    .lists { display:grid; grid-template-columns: 1fr 1fr; gap:var(--gap); margin-top:6px; }
+    @media (max-width:920px) { .lists { grid-template-columns: 1fr; } }
+
+    .box { background:var(--panel-bg); border-radius:12px; padding:18px; border:1px solid var(--border); box-shadow: 0 6px 20px rgba(11,18,32,0.06), 0 1px 0 rgba(255,255,255,0.4) inset; transition: box-shadow 180ms ease, transform 180ms ease; }
+    .box.drag-target { outline: 3px dashed var(--accent); outline-offset: 6px; background-color: rgba(31,138,61,0.03); }
+    .box h2 { margin:0 0 8px; font-size:18px; text-align:left; }
+    .note { color:var(--muted); font-size:13px; margin-bottom:10px; }
+
+    table { width:100%; border-collapse:collapse; margin-bottom:10px; }
+    thead th { text-align:left; padding:8px 6px; color:var(--muted); font-weight:700; font-size:13px; border-bottom:1px solid #f4f4f4; }
+    td { padding:10px 6px; border-bottom:1px solid #fafafa; font-size:14px; vertical-align:middle; }
+    td.actions { width:200px; text-align:right; }
+
+    .inline { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+    .inline input[type="text"], .inline input[type="number"], select.currency { height:var(--input-h); padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:#fff; font-size:14px; }
+    select.currency { width:70px; text-align:center; }
+
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; font-size:14px; }
+    .btn-add { background: linear-gradient(90deg, #17A34B 0%, #12B981 100%); color: #fff; border: none; border-radius: 10px; padding: 8px 12px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px rgba(18,185,129,0.12); transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease; }
+    .btn-ghost { background:transparent; border:1px solid var(--border); color:#111; }
+    .btn-muted { background:#f6f6f6; border:1px solid var(--border); color:#111; }
+    .btn-delete { background:#111; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-weight:700; cursor:pointer; }
+    .btn-move { background:transparent; border:1px solid var(--border); padding:6px 10px; border-radius:8px; font-weight:700; }
+
+    .groceries-footer { display:flex; justify-content:center; padding-top:8px; }
+    .ai-panel { margin:50px; text-align:center; }
+    .ai-actions { display:flex; flex-direction:column; gap:10px; margin-top:12px; align-items:center; }
+.ai-btn {
+  width: 100%;
+  max-width: 620px;
+  font-family: 'Inter', sans-serif;
+  text-align: left;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: linear-gradient(120deg, #ffffff, #f7f7f7, #ffffff);
+  background-size: 300% 300%;
+  animation: aiBtnGradient 6s ease infinite;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  font-weight: 400;
+  font-size: 16px;
+  box-shadow: 0 8px 20px rgba(11,18,32,0.06);
+}
+/* dropdown for the gear */
+.settings-gear { position: relative; display:inline-block; }
+#viewModeBtn { background:transparent; border:0; font-size:18px; cursor:pointer; padding:6px; }
+.view-mode-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 140px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(11,18,32,0.12);
+  background: white;
+  border: 1px solid var(--border);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1500;
+}
+.view-mode-menu[hidden] { display:none; }
+.view-mode-menu .view-mode-option {
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+}
+.view-mode-menu .view-mode-option[aria-checked="true"] {
+  background: rgba(31,138,61,0.08);
+  font-weight: 700;
+}
+.view-mode-menu .view-mode-option:focus { outline: 2px solid rgba(31,138,61,0.2); }
+    .modal-backdrop { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.28); z-index:40; }
+    .modal-backdrop.active { display:flex; }
+    .modal { width:480px; max-width:94%; border-radius:12px; padding:18px; background:#fff; border:1px solid var(--border); }
+    .modal h3 { margin:0 0 12px; }
+    .modal .row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
+    .modal label { min-width:62px; color:var(--muted); font-size:13px; }
+    .modal input[type="text"], .modal input[type="number"], .modal select { flex:1; height:40px; padding:8px 10px; border-radius:8px; border:1px solid var(--border); }
+
+    body.modal-open .canvas { filter: blur(4px) grayscale(.03); pointer-events:none; user-select:none; }
+    tr[draggable="true"] { cursor:grab; }
+
+    /* simple auth modal styles (if present) */
+    .auth-modal { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.28); z-index:50; }
+    .auth-modal.active { display:flex; }
+    .auth-panel { width:420px; max-width:94%; border-radius:12px; padding:18px; background:#fff; border:1px solid var(--border); }
+    .auth-panel .modes { display:flex; gap:8px; margin-bottom:12px; }
+    .auth-panel input { width:100%; margin-bottom:8px; }
+    .auth-msg { color:var(--muted); font-size:13px; margin-bottom:8px; }
+  </style>
+</head>
+<body>
+<div id="global-header" aria-live="polite" aria-busy="true"></div>
+        <script type="module" src="/header/header-loader.js"></script>
+  
+  <div class="canvas" role="application" aria-label="Groceries and pantry app">
+
+    <div class="page-heading">
+      <h1>Groceries & Pantry Log</h1>
+      <p id="pageDate">Date: --</p>
+    </div>
+
+<div class="settings-gear">
+  <button id="viewModeBtn" aria-haspopup="true" aria-expanded="false" aria-controls="viewModeMenu" title="View options">⚙️</button>
+
+  <div id="viewModeMenu" class="view-mode-menu" role="menu" aria-label="View mode" hidden>
+    <button role="menuitemradio" class="view-mode-option" data-mode="simple" aria-checked="false">Simple</button>
+    <button role="menuitemradio" class="view-mode-option" data-mode="advanced" aria-checked="false">Advanced</button>
+  </div>
+</div>
+
+    <div class="lists" role="main">
+
+      <section class="box" id="groceriesBox" aria-labelledby="groceriesHeading">
+        <h2 id="groceriesHeading">Groceries List</h2>
+        <div class="note">Add items to buy</div>
+
+        <table id="groceriesTable" aria-live="polite">
+          <thead>
+            <tr><th>Name</th><th style="width:80px">Qty</th><th style="width:80px">Currency</th><th style="width:160px">Price</th><th style="width:160px">Actions</th></tr>
+          </thead>
+          <tbody id="groceriesBody"></tbody>
+        </table>
+
+        <form id="addGroceryForm" class="inline" aria-label="Add grocery item">
+          <input id="gName" type="text" placeholder="Name..." aria-label="Name (text)" required />
+          <input id="gQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
+          <input id="gPrice" type="number" step="0.01" placeholder="Price" aria-label="Price (number)" style="width:110px" />
+          <select id="gCurrency" class="currency" aria-label="Currency">
+            <option value="$">$</option><option value="€">€</option><option value="£">£</option><option value="¥">¥</option><option value="₹">₹</option>
+          </select>
+          <button id="addGroceryBtn" class="btn btn-add" aria-label="Add grocery" type="button">Add</button>
+        </form>
+
+        <div class="groceries-footer">
+          <button id="openCustomBtn" class="btn btn-ghost" aria-haspopup="dialog" type="button">+ Add Custom Ingredient</button>
+        </div>
+      </section>
+
+      <section class="box" id="pantryBox" aria-labelledby="pantryHeading">
+        <h2 id="pantryHeading">Pantry Items</h2>
+        <div class="note">Items in your pantry</div>
+
+        <table id="pantryTable" aria-live="polite">
+          <thead>
+            <tr><th>Name</th><th style="width:80px">Qty</th><th style="width:140px">Expiration</th><th style="width:160px"></th></tr>
+          </thead>
+          <tbody id="pantryBody"></tbody>
+        </table>
+
+        <form id="addPantryForm" class="inline" aria-label="Add pantry item">
+          <input id="pName" type="text" placeholder="Name..." aria-label="Name (text)" />
+          <input id="pQty" type="number" min="1" value="1" placeholder="Qty" aria-label="Quantity (number)" style="width:80px" />
+          <input id="pExp" type="date" style="width:150px" aria-label="Expiration date" />
+          <button id="addPantryBtn" class="btn btn-add" aria-label="Add pantry item" type="button">Add to Pantry</button>
+        </form>
+      </section>
+
+    </div>
+
+    <div class="ai-panel" role="region" aria-label="AI recipes">
+      <h3>Generate AI Recipes</h3>
+      <div class="ai-actions" role="group" aria-label="AI actions">
+        <button id="aiPantryBtn" class="ai-btn" type="button">✦ AI Suggestions based on your pantry...</button>
+        <button id="aiWeeklyBtn" class="ai-btn" type="button">✦ AI Suggestions based on your weekly groceries/pantry items...</button>
+        <button id="aiMealPlanBtn" class="ai-btn" type="button">✦ AI Meal plan for the week...</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Custom ingredient modal -->
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <h3 id="modalTitle">Add Custom Ingredient</h3>
+      <div class="row">
+        <label for="cName">Name</label><input id="cName" type="text" placeholder="e.g. Almond Butter" aria-label="Custom name" />
+      </div>
+      <div class="row">
+        <label for="cQty">Qty</label><input id="cQty" type="number" min="1" value="1" aria-label="Custom quantity" style="width:140px" />
+        <label for="cPrice" style="margin-left:6px;">Price</label><input id="cPrice" type="number" step="0.01" placeholder="Price" aria-label="Custom price" style="width:110px" />
+        <select id="cCurrency" class="currency" aria-label="Currency">
+          <option value="$">$</option><option value="€">€</option><option value="£">£</option><option value="¥">¥</option><option value="₹">₹</option>
+        </select>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;">
+        <button id="modalSave" class="btn btn-add" type="button">Save</button>
+        <button id="modalCancel" class="btn btn-muted" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Optional (simple) auth modal markup. The JS gracefully degrades if this isn't present. -->
+  <div id="authModal" class="auth-modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="auth-panel" role="document">
+      <div class="modes">
+        <button id="authModeSignIn" class="btn btn-add" type="button">Sign in</button>
+        <button id="authModeSignUp" class="btn btn-muted" type="button">Sign up</button>
+      </div>
+      <div class="auth-msg" id="authMsg">Sign in with email/password or Google</div>
+      <input id="authDisplayName" placeholder="Display name (sign up only)" style="display:none" />
+      <input id="authEmail" placeholder="Email" />
+      <input id="authPassword" placeholder="Password" type="password" />
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button id="authSubmit" class="btn btn-add" type="button">Sign in</button>
+        <button id="authGoogle" class="btn btn-ghost" type="button">Sign in with Google</button>
+        <button id="authReset" class="btn btn-muted" type="button">Reset</button>
+        <button id="authCancel" class="btn btn-muted" type="button">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <script type="module">
+
+    // single, consolidated script: imports, helpers, DOM wiring, auth & firestore logic
+ import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+    // ---------- CONFIG: drop your firebase config here ----------
+    // keep this a valid JS object. replace the placeholders with your real config.
+    const firebaseConfig = {
+ apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
     authDomain: "goodplates-7ae36.firebaseapp.com",
     projectId: "goodplates-7ae36",
     storageBucket: "goodplates-7ae36.firebasestorage.app",
     messagingSenderId: "541149626283",
     appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-    measurementId: "G-HKMSHM726J"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    measurementId: "G-HKMSHM726J"    
+    };
 
-  (async () => {
-    try {
-      const t0 = performance.now();
-      const snap = await getDoc(doc(db, "users", "testDoc"));
-      console.log("getDoc success", snap.exists() ? snap.data() : "no doc", "t=", performance.now()-t0);
-    } catch (e) {
-      console.error("getDoc error", e);
+    const hasConfig = firebaseConfig && firebaseConfig.apiKey && String(firebaseConfig.apiKey).trim().length > 0;
+    if (!hasConfig) {
+      const signedState = document.getElementById('signedState');
+      if (signedState) signedState.textContent = 'Firebase config missing — auth disabled';
+      console.warn('Firebase config not provided. Add your firebaseConfig to enable auth/firestore.');
     }
-  })();
-</script>
+
+
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    try { getAnalytics(app); } catch (e) { /* optional */ }
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // ---------- DOM refs ----------
+    const signinBtn = document.getElementById('signinBtn');
+    let signoutBtn = document.getElementById('signoutBtn');
+    const signedState = document.getElementById('signedState');
+    const brandEl = document.querySelector('.brand');
+
+    const groceriesBody = document.getElementById('groceriesBody');
+    const pantryBody = document.getElementById('pantryBody');
+    const groceriesBox = document.getElementById('groceriesBox');
+    const pantryBox = document.getElementById('pantryBox');
+
+    // modal & auth elements
+    const authModal = document.getElementById('authModal');
+    const authModeSignIn = document.getElementById('authModeSignIn');
+    const authModeSignUp = document.getElementById('authModeSignUp');
+    const authDisplayName = document.getElementById('authDisplayName');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authSubmit = document.getElementById('authSubmit');
+    const authGoogle = document.getElementById('authGoogle');
+    const authReset = document.getElementById('authReset');
+    const authCancel = document.getElementById('authCancel');
+    const authMsg = document.getElementById('authMsg');
+
+    // grocery/pantry form refs
+    const addGroceryBtn = document.getElementById('addGroceryBtn');
+    const gName = document.getElementById('gName');
+    const gQty = document.getElementById('gQty');
+    const gPrice = document.getElementById('gPrice');
+    const gCurrency = document.getElementById('gCurrency');
+    const addGroceryForm = document.getElementById('addGroceryForm');
+
+    const addPantryBtn = document.getElementById('addPantryBtn');
+    const pName = document.getElementById('pName');
+    const pQty = document.getElementById('pQty');
+    const pExp = document.getElementById('pExp');
+    const addPantryForm = document.getElementById('addPantryForm');
+
+    const openCustomBtn = document.getElementById('openCustomBtn');
+    const cName = document.getElementById('cName');
+    const cQty = document.getElementById('cQty');
+    const cPrice = document.getElementById('cPrice');
+    const cCurrency = document.getElementById('cCurrency');
+
+    const modalBackdrop = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSave = document.getElementById('modalSave');
+    const modalCancel = document.getElementById('modalCancel');
+
+    // ---------- app state ----------
+    let currentUser = null;
+    let usersDoc = null;
+    let profileDocRef = null;
+    let profileUnsub = null;
+    let profileData = null;
+    let activeGroceryListIndex = 0;
+    let editingContext = null;
+
+    // ---------- helpers ----------
+    function escapeHTML(s = '') { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function formatCurrency(n, symbol = '$') { if (n == null || n === '') return '-'; const num = Number(n); if (!isFinite(num)) return '-'; return symbol + num.toFixed(2); }
+    function convertMaybeTimestamp(v) { if (!v) return null; if (typeof v.toDate === 'function') return v.toDate(); if (typeof v === 'string' || typeof v === 'number') { const d = new Date(v); return isNaN(d.getTime()) ? null : d; } if (v instanceof Date) return v; return null; }
+    function formatDate(d) { if (!d) return '-'; const dt = (d instanceof Date) ? d : new Date(d); const y = dt.getFullYear(); const m = String(dt.getMonth()+1).padStart(2,'0'); const day = String(dt.getDate()).padStart(2,'0'); return `${m}-${day}-${String(y).slice(-2)}`; }
+    function safeSetText(el, txt) { if (!el) return; el.textContent = (txt === null || txt === undefined) ? '' : String(txt); }
+
+    function setModalVisible(visible) {
+      if (!modalBackdrop) return;
+      modalBackdrop.classList.toggle('active', visible);
+      if (visible) document.body.classList.add('modal-open'); else document.body.classList.remove('modal-open');
+    }
+
+    // auth modal helpers (optional — gracefully degrades if auth modal is absent)
+    function toggleAuthModal(show, mode = 'signin') {
+      if (!authModal) return;
+      authModal.classList.toggle('active', !!show);
+      authModal.style.display = show ? 'flex' : 'none';
+      if (!show) { if (authMsg) authMsg.textContent = ''; if (authEmail) authEmail.value = ''; if (authPassword) authPassword.value = ''; if (authDisplayName) authDisplayName.value = ''; }
+      if (show) {
+        setAuthMode(mode);
+        if (authEmail) authEmail.focus();
+      }
+    }
+    function setAuthMode(mode) {
+      if (!authModal) return;
+      if (mode === 'signup') {
+        if (authDisplayName) authDisplayName.style.display = '';
+        if (authModeSignUp) authModeSignUp.classList.add('btn-add');
+        if (authModeSignIn) authModeSignIn.classList.remove('btn-add');
+        if (authSubmit) authSubmit.textContent = 'Create account';
+        if (authMsg) authMsg.textContent = 'Create a new account or sign in with Google';
+      } else {
+        if (authDisplayName) authDisplayName.style.display = 'none';
+        if (authModeSignIn) authModeSignIn.classList.add('btn-add');
+        if (authModeSignUp) authModeSignUp.classList.remove('btn-add');
+        if (authSubmit) authSubmit.textContent = 'Sign in';
+        if (authMsg) authMsg.textContent = 'Sign in with email/password or Google';
+      }
+      if (authModal) authModal.dataset.mode = mode;
+    }
+
+    // ---------- persistence helpers ----------
+    let pendingSave = null;
+    function scheduleSave() {
+      if (!profileDocRef || profileData == null) return;
+      if (pendingSave) clearTimeout(pendingSave);
+      pendingSave = setTimeout(async () => {
+        pendingSave = null;
+        try {
+          await updateDoc(profileDocRef, {
+            groceryLists: profileData.groceryLists || [],
+            pantryItems: profileData.pantryItems || [],
+            customIngredients: profileData.customIngredients || [],
+            aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+          });
+        } catch (e) {
+          try {
+            await setDoc(profileDocRef, {
+              groceryLists: profileData.groceryLists || [],
+              pantryItems: profileData.pantryItems || [],
+              customIngredients: profileData.customIngredients || [],
+              aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+            }, { merge: true });
+          } catch (e2) { console.error('Save failed', e2); }
+        }
+      }, 350);
+    }
+    async function saveNow() {
+      if (!profileDocRef || profileData == null) return;
+      try {
+        await updateDoc(profileDocRef, {
+          groceryLists: profileData.groceryLists || [],
+          pantryItems: profileData.pantryItems || [],
+          customIngredients: profileData.customIngredients || [],
+          aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+        });
+      } catch (e) {
+        try {
+          await setDoc(profileDocRef, {
+            groceryLists: profileData.groceryLists || [],
+            pantryItems: profileData.pantryItems || [],
+            customIngredients: profileData.customIngredients || [],
+            aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+          }, { merge: true });
+        } catch (e2) { console.error('Immediate save failed', e2); }
+      }
+    }
+
+    // ---------- drag helpers ----------
+    function makeDraggableRow(tr, kind, idx) {
+      tr.setAttribute('draggable', 'true');
+      tr.dataset.kind = kind;
+      tr.dataset.idx = String(idx);
+      tr.addEventListener('dragstart', (ev) => {
+        if (!currentUser) { ev.preventDefault(); return alert('Sign in to move items between lists'); }
+        const payload = JSON.stringify({ kind, idx });
+        try { ev.dataTransfer.setData('application/json', payload); } catch(e) {}
+        ev.dataTransfer.effectAllowed = 'move';
+        try { ev.dataTransfer.setData('text/plain', escapeHTML((tr.textContent || '').trim().slice(0, 200))); } catch(e){}
+        if (groceriesBox) groceriesBox.classList.add('drag-target');
+        if (pantryBox) pantryBox.classList.add('drag-target');
+      });
+      tr.addEventListener('dragend', () => {
+        if (groceriesBox) groceriesBox.classList.remove('drag-target');
+        if (pantryBox) pantryBox.classList.remove('drag-target');
+      });
+    }
+
+    // ---------- render ----------
+    function clearUI() {
+      if (groceriesBody) groceriesBody.innerHTML = '<tr><td colspan="4" class="small">Sign in to see your lists</td></tr>';
+      if (pantryBody) pantryBody.innerHTML = '<tr><td colspan="4" class="small">Sign in to see your pantry</td></tr>';
+      safeSetText(signedState, 'Not signed in');
+      if (brandEl) brandEl.textContent = '';
+      const pageHeadingDate = document.getElementById('pageDate');
+      if (pageHeadingDate) pageHeadingDate.textContent = 'Date: ' + formatDate(new Date());
+      if (signinBtn) signinBtn.style.display = hasConfig ? '' : 'none';
+      if (signoutBtn) signoutBtn.style.display = 'none';
+    }
+
+    function renderAll() {
+      const list = (profileData && profileData.groceryLists && profileData.groceryLists[activeGroceryListIndex]) || { name:'Default', items:[] };
+      renderGroceries(list.items || []);
+      renderPantry(profileData ? (profileData.pantryItems || []) : []);
+      let display = '';
+      if (usersDoc && usersDoc.name) {
+        const n = usersDoc.name;
+        display = (n.first || '') + (n.last ? (' ' + n.last) : '');
+      }
+      if (!display && currentUser) display = currentUser.displayName || currentUser.email || currentUser.uid;
+      safeSetText(signedState, display || 'Not signed in');
+      if (brandEl) brandEl.textContent = display ? display : 'GoodPlates';
+    }
+
+                    function renderGroceries(items = []) {
+                  if (!groceriesBody) return;
+                  groceriesBody.innerHTML = '';
+                  if (!items.length) return groceriesBody.innerHTML = '<tr><td colspan="5" class="small">No grocery items</td></tr>';
+                
+                  if (viewMode === 'simple') {
+                    // simple: only show name column (one column)
+                    items.forEach((it, idx) => {
+                      const tr = document.createElement('tr');
+                      tr.innerHTML = `
+                        <td>
+                          <label style="display:flex;align-items:center;gap:10px;">
+                            <input type="checkbox" data-idx="${idx}" class="chk-bought" ${it.purchased ? 'checked' : ''} />
+                            <span>${escapeHTML(it.name)}</span>
+                          </label>
+                        </td>
+                      `;
+                      makeDraggableRow(tr, 'grocery', idx);
+                      groceriesBody.appendChild(tr);
+                    });
+                
+                    groceriesBody.querySelectorAll('.chk-bought').forEach(cb => cb.addEventListener('change', onTogglePurchased));
+                    // no edit/move/delete buttons in simple mode (keeps UI uncluttered)
+                    return;
+                  }
+                
+                  // advanced: original full layout
+                  items.forEach((it, idx) => {
+                    const purchasedClass = it.purchased ? 'style="text-decoration:line-through; opacity:.7;"' : '';
+                    const currency = it.currency || '$';
+                    const priceDisplay = (it.price != null) ? formatCurrency(it.price, currency) : '-';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                      <td ${purchasedClass}>
+                        <label style="display:flex;align-items:center;gap:10px;">
+                          <input type="checkbox" data-idx="${idx}" class="chk-bought" ${it.purchased ? 'checked' : ''} />
+                          <span>${escapeHTML(it.name)}</span>
+                        </label>
+                      </td>
+                      <td ${purchasedClass}>${it.quantity ?? 1}</td>
+                      <td ${purchasedClass}>${escapeHTML(currency)}</td>
+                      <td ${purchasedClass}>${priceDisplay}</td>
+                      <td class="actions">
+                        <button data-idx="${idx}" class="btn btn-edit btn-edit-row" type="button">Edit</button>
+                        <button data-idx="${idx}" class="btn btn-move" type="button">&gt;</button>
+                        <button data-idx="${idx}" class="btn btn-delete" type="button">X</button>
+                      </td>
+                    `;
+                    makeDraggableRow(tr, 'grocery', idx);
+                    groceriesBody.appendChild(tr);
+                  });
+                
+                  groceriesBody.querySelectorAll('.chk-bought').forEach(cb => cb.addEventListener('change', onTogglePurchased));
+                  groceriesBody.querySelectorAll('.btn-edit-row').forEach(btn => btn.addEventListener('click', onEditGrocery));
+                  groceriesBody.querySelectorAll('.btn-delete').forEach(btn => btn.addEventListener('click', onDeleteGrocery));
+                  groceriesBody.querySelectorAll('.btn-move').forEach(btn => btn.addEventListener('click', onMoveToPantry));
+                }
+                
+                    function renderPantry(items = []) {
+                  if (!pantryBody) return;
+                  pantryBody.innerHTML = '';
+                  if (!items.length) return pantryBody.innerHTML = '<tr><td colspan="4" class="small">No pantry items</td></tr>';
+                
+                  if (viewMode === 'simple') {
+                    items.forEach((it, idx) => {
+                      const tr = document.createElement('tr');
+                      tr.innerHTML = `<td>${escapeHTML(it.name)}</td>`;
+                      makeDraggableRow(tr, 'pantry', idx);
+                      pantryBody.appendChild(tr);
+                    });
+                    // simple mode: no edit/delete buttons
+                    return;
+                  }
+                
+                  // advanced (original)
+                  items.forEach((it, idx) => {
+                    const exp = it.expirationDate ? formatDate(convertMaybeTimestamp(it.expirationDate)) : '-';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                      <td>${escapeHTML(it.name)}</td>
+                      <td>${it.quantity ?? 1}</td>
+                      <td>${exp}</td>
+                      <td class="actions">
+                        <button data-idx="${idx}" class="btn btn-edit btn-edit-pantry" type="button">Edit</button>
+                        <button data-idx="${idx}" class="btn btn-muted btn-delete-pantry" type="button">Delete</button>
+                      </td>
+                    `;
+                    makeDraggableRow(tr, 'pantry', idx);
+                    pantryBody.appendChild(tr);
+                  });
+                  pantryBody.querySelectorAll('.btn-edit-pantry').forEach(btn => btn.addEventListener('click', onEditPantry));
+                  pantryBody.querySelectorAll('.btn-delete-pantry').forEach(btn => btn.addEventListener('click', onDeletePantry));
+                }
+
+    // ---------- handlers ----------
+    if (addGroceryBtn) addGroceryBtn.type = 'button';
+    if (addPantryBtn) addPantryBtn.type = 'button';
+    if (modalSave) modalSave.type = 'button';
+    if (modalCancel) modalCancel.type = 'button';
+
+    async function handleAddGrocery(e) {
+      if (!currentUser) return alert('Sign in to add items');
+      e && e.preventDefault && e.preventDefault();
+      const name = gName?.value?.trim();
+      if (!name) return alert('Enter a name');
+      const qty = Number(gQty?.value) || 1;
+      const price = (gPrice && gPrice.value !== '') ? Number(gPrice.value) : null;
+      const currency = (gCurrency && gCurrency.value) || '$';
+      const item = { name, quantity: qty, price, currency, createdAt: serverTimestamp(), purchased: false };
+      profileData = profileData || {};
+      profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
+      const list = profileData.groceryLists[activeGroceryListIndex] || profileData.groceryLists[0];
+      list.items = list.items || [];
+      list.items.push(item);
+
+      scheduleSave();
+      await saveNow().catch(() => {});
+
+      renderAll();
+      if (gName) gName.value = '';
+      if (gQty) gQty.value = 1;
+      if (gPrice) gPrice.value = '';
+    }
+    if (addGroceryBtn) addGroceryBtn.addEventListener('click', handleAddGrocery);
+    if (addGroceryForm) addGroceryForm.addEventListener('submit', handleAddGrocery);
+
+    async function handleAddPantry(e) {
+      if (!currentUser) return alert('Sign in to add pantry items');
+      e && e.preventDefault && e.preventDefault();
+      const name = pName?.value?.trim();
+      if (!name) return alert('Enter a name');
+      const qty = Number(pQty?.value) || 1;
+      const expirationDate = pExp && pExp.value ? new Date(pExp.value) : null;
+      const item = { name, quantity: qty, createdAt: serverTimestamp() };
+      if (expirationDate) item.expirationDate = expirationDate;
+      profileData = profileData || {};
+      profileData.pantryItems = profileData.pantryItems || [];
+      profileData.pantryItems.push(item);
+
+      scheduleSave();
+      await saveNow().catch(()=>{});
+
+      renderAll();
+      if (pName) pName.value='';
+      if (pQty) pQty.value=1;
+      if (pExp) pExp.value='';
+    }
+    if (addPantryBtn) addPantryBtn.addEventListener('click', handleAddPantry);
+    if (addPantryForm) addPantryForm.addEventListener('submit', handleAddPantry);
+
+    if (openCustomBtn) openCustomBtn.addEventListener('click', () => {
+      if (!currentUser) return alert('Sign in to add custom ingredients');
+      editingContext = { type: 'custom' };
+      if (modalTitle) modalTitle.textContent = 'Add Custom Ingredient';
+      if (cName) cName.value = '';
+      if (cQty) cQty.value = 1;
+      if (cPrice) cPrice.value = '';
+      setModalVisible(true);
+      if (cName) cName.focus();
+    });
+
+    if (modalSave) modalSave.addEventListener('click', async () => {
+      if (!editingContext) { setModalVisible(false); return; }
+      const t = editingContext;
+      const name = (cName?.value?.trim() || '');
+      if (!name) return alert('Enter a name');
+      const qty = Number(cQty?.value || 1);
+      const price = (cPrice && cPrice.value !== '') ? Number(cPrice.value) : null;
+
+      if (t.type === 'grocery' && Number.isFinite(t.idx)) {
+        const list = profileData.groceryLists[activeGroceryListIndex];
+        const it = list.items[t.idx];
+        it.name = name; it.quantity = qty; it.price = price;
+      } else if (t.type === 'pantry' && Number.isFinite(t.idx)) {
+        const it = profileData.pantryItems[t.idx];
+        it.name = name; it.quantity = qty;
+        if (price != null) it.price = price; else delete it.price;
+      } else if (t.type === 'custom') {
+        const currency = (cCurrency && cCurrency.value) || '$';
+        const item = { name, quantity: qty, price: price, currency, createdAt: serverTimestamp() };
+        profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
+        profileData.groceryLists[activeGroceryListIndex].items.push(item);
+        profileData.customIngredients = profileData.customIngredients || [];
+        profileData.customIngredients.push({ name, quantity: qty, price: price, currency, createdAt: serverTimestamp() });
+      }
+      scheduleSave();
+      await saveNow().catch(()=>{});
+      setModalVisible(false);
+      editingContext = null;
+      renderAll();
+    });
+
+    if (modalCancel) modalCancel.addEventListener('click', () => { setModalVisible(false); editingContext = null; });
+
+    function onEditGrocery(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      const item = (profileData?.groceryLists?.[activeGroceryListIndex]?.items || [])[idx];
+      if (!item) return;
+      editingContext = { type:'grocery', idx };
+      if (modalTitle) modalTitle.textContent = 'Edit Grocery Item';
+      if (cName) cName.value = item.name || '';
+      if (cQty) cQty.value = item.quantity ?? 1;
+      if (cPrice) cPrice.value = item.price != null ? String(item.price) : '';
+      setModalVisible(true);
+    }
+    function onDeleteGrocery(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      if (!confirm('Delete this grocery item?')) return;
+      profileData.groceryLists[activeGroceryListIndex].items.splice(idx,1);
+      scheduleSave(); saveNow(); renderAll();
+    }
+    function onMoveToPantry(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      const list = profileData.groceryLists[activeGroceryListIndex];
+      const item = list.items.splice(idx,1)[0];
+      if (!item) return;
+      const p = { name: item.name, quantity: item.quantity || 1, createdAt: serverTimestamp() };
+      profileData.pantryItems = profileData.pantryItems || [];
+      profileData.pantryItems.push(p);
+      scheduleSave(); saveNow(); renderAll();
+    }
+    function onEditPantry(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      const item = profileData.pantryItems[idx];
+      if (!item) return;
+      editingContext = { type:'pantry', idx };
+      if (modalTitle) modalTitle.textContent = 'Edit Pantry Item';
+      if (cName) cName.value = item.name || '';
+      if (cQty) cQty.value = item.quantity ?? 1;
+      if (cPrice) cPrice.value = item.price != null ? String(item.price) : '';
+      setModalVisible(true);
+    }
+    function onDeletePantry(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      if (!confirm('Delete this pantry item?')) return;
+      profileData.pantryItems.splice(idx,1);
+      scheduleSave(); saveNow(); renderAll();
+    }
+    function onTogglePurchased(e) {
+      const idx = Number(e.currentTarget.dataset.idx);
+      const list = profileData.groceryLists[activeGroceryListIndex];
+      if (!list || !list.items || !list.items[idx]) return;
+      const it = list.items[idx];
+      it.purchased = !!e.currentTarget.checked;
+      if (it.purchased) it.purchasedAt = new Date(); else delete it.purchasedAt;
+      scheduleSave(); saveNow(); renderAll();
+    }
+
+    // ---------- drag/drop on boxes ----------
+    function parseDragData(ev) {
+      try { const raw = ev.dataTransfer.getData('application/json') || ev.dataTransfer.getData('text/plain'); return raw ? JSON.parse(raw) : null; } catch (e) { return null; }
+    }
+    async function handleDropOnBox(ev, targetKind) {
+      ev.preventDefault();
+      if (!currentUser) return alert('Sign in to move items');
+      const payload = parseDragData(ev);
+      if (!payload || typeof payload.kind !== 'string' || payload.idx == null) { return; }
+      const srcKind = payload.kind; const srcIdx = Number(payload.idx);
+      if (srcKind === targetKind) { if (groceriesBox) groceriesBox.classList.remove('drag-target'); if (pantryBox) pantryBox.classList.remove('drag-target'); return; }
+      if (srcKind === 'grocery' && targetKind === 'pantry') {
+        const list = profileData.groceryLists[activeGroceryListIndex]; if (!list || !list.items || !list.items[srcIdx]) return;
+        const item = list.items.splice(srcIdx,1)[0]; const p = { name: item.name, quantity: item.quantity || 1, createdAt: serverTimestamp() };
+        profileData.pantryItems = profileData.pantryItems || []; profileData.pantryItems.push(p); scheduleSave(); await saveNow().catch(()=>{}); renderAll();
+      }
+      if (srcKind === 'pantry' && targetKind === 'grocery') {
+        if (!profileData.pantryItems || !profileData.pantryItems[srcIdx]) return;
+        const pitem = profileData.pantryItems.splice(srcIdx,1)[0]; const gItem = { name: pitem.name, quantity: pitem.quantity || 1, price: pitem.price ?? null, createdAt: serverTimestamp() };
+        profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }]; profileData.groceryLists[activeGroceryListIndex].items.push(gItem); scheduleSave(); await saveNow().catch(()=>{}); renderAll();
+      }
+      if (groceriesBox) groceriesBox.classList.remove('drag-target'); if (pantryBox) pantryBox.classList.remove('drag-target');
+    }
+    if (groceriesBox) { groceriesBox.addEventListener('dragover', (e) => e.preventDefault()); groceriesBox.addEventListener('drop', (e) => handleDropOnBox(e, 'grocery')); }
+    if (pantryBox)  { pantryBox.addEventListener('dragover', (e) => e.preventDefault());  pantryBox.addEventListener('drop', (e) => handleDropOnBox(e, 'pantry')); }
+
+    // ---------- AUTH: sign-in modal wiring (email/password + Google) ----------
+    async function initAuthUI() {
+      if (!hasConfig) return;
+      try { await setPersistence(auth, browserLocalPersistence); } catch(e){ console.warn('setPersistence failed', e); }
+
+      if (signinBtn) signinBtn.addEventListener('click', () => toggleAuthModal(true, 'signin'));
+      if (authModeSignIn) authModeSignIn.addEventListener('click', () => setAuthMode('signin'));
+      if (authModeSignUp) authModeSignUp.addEventListener('click', () => setAuthMode('signup'));
+      if (authCancel) authCancel.addEventListener('click', () => toggleAuthModal(false));
+
+      if (authGoogle) authGoogle.addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+          authGoogle.disabled = true; authGoogle.textContent = 'Signing in...';
+          await signInWithPopup(auth, provider);
+          toggleAuthModal(false);
+        } catch (err) { console.error('Google sign-in failed', err); if (authMsg) authMsg.textContent = 'Google sign-in failed: ' + (err.message || String(err)); }
+        finally { authGoogle.disabled = false; authGoogle.textContent = 'Sign in with Google'; }
+      });
+
+      if (authSubmit) authSubmit.addEventListener('click', async () => {
+        const mode = authModal?.dataset?.mode || 'signin';
+        const email = (authEmail.value || '').trim(); const pass = authPassword.value || '';
+        if (!email || !pass) { if (authMsg) authMsg.textContent = 'Enter email & password'; return; }
+        authSubmit.disabled = true; authSubmit.textContent = mode === 'signup' ? 'Creating...' : 'Signing in...';
+        try {
+          if (mode === 'signup') {
+            const displayName = (authDisplayName.value || '').trim();
+            const cred = await createUserWithEmailAndPassword(auth, email, pass);
+            if (displayName && cred && cred.user) { try { await updateProfile(cred.user, { displayName }); } catch(e){} }
+            toggleAuthModal(false);
+          } else {
+            await signInWithEmailAndPassword(auth, email, pass);
+            toggleAuthModal(false);
+          }
+        } catch (err) { console.error('Auth error', err); if (authMsg) authMsg.textContent = err.message || String(err); }
+        finally { authSubmit.disabled = false; authSubmit.textContent = mode === 'signup' ? 'Create account' : 'Sign in'; }
+      });
+
+      if (authReset) authReset.addEventListener('click', async () => {
+        const email = (authEmail.value || '').trim(); if (!email) { if (authMsg) authMsg.textContent = 'Enter your email to reset password'; return; }
+        try { await sendPasswordResetEmail(auth, email); if (authMsg) authMsg.textContent = 'Password reset email sent — check your inbox.'; } catch (err) { console.error('Reset failed', err); if (authMsg) authMsg.textContent = 'Reset error: ' + (err.message || String(err)); }
+      });
+    }
+    initAuthUI();
+
+    // ---------- auth observer (single) ----------
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user;
+      if (!user) {
+        signedState && (signedState.textContent = 'Not signed in');
+        if (signinBtn) signinBtn.style.display = hasConfig ? '' : 'none';
+        if (signoutBtn) signoutBtn.style.display = 'none';
+        profileDocRef = null; profileData = null; usersDoc = null;
+        if (profileUnsub) { profileUnsub(); profileUnsub = null; }
+        clearUI();
+        return;
+      }
+
+      if (signinBtn) signinBtn.style.display = 'none';
+
+      // create/show sign-out button if needed
+      if (!signoutBtn) {
+        const authActions = document.querySelector('.auth-actions');
+        if (authActions) {
+          signoutBtn = document.createElement('button');
+          signoutBtn.id = 'signoutBtn'; signoutBtn.className = 'btn btn-muted'; signoutBtn.textContent = 'Sign out'; signoutBtn.type = 'button';
+          authActions.appendChild(signoutBtn);
+          signoutBtn.addEventListener('click', async () => { try { await signOut(auth); } catch (e) { console.error('Sign-out failed', e); alert('Sign out failed'); } });
+        }
+      } else { signoutBtn.style.display = ''; }
+
+      // ensure users/{uid}
+      try {
+        const usersSnap = await getDoc(doc(db, 'users', user.uid));
+        if (!usersSnap.exists()) {
+          const userRecord = { email: user.email || '', name: { first: user.displayName ? user.displayName.split(' ')[0] : '', last: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '' }, profilePicture: user.photoURL || '', createdAt: serverTimestamp() };
+          await setDoc(doc(db, 'users', user.uid), userRecord, { merge: true }); usersDoc = userRecord;
+        } else { usersDoc = usersSnap.data(); }
+      } catch (e) { console.warn('Could not read/create users/{uid}', e); usersDoc = null; }
+
+      // ensure profile doc & subscribe realtime
+      profileDocRef = doc(db, 'profiles', user.uid);
+      try {
+        const snap = await getDoc(profileDocRef);
+        if (!snap.exists()) {
+          const initial = { groceryLists: [{ name: 'Default', items: [], createdAt: serverTimestamp() }], pantryItems: [], customIngredients: [], aiSuggestionsEnabled: true, spendingHistory: [], createdAt: serverTimestamp() };
+          await setDoc(profileDocRef, initial);
+        }
+      } catch (e) { console.error('Could not ensure profile doc', e); }
+
+      if (profileUnsub) { profileUnsub(); profileUnsub = null; }
+      profileUnsub = onSnapshot(profileDocRef, (snap) => {
+        if (!snap.exists()) { profileData = null; clearUI(); return; }
+        profileData = snap.data();
+        profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
+        profileData.pantryItems = profileData.pantryItems || [];
+        profileData.customIngredients = profileData.customIngredients || [];
+        profileData.spendingHistory = profileData.spendingHistory || [];
+        renderAll();
+      }, (err) => { console.error('Profile realtime error', err); });
+      
+    });
+                // ---------- View mode (Simple / Advanced) UI wiring ----------
+                const viewModeBtn = document.getElementById('viewModeBtn');
+                const viewModeMenu = document.getElementById('viewModeMenu');
+                const viewModeOptions = viewModeMenu ? Array.from(viewModeMenu.querySelectorAll('.view-mode-option')) : [];
+                // global view mode var (default advanced)
+                let viewMode = localStorage.getItem('viewMode') || 'advanced';
+                
+                // apply a mode and persist
+                function setViewMode(mode, { save = true } = {}) {
+                  if (mode !== 'simple' && mode !== 'advanced') mode = 'advanced';
+                  viewMode = mode;
+                  if (save) localStorage.setItem('viewMode', mode);
+                
+                  // update aria / menu visual state
+                  if (viewModeBtn) viewModeBtn.setAttribute('aria-expanded', 'false');
+                  if (viewModeMenu) viewModeMenu.hidden = true;
+                  viewModeOptions.forEach(opt => {
+                    const m = opt.dataset.mode;
+                    opt.setAttribute('aria-checked', m === viewMode ? 'true' : 'false');
+                  });
+                
+                  // call renderAll to refresh lists with new mode
+                  try { renderAll(); } catch (e) { console.error('renderAll failed after setViewMode', e); }
+                }
+                
+                // toggle menu open/close
+                function toggleViewModeMenu(open) {
+                  if (!viewModeMenu || !viewModeBtn) return;
+                  const isOpen = open === undefined ? (viewModeMenu.hidden === true ? false : true) : !!open;
+                  if (isOpen) {
+                    viewModeMenu.hidden = false;
+                    viewModeBtn.setAttribute('aria-expanded', 'true');
+                    // focus first selected option
+                    const sel = viewModeOptions.find(o => o.dataset.mode === viewMode) || viewModeOptions[0];
+                    sel && sel.focus();
+                  } else {
+                    viewModeMenu.hidden = true;
+                    viewModeBtn.setAttribute('aria-expanded', 'false');
+                    viewModeBtn.focus();
+                  }
+                }
+                
+                // click the gear button to toggle menu
+                if (viewModeBtn) {
+                  viewModeBtn.addEventListener('click', (e) => {
+                    toggleViewModeMenu(viewModeMenu ? viewModeMenu.hidden : true);
+                  });
+                  // keyboard: open with ArrowDown or Enter/Space
+                  viewModeBtn.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleViewModeMenu(true); }
+                  });
+                }
+                
+                // clicking option selects mode
+                viewModeOptions.forEach(opt => {
+                  opt.addEventListener('click', (e) => {
+                    const m = opt.dataset.mode;
+                    setViewMode(m);
+                  });
+                  opt.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); opt.click(); }
+                    if (e.key === 'ArrowDown') { e.preventDefault(); const next = viewModeOptions[(viewModeOptions.indexOf(opt)+1) % viewModeOptions.length]; next && next.focus(); }
+                    if (e.key === 'ArrowUp') { e.preventDefault(); const prev = viewModeOptions[(viewModeOptions.indexOf(opt)-1 + viewModeOptions.length) % viewModeOptions.length]; prev && prev.focus(); }
+                    if (e.key === 'Escape') { toggleViewModeMenu(false); }
+                  });
+                });
+                
+                // close menu when clicking outside
+                document.addEventListener('click', (ev) => {
+                  if (!viewModeMenu || !viewModeBtn) return;
+                  if (viewModeMenu.contains(ev.target) || viewModeBtn.contains(ev.target)) return;
+                  viewModeMenu.hidden = true;
+                  viewModeBtn.setAttribute('aria-expanded', 'false');
+                });
+                
+                // initialize UI from persisted value
+                setViewMode(viewMode, { save: false });
+    // initial UI
+    clearUI();
+
+    // debug helpers
+    window._profile = () => profileData;
+    window._usersDoc = () => usersDoc;
+    window._saveNow = () => saveNow();
+
+  </script>
+</body>
+</html>
