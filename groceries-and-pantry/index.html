@@ -247,7 +247,9 @@
       console.warn('Firebase config not provided. Add your firebaseConfig to enable auth/firestore.');
     }
 
-    const app = initializeApp(firebaseConfig);
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     try { getAnalytics(app); } catch (e) { /* optional */ }
     const db = getFirestore(app);
     const auth = getAuth(app);
