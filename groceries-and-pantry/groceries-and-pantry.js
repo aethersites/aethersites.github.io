@@ -605,21 +605,19 @@ onAuthStateChanged(auth, async (user) => {
 
   if (signinBtn) signinBtn.style.display = 'none';
   // ensure signout button exists (create if HTML didn't include it)
-  if (!signoutBtn) {
-    const authActions = document.querySelector('.auth-actions');
-    if (authActions) {
-      signoutBtn = document.createElement('button');
-      signoutBtn.id = 'signoutBtn';
-      signoutBtn.className = 'btn btn-muted';
-      signoutBtn.textContent = 'Sign out';
-      authActions.appendChild(signoutBtn);
-      signoutBtn.addEventListener('click', async () => {
-        try { await signOut(auth); } catch (e) { console.error('Sign-out failed', e); }
-      });
-    }
-  } else {
-    signoutBtn.style.display = '';
-  }
+if (signinBtn) signinBtn.style.display = 'none'; // hide local sign-in if present
+
+// Update the textual user state. The header may have its own UI, but we keep signedState accurate.
+if (signedState) {
+  signedState.textContent = currentUser ? (currentUser.displayName || currentUser.email || currentUser.uid) : 'Not signed in';
+}
+
+// Optional: if your header exposes a sign-out button with id="headerSignout", show it:
+const headerSignout = document.getElementById('headerSignout');
+if (headerSignout) {
+  headerSignout.style.display = ''; // make sure it's visible
+  // headerSignout should call signOut(auth) itself when clicked.
+}
 
   // ensure users/{uid}
   try {
