@@ -1,6 +1,6 @@
 // grocery/grocery.js
 // Firestore-linked groceries + pantry with transactional array updates
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
 import {
   getFirestore,
@@ -30,7 +30,7 @@ const firebaseConfig = {
   measurementId: "G-HKMSHM726J"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 try { getAnalytics(app); } catch (e) { /* optional */ }
 
 const db = getFirestore(app);
