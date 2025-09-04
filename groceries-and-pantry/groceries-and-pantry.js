@@ -33,12 +33,13 @@ import {
 
 /* --------- FIREBASE: fill your config here --------- */
 const firebaseConfig = {
-  // <-- REPLACE with your Firebase config object. Example:
-  // apiKey: "...",
-  // authDomain: "your-app.firebaseapp.com",
-  // projectId: "your-app",
-  // messagingSenderId: "...",
-  // appId: "...",
+  apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
 };
 
 const hasConfig = firebaseConfig && firebaseConfig.apiKey && String(firebaseConfig.apiKey).trim().length > 0;
