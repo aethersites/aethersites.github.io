@@ -1,6 +1,7 @@
 // grocery/grocery.js
-// Firestore-linked groceries + pantry with transactional array updates
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+// Replace the firebaseConfig placeholder with your real config object.
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-analytics.js";
 import {
   getFirestore,
@@ -9,9 +10,7 @@ import {
   setDoc,
   updateDoc,
   onSnapshot,
-  serverTimestamp,
-  runTransaction,
-  collection
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 import {
   getAuth,
@@ -19,19 +18,19 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
-/* --------- FIREBASE: YOUR CONFIG (you already gave this) --------- */
+/* --------- FIREBASE: fill your config here --------- */
 const firebaseConfig = {
-  apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
-  authDomain: "goodplates-7ae36.firebaseapp.com",
-  projectId: "goodplates-7ae36",
-  storageBucket: "goodplates-7ae36.firebasestorage.app",
-  messagingSenderId: "541149626283",
-  appId: "1:541149626283:web:928888f0b42cda49b7dcee",
-  measurementId: "G-HKMSHM726J"
+    apiKey: "AIzaSyCOHC_OvQ4onPkhLvHzZEPazmY6PRcxjnw",
+    authDomain: "goodplates-7ae36.firebaseapp.com",
+    projectId: "goodplates-7ae36",
+    storageBucket: "goodplates-7ae36.firebasestorage.app",
+    messagingSenderId: "541149626283",
+    appId: "1:541149626283:web:928888f0b42cda49b7dcee",
+    measurementId: "G-HKMSHM726J"
 };
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-try { getAnalytics(app); } catch (e) { /* optional */ }
+const app = initializeApp(firebaseConfig);
+try { getAnalytics(app); } catch (e) { /* analytics optional */ }
 
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -107,188 +106,98 @@ function formatDate(d) {
   const y = dt.getFullYear(); const m = String(dt.getMonth()+1).padStart(2,'0'); const day = String(dt.getDate()).padStart(2,'0');
   return `${m}-${day}-${String(y).slice(-2)}`;
 }
-function safeSetText(el, txt) { if (!el) return; el.textContent = (txt === null || txt === undefined) ? '' : String(txt); }
-function setModalVisible(visible) { if (!modalBackdrop) return; modalBackdrop.style.display = visible ? 'flex' : 'none'; document.body.classList.toggle('modal-open', !!visible); }
+function safeSetText(el, txt) {
+  if (!el) return;
+  el.textContent = (txt === null || txt === undefined) ? '' : String(txt);
+}
+function setModalVisible(visible) {
+  if (!modalBackdrop) return;
+  modalBackdrop.style.display = visible ? 'flex' : 'none';
+  if (visible) document.body.classList.add('modal-open'); else document.body.classList.remove('modal-open');
+}
 
-/* ---------- generate stable id helper (client-side) ---------- */
-function genId() {
-  // Generate an ID using Firestore's doc().id pattern but without writing:
+/* ---------- Persistence helpers ---------- */
+let pendingSave = null;
+function scheduleSave() {
+  if (!profileDocRef || profileData == null) return;
+  if (pendingSave) clearTimeout(pendingSave);
+  pendingSave = setTimeout(async () => {
+    pendingSave = null;
+    try {
+      await updateDoc(profileDocRef, {
+        groceryLists: profileData.groceryLists || [],
+        pantryItems: profileData.pantryItems || [],
+        customIngredients: profileData.customIngredients || [],
+        aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+      });
+    } catch (e) {
+      try {
+        await setDoc(profileDocRef, {
+          groceryLists: profileData.groceryLists || [],
+          pantryItems: profileData.pantryItems || [],
+          customIngredients: profileData.customIngredients || [],
+          aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+        }, { merge: true });
+      } catch (e2) {
+        console.error('Save failed', e2);
+      }
+    }
+  }, 350);
+}
+async function saveNow() {
+  if (!profileDocRef || profileData == null) return;
   try {
-    const ref = doc(collection(db, '__idgen__'));
-    return ref.id;
+    await updateDoc(profileDocRef, {
+      groceryLists: profileData.groceryLists || [],
+      pantryItems: profileData.pantryItems || [],
+      customIngredients: profileData.customIngredients || [],
+      aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+    });
   } catch (e) {
-    // fallback: reasonably unique client-side id
-    return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8);
+    try {
+      await setDoc(profileDocRef, {
+        groceryLists: profileData.groceryLists || [],
+        pantryItems: profileData.pantryItems || [],
+        customIngredients: profileData.customIngredients || [],
+        aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled
+      }, { merge: true });
+    } catch (e2) {
+      console.error('Immediate save failed', e2);
+    }
   }
 }
 
-/* ---------- Persistence helpers using transactions ---------- */
-
-/**
- * Transactionally add an item to the grocery list (array of maps)
- * Ensures we do a read/modify/write in a transaction to reduce overwrite races.
- * Writes the following item map:
- * { id, name, quantity, price, priceCents, currency, createdAt, updatedAt }
- */
-async function txAddGroceryItem(item) {
-  if (!profileDocRef) throw new Error('profileDocRef missing');
-
-  // runTransaction returns the value returned from the transaction function;
-  // we return the created item so caller can reconcile optimistic previews if needed.
-  return await runTransaction(db, async (tx) => {
-    const snap = await tx.get(profileDocRef);
-    let data = snap.exists() ? snap.data() : null;
-
-    // initialize data shape if missing (don't write yet)
-    if (!data) {
-      data = {
-        groceryLists: [],
-        pantryItems: [],
-        customIngredients: []
-      };
-    }
-
-    // normalize arrays
-    data.groceryLists = data.groceryLists || [];
-
-    // ensure active list exists
-    if (!data.groceryLists[activeGroceryListIndex]) {
-      data.groceryLists[activeGroceryListIndex] = {
-        id: genId(),
-        name: 'Default',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        currency: '$',
-        items: []
-      };
-    }
-
-    const list = data.groceryLists[activeGroceryListIndex];
-    list.items = list.items || [];
-
-    // robust price handling: allow 0, null if absent
-    const price = (item.price !== undefined && item.price !== null && item.price !== '') ? Number(item.price) : null;
-    const priceCents = (price != null) ? Math.round(price * 100) : null;
-
-    const newItem = {
-      id: genId(),
-      name: (item.name || '').trim(),
-      quantity: Number(item.quantity || 1),
-      price: price,                      // null or a number (0 allowed)
-      priceCents: priceCents,            // null or integer cents
-      currency: item.currency || list.currency || '$',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    };
-
-    list.items.push(newItem);
-    list.updatedAt = serverTimestamp();
-
-    // Single write: if the doc already existed -> update, else set (merge)
-    if (snap.exists()) {
-      tx.update(profileDocRef, {
-        groceryLists: data.groceryLists,
-        updatedAt: serverTimestamp()
-      });
-    } else {
-      // ensure other top-level arrays exist when creating the doc
-      tx.set(profileDocRef, {
-        groceryLists: data.groceryLists,
-        pantryItems: data.pantryItems || [],
-        customIngredients: data.customIngredients || [],
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-    }
-
-    // return the created item for caller's convenience
-    return newItem;
-  });
-}
-
-
-/**
- * Transactionally add pantry item:
- * { id, name, quantity, price, priceCents, currency, createdAt, updatedAt, expirationDate? }
- */
-async function txAddPantryItem(item) {
-  if (!profileDocRef) throw new Error('profileDocRef missing');
-  await runTransaction(db, async (tx) => {
-    const snap = await tx.get(profileDocRef);
-    let data = snap.exists() ? snap.data() : null;
-    if (!data) {
-      data = {
-        groceryLists: [],
-        pantryItems: [],
-        customIngredients: []
-      };
-      tx.set(profileDocRef, data, { merge: true });
-    }
-    data.pantryItems = data.pantryItems || [];
-    const price = (typeof item.price === 'number') ? item.price : (item.price ? Number(item.price) : 0);
-    const priceCents = Math.round((price || 0) * 100);
-    const newItem = {
-      id: genId(),
-      name: (item.name || '').trim(),
-      quantity: Number(item.quantity || 1),
-      price: price || null,
-      priceCents: price != null ? priceCents : null,
-      currency: item.currency || '$',
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    };
-    if (item.expirationDate) newItem.expirationDate = item.expirationDate; // store Date or string (Firestore will accept JS Date)
-    data.pantryItems.push(newItem);
-    tx.update(profileDocRef, { pantryItems: data.pantryItems });
-  });
-}
-
-/**
- * Transactionally add a custom ingredient to customIngredients array:
- * { name, quantity, price, calories? }
- */
-async function txAddCustomIngredient(ci) {
-  if (!profileDocRef) throw new Error('profileDocRef missing');
-  await runTransaction(db, async (tx) => {
-    const snap = await tx.get(profileDocRef);
-    let data = snap.exists() ? snap.data() : null;
-    if (!data) {
-      data = { groceryLists: [], pantryItems: [], customIngredients: [] };
-      tx.set(profileDocRef, data, { merge: true });
-    }
-    data.customIngredients = data.customIngredients || [];
-    const newCI = {
-      name: (ci.name || '').trim(),
-      quantity: Number(ci.quantity || 1),
-      price: ci.price != null ? Number(ci.price) : null,
-      calories: ci.calories != null ? Number(ci.calories) : undefined
-    };
-    data.customIngredients.push(newCI);
-    tx.update(profileDocRef, { customIngredients: data.customIngredients });
-  });
-}
-
-/* ---------- Drag helpers (unchanged) ---------- */
+/* ---------- Drag state & helpers ---------- */
 function makeDraggableRow(tr, kind, idx) {
+  // add attributes used for drag/drop
   tr.setAttribute('draggable', 'true');
-  tr.dataset.kind = kind;
+  tr.dataset.kind = kind; // 'grocery' or 'pantry'
   tr.dataset.idx = String(idx);
+
   tr.addEventListener('dragstart', (ev) => {
-    if (!currentUser) { ev.preventDefault(); return alert('Sign in to move items between lists'); }
+    // disallow drag if not signed in
+    if (!currentUser) {
+      ev.preventDefault();
+      return alert('Sign in to move items between lists');
+    }
     const payload = JSON.stringify({ kind, idx });
-    try { ev.dataTransfer.setData('application/json', payload); } catch(e) {}
+    ev.dataTransfer.setData('application/json', payload);
+    // allow move effect
     ev.dataTransfer.effectAllowed = 'move';
-    try { ev.dataTransfer.setData('text/plain', escapeHTML((tr.textContent || '').trim().slice(0, 200))); } catch(e){}
+    // small visual (some browsers need text)
+    ev.dataTransfer.setData('text/plain', escapeHTML((tr.textContent || '').trim().slice(0, 200)));
+    // highlight target boxes
     if (groceriesBox) groceriesBox.classList.add('drag-target');
     if (pantryBox) pantryBox.classList.add('drag-target');
   });
-  tr.addEventListener('dragend', () => {
+
+  tr.addEventListener('dragend', (ev) => {
     if (groceriesBox) groceriesBox.classList.remove('drag-target');
     if (pantryBox) pantryBox.classList.remove('drag-target');
   });
 }
 
-/* ---------- render/clear UI (keeps your existing renderers) ---------- */
+/* ---------- Render / Clear UI ---------- */
 function clearUI() {
   if (groceriesBody) groceriesBody.innerHTML = '<tr><td colspan="4" class="small">Sign in to see your lists</td></tr>';
   if (pantryBody) pantryBody.innerHTML = '<tr><td colspan="4" class="small">Sign in to see your pantry</td></tr>';
@@ -315,14 +224,14 @@ function renderAll() {
 function renderGroceries(items = []) {
   if (!groceriesBody) return;
   groceriesBody.innerHTML = '';
-  if (!items.length) return groceriesBody.innerHTML = '<tr><td colspan="5" class="small">No grocery items</td></tr>';
+  if (!items.length) return groceriesBody.innerHTML = '<tr><td colspan="4" class="small">No grocery items</td></tr>';
+
   items.forEach((it, idx) => {
     const purchasedClass = it.purchased ? 'style="text-decoration:line-through; opacity:.7;"' : '';
     const currency = it.currency || '$';
     const priceDisplay = (it.price != null) ? formatCurrency(it.price, currency) : '-';
-    const created = convertMaybeTimestamp(it.createdAt) || null;
-    const createdText = created ? (' • ' + formatDate(created)) : '';
     const tr = document.createElement('tr');
+
     tr.innerHTML = `
       <td ${purchasedClass}>
         <label style="display:flex;align-items:center;gap:10px;">
@@ -331,17 +240,19 @@ function renderGroceries(items = []) {
         </label>
       </td>
       <td ${purchasedClass}>${it.quantity ?? 1}</td>
-      <td ${purchasedClass}>${escapeHTML(currency)}</td>
-      <td ${purchasedClass}>${priceDisplay}${createdText}</td>
+      <td ${purchasedClass}>${priceDisplay}</td>
       <td class="actions">
-        <button data-idx="${idx}" class="btn btn-edit btn-edit-row" type="button">Edit</button>
-        <button data-idx="${idx}" class="btn btn-move" type="button">&gt;</button>
-        <button data-idx="${idx}" class="btn btn-delete" type="button">X</button>
+        <button data-idx="${idx}" class="btn btn-edit btn-edit-row">Edit</button>
+        <button data-idx="${idx}" class="btn btn-muted btn-move">Move → Pantry</button>
+        <button data-idx="${idx}" class="btn btn-danger btn-delete">Delete</button>
       </td>
     `;
+    // make the table row draggable
     makeDraggableRow(tr, 'grocery', idx);
+
     groceriesBody.appendChild(tr);
   });
+
   groceriesBody.querySelectorAll('.chk-bought').forEach(cb => cb.addEventListener('change', onTogglePurchased));
   groceriesBody.querySelectorAll('.btn-edit-row').forEach(btn => btn.addEventListener('click', onEditGrocery));
   groceriesBody.querySelectorAll('.btn-delete').forEach(btn => btn.addEventListener('click', onDeleteGrocery));
@@ -354,71 +265,53 @@ function renderPantry(items = []) {
   if (!items.length) return pantryBody.innerHTML = '<tr><td colspan="4" class="small">No pantry items</td></tr>';
   items.forEach((it, idx) => {
     const exp = it.expirationDate ? formatDate(convertMaybeTimestamp(it.expirationDate)) : '-';
-    const created = convertMaybeTimestamp(it.createdAt) || null;
-    const createdText = created ? (' • ' + formatDate(created)) : '';
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${escapeHTML(it.name)}</td>
       <td>${it.quantity ?? 1}</td>
-      <td>${exp}${createdText}</td>
+      <td>${exp}</td>
       <td class="actions">
-        <button data-idx="${idx}" class="btn btn-edit btn-edit-pantry" type="button">Edit</button>
-        <button data-idx="${idx}" class="btn btn-muted btn-delete-pantry" type="button">Delete</button>
+        <button data-idx="${idx}" class="btn btn-edit btn-edit-pantry">Edit</button>
+        <button data-idx="${idx}" class="btn btn-danger btn-delete-pantry">Delete</button>
       </td>
     `;
+    // make the row draggable
     makeDraggableRow(tr, 'pantry', idx);
+
     pantryBody.appendChild(tr);
   });
   pantryBody.querySelectorAll('.btn-edit-pantry').forEach(btn => btn.addEventListener('click', onEditPantry));
   pantryBody.querySelectorAll('.btn-delete-pantry').forEach(btn => btn.addEventListener('click', onDeletePantry));
 }
 
-/* ---------- Event handlers (Add) ---------- */
+/* ---------- Event handlers ---------- */
+
+// ensure form buttons don't submit the page; force button-type for safety
 if (addGroceryBtn) addGroceryBtn.type = 'button';
 if (addPantryBtn) addPantryBtn.type = 'button';
 if (modalSave) modalSave.type = 'button';
 if (modalCancel) modalCancel.type = 'button';
 
+// Add grocery
 async function handleAddGrocery(e) {
   if (!currentUser) return alert('Sign in to add items');
   e && e.preventDefault && e.preventDefault();
-
   const name = gName?.value?.trim();
   if (!name) return alert('Enter a name');
-
   const qty = Number(gQty?.value) || 1;
   const price = (gPrice && gPrice.value !== '') ? Number(gPrice.value) : null;
   const currency = (gCurrency && gCurrency.value) || '$';
-
-  // Local optimistic push so UI reflects quickly
+  const item = { name, quantity: qty, price, currency, createdAt: serverTimestamp(), purchased: false };
   profileData = profileData || {};
-  profileData.groceryLists = profileData.groceryLists || [{ id: genId(), name:'Default', items: [] }];
+  profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
   const list = profileData.groceryLists[activeGroceryListIndex] || profileData.groceryLists[0];
   list.items = list.items || [];
-  // create a local preview item (no server timestamps)
-  const previewItem = {
-    id: genId(),
-    name,
-    quantity: qty,
-    price: price,
-    priceCents: price != null ? Math.round(price * 100) : null,
-    currency,
-    createdAt: new Date(), // local placeholder
-    updatedAt: new Date()
-  };
-  list.items.push(previewItem);
+  list.items.push(item);
+
+  scheduleSave();
+  await saveNow().catch(() => { /* already scheduled */ });
+
   renderAll();
-
-  // now persist using transaction
-  try {
-    await txAddGroceryItem({ name, quantity: qty, price, currency });
-    console.log('Grocery item added to Firestore');
-  } catch (err) {
-    console.error('Failed to add grocery item transactionally', err);
-    alert('Could not save grocery item. Check console for details.');
-    // Optionally: revert preview or mark as unsynced
-  }
-
   if (gName) gName.value = '';
   if (gQty) gQty.value = 1;
   if (gPrice) gPrice.value = '';
@@ -426,50 +319,32 @@ async function handleAddGrocery(e) {
 if (addGroceryBtn) addGroceryBtn.addEventListener('click', handleAddGrocery);
 if (addGroceryForm) addGroceryForm.addEventListener('submit', handleAddGrocery);
 
+// Add pantry
 async function handleAddPantry(e) {
   if (!currentUser) return alert('Sign in to add pantry items');
   e && e.preventDefault && e.preventDefault();
-
   const name = pName?.value?.trim();
   if (!name) return alert('Enter a name');
   const qty = Number(pQty?.value) || 1;
   const expirationDate = pExp && pExp.value ? new Date(pExp.value) : null;
-  const price = null;
-  const currency = '$';
-
-  // optimistic local push
+  const item = { name, quantity: qty, createdAt: serverTimestamp() };
+  if (expirationDate) item.expirationDate = expirationDate;
   profileData = profileData || {};
   profileData.pantryItems = profileData.pantryItems || [];
-  const preview = {
-    id: genId(),
-    name,
-    quantity: qty,
-    price: price,
-    priceCents: price != null ? Math.round(price*100) : null,
-    currency,
-    expirationDate: expirationDate || null,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
-  profileData.pantryItems.push(preview);
+  profileData.pantryItems.push(item);
+
+  scheduleSave();
+  await saveNow().catch(()=>{});
+
   renderAll();
-
-  try {
-    await txAddPantryItem({ name, quantity: qty, expirationDate, price, currency });
-    console.log('Pantry item added to Firestore');
-  } catch (err) {
-    console.error('Failed to add pantry item', err);
-    alert('Could not save pantry item. Check console.');
-  }
-
-  if (pName) pName.value = '';
-  if (pQty) pQty.value = 1;
-  if (pExp) pExp.value = '';
+  if (pName) pName.value='';
+  if (pQty) pQty.value=1;
+  if (pExp) pExp.value='';
 }
 if (addPantryBtn) addPantryBtn.addEventListener('click', handleAddPantry);
 if (addPantryForm) addPantryForm.addEventListener('submit', handleAddPantry);
 
-/* ---------- modal custom save ---------- */
+// open custom modal
 if (openCustomBtn) openCustomBtn.addEventListener('click', () => {
   if (!currentUser) return alert('Sign in to add custom ingredients');
   editingContext = { type: 'custom' };
@@ -481,6 +356,7 @@ if (openCustomBtn) openCustomBtn.addEventListener('click', () => {
   if (cName) cName.focus();
 });
 
+// modal save
 if (modalSave) modalSave.addEventListener('click', async () => {
   if (!editingContext) { setModalVisible(false); return; }
   const t = editingContext;
@@ -489,66 +365,22 @@ if (modalSave) modalSave.addEventListener('click', async () => {
   const qty = Number(cQty?.value || 1);
   const price = (cPrice && cPrice.value !== '') ? Number(cPrice.value) : null;
 
-  if (t.type === 'custom') {
-    // optimistic local push
-    profileData = profileData || {};
+  if (t.type === 'grocery' && Number.isFinite(t.idx)) {
+    const list = profileData.groceryLists[activeGroceryListIndex];
+    const it = list.items[t.idx];
+    it.name = name; it.quantity = qty; it.price = price;
+  } else if (t.type === 'pantry' && Number.isFinite(t.idx)) {
+    const it = profileData.pantryItems[t.idx];
+    it.name = name; it.quantity = qty;
+    if (price != null) it.price = price; else delete it.price;
+  } else if (t.type === 'custom') {
+    const currency = (cCurrency && cCurrency.value) || '$';
+    const item = { name, quantity: qty, price: price, currency, createdAt: serverTimestamp() };
+    profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
+    profileData.groceryLists[activeGroceryListIndex].items.push(item);
     profileData.customIngredients = profileData.customIngredients || [];
-    profileData.customIngredients.push({ name, quantity: qty, price });
-    renderAll();
-
-    try {
-      await txAddCustomIngredient({ name, quantity: qty, price });
-      console.log('Custom ingredient saved');
-    } catch (err) {
-      console.error('Failed to save custom ingredient', err);
-      alert('Could not save custom ingredient.');
-    }
-  } else {
-    // other edit branches you already had could be adapted to transactions if needed
+    profileData.customIngredients.push({ name, quantity: qty, price: price, currency, createdAt: serverTimestamp() });
   }
-/* ---------- simple debounced save helpers (add these) ---------- */
-let _pendingSaveTimer = null;
-async function _doSaveToFirestore() {
-  if (!profileDocRef || !profileData) return;
-  try {
-    await updateDoc(profileDocRef, {
-      groceryLists: profileData.groceryLists || [],
-      pantryItems: profileData.pantryItems || [],
-      customIngredients: profileData.customIngredients || [],
-      aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled,
-      updatedAt: serverTimestamp()
-    });
-  } catch (err) {
-    // fallback: setDoc with merge if update fails
-    try {
-      await setDoc(profileDocRef, {
-        groceryLists: profileData.groceryLists || [],
-        pantryItems: profileData.pantryItems || [],
-        customIngredients: profileData.customIngredients || [],
-        aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled,
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-    } catch (e) {
-      console.error('Save to Firestore failed', e);
-      throw e;
-    }
-  }
-}
-
-function scheduleSave() {
-  if (!profileDocRef || profileData == null) return;
-  if (_pendingSaveTimer) clearTimeout(_pendingSaveTimer);
-  _pendingSaveTimer = setTimeout(() => {
-    _pendingSaveTimer = null;
-    _doSaveToFirestore().catch(e => console.error('Scheduled save error', e));
-  }, 350);
-}
-
-async function saveNow() {
-  if (_pendingSaveTimer) { clearTimeout(_pendingSaveTimer); _pendingSaveTimer = null; }
-  return _doSaveToFirestore();
-}
-  
   scheduleSave();
   await saveNow().catch(()=>{});
   setModalVisible(false);
@@ -556,11 +388,10 @@ async function saveNow() {
   renderAll();
 });
 
-/* ---------- Edit/Delete/Move/Toggles (kept local+scheduled) ---------- */
-/* For edits/deletes/moves I retained your scheduleSave/saveNow flow for simplicity.
-   If you want every edit/delete/move to be transactional, we can convert them to runTransaction updates similarly.
-*/
+// modal cancel
+if (modalCancel) modalCancel.addEventListener('click', () => { setModalVisible(false); editingContext = null; });
 
+// Edit / Delete / Move / Toggle handlers
 function onEditGrocery(e) {
   const idx = Number(e.currentTarget.dataset.idx);
   const item = (profileData?.groceryLists?.[activeGroceryListIndex]?.items || [])[idx];
@@ -584,7 +415,7 @@ function onMoveToPantry(e) {
   const list = profileData.groceryLists[activeGroceryListIndex];
   const item = list.items.splice(idx,1)[0];
   if (!item) return;
-  const p = { id: genId(), name: item.name, quantity: item.quantity || 1, price: item.price ?? null, priceCents: item.price ? Math.round(item.price*100) : null, currency: item.currency || '$', createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
+  const p = { name: item.name, quantity: item.quantity || 1, createdAt: serverTimestamp() };
   profileData.pantryItems = profileData.pantryItems || [];
   profileData.pantryItems.push(p);
   scheduleSave(); saveNow();
@@ -614,49 +445,77 @@ function onTogglePurchased(e) {
   if (!list || !list.items || !list.items[idx]) return;
   const it = list.items[idx];
   it.purchased = !!e.currentTarget.checked;
-  if (it.purchased) it.purchasedAt = new Date(); else delete it.purchasedAt;
-  scheduleSave(); saveNow(); renderAll();
+  if (it.purchased) it.purchasedAt = new Date();
+  else delete it.purchasedAt;
+  scheduleSave(); saveNow();
+  renderAll();
 }
 
-/* ---------- Drag/drop on boxes ---------- */
-function parseDragData(ev) { try { const raw = ev.dataTransfer.getData('application/json') || ev.dataTransfer.getData('text/plain'); return raw ? JSON.parse(raw) : null; } catch (e) { return null; } }
+/* ---------- Drag drop on boxes ---------- */
+// add handlers to accept drops on the two boxes
+function parseDragData(ev) {
+  try {
+    const raw = ev.dataTransfer.getData('application/json') || ev.dataTransfer.getData('text/plain');
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 async function handleDropOnBox(ev, targetKind) {
   ev.preventDefault();
   if (!currentUser) return alert('Sign in to move items');
   const payload = parseDragData(ev);
-  if (!payload || typeof payload.kind !== 'string' || payload.idx == null) return;
+  if (!payload || typeof payload.kind !== 'string' || payload.idx == null) {
+    return;
+  }
   const srcKind = payload.kind;
   const srcIdx = Number(payload.idx);
-  if (srcKind === targetKind) { if (groceriesBox) groceriesBox.classList.remove('drag-target'); if (pantryBox) pantryBox.classList.remove('drag-target'); return; }
 
+  // no-op if same list
+  if (srcKind === targetKind) {
+    if (groceriesBox) groceriesBox.classList.remove('drag-target');
+    if (pantryBox) pantryBox.classList.remove('drag-target');
+    return;
+  }
+
+  // move from groceries -> pantry
   if (srcKind === 'grocery' && targetKind === 'pantry') {
     const list = profileData.groceryLists[activeGroceryListIndex];
     if (!list || !list.items || !list.items[srcIdx]) return;
     const item = list.items.splice(srcIdx,1)[0];
-    // optimistic local update
+    const p = { name: item.name, quantity: item.quantity || 1, createdAt: serverTimestamp() };
     profileData.pantryItems = profileData.pantryItems || [];
-    profileData.pantryItems.push({ id: genId(), name: item.name, quantity: item.quantity || 1, price: item.price ?? null, priceCents: item.price ? Math.round(item.price*100) : null, currency: item.currency || '$', createdAt: new Date(), updatedAt: new Date() });
-    renderAll();
-    // persist (for simplicity, reusing scheduleSave)
+    profileData.pantryItems.push(p);
     scheduleSave(); await saveNow().catch(()=>{});
+    renderAll();
   }
 
+  // move from pantry -> groceries
   if (srcKind === 'pantry' && targetKind === 'grocery') {
     if (!profileData.pantryItems || !profileData.pantryItems[srcIdx]) return;
     const pitem = profileData.pantryItems.splice(srcIdx,1)[0];
-    profileData.groceryLists = profileData.groceryLists || [{ id: genId(), name:'Default', items: [] }];
-    profileData.groceryLists[activeGroceryListIndex].items.push({ id: genId(), name: pitem.name, quantity: pitem.quantity || 1, price: pitem.price ?? null, priceCents: pitem.price ? Math.round(pitem.price*100) : null, currency: pitem.currency || '$', createdAt: new Date(), updatedAt: new Date() });
-    renderAll();
+    const gItem = { name: pitem.name, quantity: pitem.quantity || 1, price: pitem.price ?? null, createdAt: serverTimestamp() };
+    profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
+    profileData.groceryLists[activeGroceryListIndex].items.push(gItem);
     scheduleSave(); await saveNow().catch(()=>{});
+    renderAll();
   }
 
   if (groceriesBox) groceriesBox.classList.remove('drag-target');
   if (pantryBox) pantryBox.classList.remove('drag-target');
 }
-if (groceriesBox) { groceriesBox.addEventListener('dragover', (e) => e.preventDefault()); groceriesBox.addEventListener('drop', (e) => handleDropOnBox(e, 'grocery')); }
-if (pantryBox) { pantryBox.addEventListener('dragover', (e) => e.preventDefault()); pantryBox.addEventListener('drop', (e) => handleDropOnBox(e, 'pantry')); }
 
-/* ---------- Auth observer & profile realtime ---------- */
+if (groceriesBox) {
+  groceriesBox.addEventListener('dragover', (e) => e.preventDefault());
+  groceriesBox.addEventListener('drop', (e) => handleDropOnBox(e, 'grocery'));
+}
+if (pantryBox) {
+  pantryBox.addEventListener('dragover', (e) => e.preventDefault());
+  pantryBox.addEventListener('drop', (e) => handleDropOnBox(e, 'pantry'));
+}
+
+/* ---------- Auth observer: fetch users + profile (realtime) ---------- */
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   if (!user) {
@@ -671,29 +530,26 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  // Hide local sign-in (we assume header handles auth) and update the textual state.
-if (signinBtn) signinBtn.style.display = 'none';
-if (signedState) {
-  signedState.textContent = currentUser ? (currentUser.displayName || currentUser.email || currentUser.uid) : 'Not signed in';
-}
-// If the header exposes a sign-out button, let it handle sign-out.
-const headerSignout = document.getElementById('headerSignout');
-if (headerSignout) headerSignout.style.display = '';
+  // signed in
+  if (signinBtn) signinBtn.style.display = 'none';
+  // ensure signout button exists (create if HTML didn't include it)
+  if (!signoutBtn) {
+    const authActions = document.querySelector('.auth-actions');
+    if (authActions) {
+      signoutBtn = document.createElement('button');
+      signoutBtn.id = 'signoutBtn';
+      signoutBtn.className = 'btn btn-muted';
+      signoutBtn.textContent = 'Sign out';
+      authActions.appendChild(signoutBtn);
+      signoutBtn.addEventListener('click', async () => {
+        try { await signOut(auth); } catch (e) { console.error('Sign-out failed', e); }
+      });
+    }
+  } else {
+    signoutBtn.style.display = '';
+  }
 
-  
-// Update the textual user state. The header may have its own UI, but we keep signedState accurate.
-if (signedState) {
-  signedState.textContent = currentUser ? (currentUser.displayName || currentUser.email || currentUser.uid) : 'Not signed in';
-}
-
-// Optional: if your header exposes a sign-out button with id="headerSignout", show it:
-const headerSignout = document.getElementById('headerSignout');
-if (headerSignout) {
-  headerSignout.style.display = ''; // make sure it's visible
-  // headerSignout should call signOut(auth) itself when clicked.
-}
-
-  // ensure users/{uid}
+  // fetch or create users/{uid}
   try {
     const usersSnap = await getDoc(doc(db, 'users', user.uid));
     if (!usersSnap.exists()) {
@@ -719,15 +575,15 @@ if (headerSignout) {
     const snap = await getDoc(profileDocRef);
     if (!snap.exists()) {
       const initial = {
-        groceryLists: [{ id: genId(), name: 'Default', items: [], createdAt: serverTimestamp(), updatedAt: serverTimestamp(), currency: '$' }],
+        groceryLists: [{ name: 'Default', items: [], createdAt: serverTimestamp() }],
         pantryItems: [],
         customIngredients: [],
         aiSuggestionsEnabled: true,
         spendingHistory: [],
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        createdAt: serverTimestamp()
       };
       await setDoc(profileDocRef, initial);
+      // profileData will be loaded by onSnapshot below
     }
   } catch (e) {
     console.error('Could not ensure profile doc', e);
@@ -735,10 +591,14 @@ if (headerSignout) {
 
   if (profileUnsub) { profileUnsub(); profileUnsub = null; }
   profileUnsub = onSnapshot(profileDocRef, (snap) => {
-    if (!snap.exists()) { profileData = null; clearUI(); return; }
+    if (!snap.exists()) {
+      profileData = null;
+      clearUI();
+      return;
+    }
     profileData = snap.data();
     // normalize arrays
-    profileData.groceryLists = profileData.groceryLists || [{ id: genId(), name:'Default', items: [] }];
+    profileData.groceryLists = profileData.groceryLists || [{ name:'Default', items: [] }];
     profileData.pantryItems = profileData.pantryItems || [];
     profileData.customIngredients = profileData.customIngredients || [];
     profileData.spendingHistory = profileData.spendingHistory || [];
@@ -750,10 +610,7 @@ if (headerSignout) {
 
 /* ---------- initial UI ---------- */
 clearUI();
-
-// debug helpers:
+// debug helpers for console
 window._profile = () => profileData;
 window._usersDoc = () => usersDoc;
-window._saveNow = () => (profileDocRef ? updateDoc(profileDocRef, { updatedAt: serverTimestamp() }) : Promise.resolve());
-
-/* End of grocery/grocery.js */
+window._saveNow = () => saveNow();
