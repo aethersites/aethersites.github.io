@@ -132,22 +132,27 @@ function genId() {
  */
 async function txAddGroceryItem(item) {
   if (!profileDocRef) throw new Error('profileDocRef missing');
-  await runTransaction(db, async (tx) => {
+
+  // runTransaction returns the value returned from the transaction function;
+  // we return the created item so caller can reconcile optimistic previews if needed.
+  return await runTransaction(db, async (tx) => {
     const snap = await tx.get(profileDocRef);
     let data = snap.exists() ? snap.data() : null;
+
+    // initialize data shape if missing (don't write yet)
     if (!data) {
       data = {
         groceryLists: [],
         pantryItems: [],
         customIngredients: []
       };
-      tx.set(profileDocRef, data, { merge: true });
     }
-    // normalize
+
+    // normalize arrays
     data.groceryLists = data.groceryLists || [];
+
     // ensure active list exists
     if (!data.groceryLists[activeGroceryListIndex]) {
-      // create a default list with id
       data.groceryLists[activeGroceryListIndex] = {
         id: genId(),
         name: 'Default',
@@ -157,29 +162,50 @@ async function txAddGroceryItem(item) {
         items: []
       };
     }
+
     const list = data.groceryLists[activeGroceryListIndex];
-    // ensure items array
     list.items = list.items || [];
-    // create item record with required fields and priceCents
-    const price = (typeof item.price === 'number') ? item.price : (item.price ? Number(item.price) : 0);
-    const priceCents = Math.round((price || 0) * 100);
+
+    // robust price handling: allow 0, null if absent
+    const price = (item.price !== undefined && item.price !== null && item.price !== '') ? Number(item.price) : null;
+    const priceCents = (price != null) ? Math.round(price * 100) : null;
+
     const newItem = {
       id: genId(),
       name: (item.name || '').trim(),
       quantity: Number(item.quantity || 1),
-      price: price || null,
-      priceCents: price != null ? priceCents : null,
+      price: price,                      // null or a number (0 allowed)
+      priceCents: priceCents,            // null or integer cents
       currency: item.currency || list.currency || '$',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
+
     list.items.push(newItem);
-    // update the list's updatedAt
     list.updatedAt = serverTimestamp();
-    // write back entire groceryLists array
-    tx.update(profileDocRef, { groceryLists: data.groceryLists });
+
+    // Single write: if the doc already existed -> update, else set (merge)
+    if (snap.exists()) {
+      tx.update(profileDocRef, {
+        groceryLists: data.groceryLists,
+        updatedAt: serverTimestamp()
+      });
+    } else {
+      // ensure other top-level arrays exist when creating the doc
+      tx.set(profileDocRef, {
+        groceryLists: data.groceryLists,
+        pantryItems: data.pantryItems || [],
+        customIngredients: data.customIngredients || [],
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+
+    // return the created item for caller's convenience
+    return newItem;
   });
 }
+
 
 /**
  * Transactionally add pantry item:
@@ -480,7 +506,49 @@ if (modalSave) modalSave.addEventListener('click', async () => {
   } else {
     // other edit branches you already had could be adapted to transactions if needed
   }
+/* ---------- simple debounced save helpers (add these) ---------- */
+let _pendingSaveTimer = null;
+async function _doSaveToFirestore() {
+  if (!profileDocRef || !profileData) return;
+  try {
+    await updateDoc(profileDocRef, {
+      groceryLists: profileData.groceryLists || [],
+      pantryItems: profileData.pantryItems || [],
+      customIngredients: profileData.customIngredients || [],
+      aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled,
+      updatedAt: serverTimestamp()
+    });
+  } catch (err) {
+    // fallback: setDoc with merge if update fails
+    try {
+      await setDoc(profileDocRef, {
+        groceryLists: profileData.groceryLists || [],
+        pantryItems: profileData.pantryItems || [],
+        customIngredients: profileData.customIngredients || [],
+        aiSuggestionsEnabled: !!profileData.aiSuggestionsEnabled,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (e) {
+      console.error('Save to Firestore failed', e);
+      throw e;
+    }
+  }
+}
 
+function scheduleSave() {
+  if (!profileDocRef || profileData == null) return;
+  if (_pendingSaveTimer) clearTimeout(_pendingSaveTimer);
+  _pendingSaveTimer = setTimeout(() => {
+    _pendingSaveTimer = null;
+    _doSaveToFirestore().catch(e => console.error('Scheduled save error', e));
+  }, 350);
+}
+
+async function saveNow() {
+  if (_pendingSaveTimer) { clearTimeout(_pendingSaveTimer); _pendingSaveTimer = null; }
+  return _doSaveToFirestore();
+}
+  
   scheduleSave();
   await saveNow().catch(()=>{});
   setModalVisible(false);
@@ -603,10 +671,16 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  if (signinBtn) signinBtn.style.display = 'none';
-  // ensure signout button exists (create if HTML didn't include it)
-if (signinBtn) signinBtn.style.display = 'none'; // hide local sign-in if present
+  // Hide local sign-in (we assume header handles auth) and update the textual state.
+if (signinBtn) signinBtn.style.display = 'none';
+if (signedState) {
+  signedState.textContent = currentUser ? (currentUser.displayName || currentUser.email || currentUser.uid) : 'Not signed in';
+}
+// If the header exposes a sign-out button, let it handle sign-out.
+const headerSignout = document.getElementById('headerSignout');
+if (headerSignout) headerSignout.style.display = '';
 
+  
 // Update the textual user state. The header may have its own UI, but we keep signedState accurate.
 if (signedState) {
   signedState.textContent = currentUser ? (currentUser.displayName || currentUser.email || currentUser.uid) : 'Not signed in';
