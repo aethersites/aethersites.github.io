@@ -6,7 +6,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
 
   <title>Groceries & Pantry</title>
- 
   <style>
     :root{
       --page-bg: #ffffff;
@@ -41,9 +40,7 @@
     .box.drag-target { outline: 3px dashed var(--accent); outline-offset: 6px; background-color: rgba(31,138,61,0.03); }
     .box h2 { margin:0 0 8px; font-size:18px; text-align:left; }
     .note { color:var(--muted); font-size:13px; margin-bottom:10px; }
-.body {
-  padding-top: 64px; /* set to the actual header height */
-}
+
     table { width:100%; border-collapse:collapse; margin-bottom:10px; }
     thead th { text-align:left; padding:8px 6px; color:var(--muted); font-weight:700; font-size:13px; border-bottom:1px solid #f4f4f4; }
     td { padding:10px 6px; border-bottom:1px solid #fafafa; font-size:14px; vertical-align:middle; }
@@ -101,9 +98,14 @@
   </style>
 </head>
 <body>
- <div id="global-header" aria-live="polite" aria-busy="true"></div>
-        <script type="module" src="/header/header-loader.js"></script>
-  
+  <div id="global-header"></div>
+<script>
+  // change the filename depending on the page/user state
+  const headerType = "header-2"; // "header-2" or "header-3"
+  fetch(`/header/${headerType}.html`)
+    .then(res => res.text())
+    .then(html => document.querySelector("#global-header").innerHTML = html);
+</script>
 
   <div class="canvas" role="application" aria-label="Groceries and pantry app">
 
@@ -114,6 +116,13 @@
 
     <div class="settings-gear" aria-hidden="true">⚙️</div>
 
+    <div class="sitebar" role="banner" aria-label="Site header">
+      <div class="brand">GoodPlates</div>
+      <div class="auth-actions">
+        <div id="signedState" class="user-info">Not signed in</div>
+        <button id="signinBtn" class="btn btn-muted" aria-label="Sign in" type="button">Sign in</button>
+      </div>
+    </div>
 
     <div class="lists" role="main">
 
@@ -242,9 +251,7 @@
       console.warn('Firebase config not provided. Add your firebaseConfig to enable auth/firestore.');
     }
 
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig);
     try { getAnalytics(app); } catch (e) { /* optional */ }
     const db = getFirestore(app);
     const auth = getAuth(app);
@@ -794,3 +801,5 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
   </script>
 </body>
 </html>
+
+
