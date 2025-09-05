@@ -409,11 +409,9 @@ if (!container) {
       });
     })();
   </script>
-</body>
-</html>
 
 
-// TEMPORARY: Password Access
+    // TEMPORARY: Password Access
 <script>
 (function () {
   // ========== CONFIG ==========
@@ -577,3 +575,8 @@ if (!container) {
   }
 })();
 </script>
+
+</body>
+</html>
+
+
